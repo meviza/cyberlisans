@@ -1,0 +1,386 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
+}
+
+enum Locale {
+  TR
+  EN
+  DE
+  AR
+  RU
+}
+
+enum Currency {
+  TRY
+  USD
+  EUR
+  USDT
+}
+
+enum WalletTxType {
+  DEPOSIT
+  WITHDRAWAL
+  PURCHASE
+  REFUND
+  ADMIN_CREDIT
+  ADMIN_DEBIT
+  REFERRAL_REWARD
+  LOYALTY_REWARD
+  GIFT_RECEIVED
+  GIFT_SENT
+}
+
+enum DeliveryType {
+  KEY
+  DOWNLOAD
+  API_CREDITS
+  MANUAL
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentProvider {
+  PAYTR
+  PAPARA
+  NOWPAYMENTS
+  STRIPE
+  BANK_TRANSFER
+  WALLET
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  EXPIRED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  BALANCE_CHANGE
+  STATUS_CHANGE
+  ROLE_CHANGE
+  PERMISSION_GRANT
+  PERMISSION_REVOKE
+  SETTINGS_CHANGE
+}
+
+model User {
+  id               String     @id @default(uuid()) @db.Uuid
+  email            String     @unique
+  emailVerified    Boolean    @default(false)
+  username         String     @unique
+  displayName      String?
+  avatarUrl        String?
+  locale           Locale     @default(TR)
+  currency         Currency   @default(TRY)
+  role             UserRole   @default(CUSTOMER)
+  status           UserStatus @default(PENDING_VERIFICATION)
+  twoFactorEnabled Boolean    @default(false)
+  twoFactorSecret  String?
+  isAdult          Boolean    @default(false)
+  marketingOptIn   Boolean    @default(false)
+  referralCode     String     @unique @default(cuid())
+  referredById     String?    @db.Uuid
+  referredBy       User?      @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals        User[]     @relation("UserReferrals")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  lastLoginAt      DateTime?
+
+  wallet             Wallet?
+  walletTransactions WalletTransaction[]
+  orders             Order[]
+  payments           Payment[]
+  productKeys        ProductKey[]
+  auditLogs          AuditLog[]          @relation("ActorLogs")
+  targetAuditLogs    AuditLog[]          @relation("TargetLogs")
+  sessions           Session[]
+  consentRecords     ConsentRecord[]
+
+  @@index([email])
+  @@index([username])
+  @@index([referralCode])
+  @@index([referredById])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@map("sessions")
+}
+
+model Wallet {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @unique @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balanceTry   Decimal  @default(0) @db.Decimal(18, 2)
+  balanceUsd   Decimal  @default(0) @db.Decimal(18, 2)
+  balanceEur   Decimal  @default(0) @db.Decimal(18, 2)
+  balanceUsdt  Decimal  @default(0) @db.Decimal(18, 2)
+  loyaltyCoins Int      @default(0)
+  version      Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id            String       @id @default(uuid()) @db.Uuid
+  userId        String       @db.Uuid
+  user          User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  type          WalletTxType
+  currency      Currency
+  amount        Decimal      @db.Decimal(18, 2)
+  balanceAfter  Decimal      @db.Decimal(18, 2)
+  referenceType String?
+  referenceId   String?
+  description   String?
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([referenceType, referenceId])
+  @@map("wallet_transactions")
+}
+
+model Category {
+  id          String    @id @default(uuid()) @db.Uuid
+  slug        String    @unique
+  name        String
+  nameEn      String?
+  nameDe      String?
+  nameAr      String?
+  nameRu      String?
+  icon        String?
+  description String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@index([slug])
+  @@index([isActive, sortOrder])
+  @@map("categories")
+}
+
+model Brand {
+  id         String    @id @default(uuid()) @db.Uuid
+  slug       String    @unique
+  name       String
+  logoUrl    String?
+  websiteUrl String?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  products   Product[]
+
+  @@index([slug])
+  @@map("brands")
+}
+
+model Product {
+  id           String       @id @default(uuid()) @db.Uuid
+  categoryId   String       @db.Uuid
+  category     Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brandId      String?      @db.Uuid
+  brand        Brand?       @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  slug         String       @unique
+  title        String
+  description  String?
+  imageUrl     String?
+  modelUrl     String?
+  priceTry     Decimal      @db.Decimal(18, 2)
+  priceUsd     Decimal      @db.Decimal(18, 2)
+  priceEur     Decimal      @db.Decimal(18, 2)
+  priceUsdt    Decimal      @db.Decimal(18, 2)
+  stock        Int          @default(0)
+  deliveryType DeliveryType @default(KEY)
+  isActive     Boolean      @default(true)
+  isFeatured   Boolean      @default(false)
+  tags         String[]
+  metadata     Json?
+  sortOrder    Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  keys       ProductKey[]
+  orderItems OrderItem[]
+
+  @@index([categoryId, isActive, sortOrder])
+  @@index([brandId, isActive])
+  @@index([slug])
+  @@index([isFeatured, isActive])
+  @@map("products")
+}
+
+model ProductKey {
+  id          String      @id @default(uuid()) @db.Uuid
+  productId   String      @db.Uuid
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  code        String
+  isUsed      Boolean     @default(false)
+  usedById    String?     @db.Uuid
+  usedBy      User?       @relation(fields: [usedById], references: [id], onDelete: SetNull)
+  usedAt      DateTime?
+  reservedAt  DateTime?
+  reservedFor String?     @db.Uuid
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+
+  @@index([productId, isUsed])
+  @@index([reservedFor])
+  @@map("product_keys")
+}
+
+model Order {
+  id            String           @id @default(uuid()) @db.Uuid
+  orderNumber   String           @unique @default(cuid())
+  userId        String           @db.Uuid
+  user          User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  totalAmount   Decimal          @db.Decimal(18, 2)
+  currency      Currency
+  status        OrderStatus      @default(PENDING)
+  paymentMethod PaymentProvider?
+  notes         String?
+  paidAt        DateTime?
+  fulfilledAt   DateTime?
+  cancelledAt   DateTime?
+  refundedAt    DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  items    OrderItem[]
+  payments Payment[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String      @id @default(uuid()) @db.Uuid
+  orderId      String      @db.Uuid
+  order        Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String      @db.Uuid
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productKeyId String?     @db.Uuid
+  productKey   ProductKey? @relation(fields: [productKeyId], references: [id], onDelete: SetNull)
+  quantity     Int         @default(1)
+  unitPrice    Decimal     @db.Decimal(18, 2)
+  totalPrice   Decimal     @db.Decimal(18, 2)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Payment {
+  id             String          @id @default(uuid()) @db.Uuid
+  userId         String          @db.Uuid
+  user           User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orderId        String?         @db.Uuid
+  order          Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  provider       PaymentProvider
+  providerRef    String?         @unique
+  amount         Decimal         @db.Decimal(18, 2)
+  currency       Currency
+  status         PaymentStatus   @default(PENDING)
+  webhookPayload Json?
+  metadata       Json?
+  expiresAt      DateTime?
+  paidAt         DateTime?
+  refundedAt     DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([orderId])
+  @@index([provider, status])
+  @@index([providerRef])
+  @@map("payments")
+}
+
+model AuditLog {
+  id           String      @id @default(uuid()) @db.Uuid
+  actorId      String?     @db.Uuid
+  actor        User?       @relation("ActorLogs", fields: [actorId], references: [id], onDelete: SetNull)
+  targetUserId String?     @db.Uuid
+  targetUser   User?       @relation("TargetLogs", fields: [targetUserId], references: [id], onDelete: SetNull)
+  action       AuditAction
+  targetType   String?
+  targetId     String?
+  payload      Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime    @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@index([action, createdAt])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
+
+model ConsentRecord {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String?  @db.Uuid
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email           String?
+  type            String
+  granted         Boolean
+  ipAddress       String?
+  userAgent       String?
+  documentVersion String
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@map("consent_records")
+}

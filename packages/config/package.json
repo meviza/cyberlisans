@@ -1,0 +1,6 @@
+{
+  "name": "@cyberlisans/config",
+  "private": true,
+  "files": ["tsconfig.json", "tailwind-preset.cjs"],
+  "main": "./tailwind-preset.cjs"
+}

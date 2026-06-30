@@ -1,0 +1,29 @@
+{
+  "name": "cyberlisans",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json,css}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "turbo": "2.3.3",
+    "typescript": "5.7.3",
+    "prettier": "3.4.2",
+    "husky": "9.1.7",
+    "lint-staged": "15.4.0",
+    "@types/node": "22.10.10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma", "esbuild", "sharp", "unrs-resolver"]
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,md,json,css}": ["prettier --write"]
+  }
+}

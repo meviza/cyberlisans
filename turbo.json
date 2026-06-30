@@ -1,0 +1,38 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "lint": {},
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {},
+    "clean": {
+      "cache": false
+    }
+  },
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "RESEND_API_KEY",
+    "PAYTR_MERCHANT_ID",
+    "PAYTR_MERCHANT_KEY",
+    "PAYTR_MERCHANT_SALT",
+    "PAPARA_API_KEY",
+    "NOWPAYMENTS_API_KEY",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "JWT_SECRET",
+    "ENCRYPTION_KEY"
+  ],
+  "globalDependencies": ["**/.env.*local"]
+}

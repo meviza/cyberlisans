@@ -1,0 +1,45 @@
+export type {
+  User,
+  Session,
+  Wallet,
+  WalletTransaction,
+  Category,
+  Brand,
+  Product,
+  ProductKey,
+  Order,
+  OrderItem,
+  Payment,
+  AuditLog,
+  ConsentRecord,
+  Prisma,
+} from '@prisma/client';
+
+export {
+  UserRole,
+  UserStatus,
+  Locale,
+  Currency,
+  WalletTxType,
+  DeliveryType,
+  OrderStatus,
+  PaymentProvider,
+  PaymentStatus,
+  AuditAction,
+} from '@prisma/client';
+
+export type {
+  User as UserModel,
+  Session as SessionModel,
+  Wallet as WalletModel,
+  WalletTransaction as WalletTransactionModel,
+  Category as CategoryModel,
+  Brand as BrandModel,
+  Product as ProductModel,
+  ProductKey as ProductKeyModel,
+  Order as OrderModel,
+  OrderItem as OrderItemModel,
+  Payment as PaymentModel,
+  AuditLog as AuditLogModel,
+  ConsentRecord as ConsentRecordModel,
+} from '@prisma/client';
