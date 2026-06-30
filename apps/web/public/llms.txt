@@ -1,0 +1,38 @@
+# CyberLisans
+
+> Dijital lisansların yeni adresi. Steam, PlayStation, Xbox, yazılım anahtarları ve AI API kredileri için orijinal ürünler, anında teslim, güvenli ödeme.
+
+## Hakkımızda
+CyberLisans, Türkiye merkezli dijital lisans platformudur. 2026 yılında kurulmuştur. Oyun, yazılım ve AI API lisansları sunmaktayız. Tüm ürünler orijinaldir ve otomatik teslim edilir.
+
+## Ürün Kategorileri
+- Oyun: Steam Cüzdan, PSN Bakiye, Xbox Game Pass, Riot Valorant Points
+- Yazılım: Windows 11 Pro, Microsoft 365, Canva Pro, Spotify Premium, Discord Nitro, Netflix
+- AI API: OpenAI API Kredisi, Anthropic Claude API Kredisi
+
+## Ödeme Yöntemleri
+- PayTR (kredi kartı, banka kartı)
+- Papara
+- Kripto (Bitcoin, Ethereum, USDT)
+- Havale / EFT
+- Stripe (uluslararası kartlar)
+
+## Özellikler
+- ⚡ Anında otomatik teslim (5 saniye)
+- 🔒 2FA + PCI-DSS uyumlu
+- 💰 Çoklu para birimi: TRY, USD, EUR, USDT
+- 🌍 5 dilde hizmet: TR, EN, DE, AR, RU
+- 🎁 Sadakat programı (her alışverişte %1 geri)
+- 🤝 Referral programı (davet et, %5 kazan)
+- 🛡️ 7/24 destek
+
+## İletişim
+- Web: https://cyberlisans.com
+- E-posta: [email protected]
+- Discord: discord.gg/cyberlisans
+- Telegram: t.me/cyberlisans
+
+## Yasal
+- Kullanım Koşulları: /legal/terms
+- Gizlilik Politikası: /legal/privacy
+- KVKK Aydınlatma Metni: /legal/kvkk

@@ -1,0 +1,46 @@
+'use client';
+
+import * as React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LayoutDashboard, Package, Wallet, Receipt, Settings } from 'lucide-react';
+import { cn } from '@cyberlisans/ui/cn';
+
+const ITEMS = [
+  { href: '/dashboard', label: 'Genel Bakış', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/products', label: 'Ürünlerim', icon: Package },
+  { href: '/dashboard/wallet', label: 'Cüzdan', icon: Wallet },
+  { href: '/dashboard/orders', label: 'Siparişler', icon: Receipt },
+  { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
+];
+
+export function Sidebar() {
+  const pathname = usePathname();
+
+  return (
+    <aside className="hidden w-64 shrink-0 border-r border-cyber-cyan/20 bg-cyber-darker/60 backdrop-blur-sm md:block">
+      <nav className="sticky top-20 flex flex-col gap-1 p-4">
+        {ITEMS.map((item) => {
+          const Icon = item.icon;
+          const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'group flex items-center gap-3 rounded-md border border-transparent px-3 py-2.5 text-sm transition-all',
+                active
+                  ? 'border-cyber-cyan/40 bg-cyber-cyan/10 text-cyber-cyan shadow-[0_0_20px_rgba(0,240,255,0.15)]'
+                  : 'text-white/70 hover:border-cyber-cyan/20 hover:bg-cyber-cyan/5 hover:text-white'
+              )}
+            >
+              <Icon className={cn('h-4 w-4', active && 'text-cyber-cyan')} />
+              <span className="font-medium">{item.label}</span>
+              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyber-cyan shadow-[0_0_8px_rgba(0,240,255,0.8)]" />}
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+}

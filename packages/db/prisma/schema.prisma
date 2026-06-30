@@ -129,6 +129,7 @@ model User {
   targetAuditLogs    AuditLog[]          @relation("TargetLogs")
   sessions           Session[]
   consentRecords     ConsentRecord[]
+  credential         UserCredential?
 
   @@index([email])
   @@index([username])
@@ -138,18 +139,31 @@ model User {
 }
 
 model Session {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @db.Uuid
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refreshToken String   @unique
-  userAgent    String?
-  ipAddress    String?
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken     String   @unique
+  refreshTokenHash String?  @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
 
   @@index([userId])
   @@index([refreshToken])
+  @@index([refreshTokenHash])
   @@map("sessions")
+}
+
+model UserCredential {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @unique @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("user_credentials")
 }
 
 model Wallet {

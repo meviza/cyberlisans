@@ -3,6 +3,7 @@ import { Inter, Orbitron, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ScrollProgressBar } from '@/components/3d/scroll-progress-bar';
 import { MagneticCursor } from '@/components/motion/magnetic-cursor';
+import { AuthProvider } from '@/lib/auth-context';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const orbitron = Orbitron({
@@ -85,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-cyber-darker font-body text-white antialiased">
         <ScrollProgressBar />
         <MagneticCursor />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
