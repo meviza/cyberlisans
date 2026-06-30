@@ -6,6 +6,8 @@ import { secureHeaders } from 'hono/secure-headers';
 import { authRoutes } from './interface/routes/auth';
 import { profileRoutes } from './interface/routes/profile';
 import { sessionRoutes } from './interface/routes/sessions';
+import { walletRoutes } from './interface/routes/wallet';
+import { paymentsRoutes } from './interface/routes/payments';
 
 const app = new Hono();
 
@@ -27,11 +29,17 @@ app.get('/health', (c) => c.json({ status: 'healthy', timestamp: new Date().toIS
 app.route('/auth', authRoutes);
 app.route('/profile', profileRoutes);
 app.route('/sessions', sessionRoutes);
+app.route('/wallet', walletRoutes);
+app.route('/payments', paymentsRoutes);
 
 app.notFound((c) => c.json({ error: 'Not found' }, 404));
 
 const port = Number(process.env['PORT'] ?? 3001);
 
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`CyberLisans API running on http://localhost:${info.port}`);
-});
+if (process.env['NODE_ENV'] !== 'test') {
+  serve({ fetch: app.fetch, port }, (info) => {
+    console.log(`CyberLisans API running on http://localhost:${info.port}`);
+  });
+}
+
+export default app;

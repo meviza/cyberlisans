@@ -11,6 +11,7 @@
       "@cyberlisans/auth": ["../../packages/auth/src"],
       "@cyberlisans/validators": ["../../packages/validators/src"],
       "@cyberlisans/payments": ["../../packages/payments/src"],
+      "@cyberlisans/payments/*": ["../../packages/payments/src/*"],
       "@cyberlisans/types": ["../../packages/types/src"]
     },
     "skipLibCheck": true

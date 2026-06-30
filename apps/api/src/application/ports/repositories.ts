@@ -92,3 +92,86 @@ export interface ConsentRecordInput {
 export interface IConsentRepository {
   record(data: ConsentRecordInput): Promise<void>;
 }
+import type {
+  WalletEntity,
+  WalletTransactionEntity,
+  PaymentEntity,
+  WalletTxType,
+  Currency,
+} from '../../domain/entities/wallet';
+
+export interface IWalletRepository {
+  findByUserId(userId: string): Promise<WalletEntity | null>;
+  findById(id: string): Promise<WalletEntity | null>;
+  credit(input: {
+    userId: string;
+    currency: Currency;
+    amount: number;
+    type: WalletTxType;
+    description?: string;
+    referenceType?: string;
+    referenceId?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{ wallet: WalletEntity; transaction: WalletTransactionEntity }>;
+  debit(input: {
+    userId: string;
+    currency: Currency;
+    amount: number;
+    type: WalletTxType;
+    description?: string;
+    referenceType?: string;
+    referenceId?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{ wallet: WalletEntity; transaction: WalletTransactionEntity }>;
+  transfer(input: {
+    fromUserId: string;
+    toUserId: string;
+    currency: Currency;
+    amount: number;
+    description?: string;
+  }): Promise<void>;
+  listTransactions(input: {
+    userId: string;
+    type?: WalletTxType;
+    cursor?: string;
+    limit: number;
+  }): Promise<WalletTransactionEntity[]>;
+  addLoyaltyCoins(userId: string, coins: number): Promise<WalletEntity>;
+}
+
+export interface IPaymentRepository {
+  create(input: {
+    userId: string;
+    orderId?: string;
+    provider: PaymentEntity['provider'];
+    amount: number;
+    currency: Currency;
+    expiresAt?: Date;
+    metadata?: Record<string, unknown>;
+  }): Promise<PaymentEntity>;
+  findById(id: string): Promise<PaymentEntity | null>;
+  findByProviderRef(
+    provider: PaymentEntity['provider'],
+    providerRef: string,
+  ): Promise<PaymentEntity | null>;
+  updateStatus(
+    id: string,
+    status: PaymentEntity['status'],
+    extras?: { providerRef?: string; webhookPayload?: Record<string, unknown>; paidAt?: Date },
+  ): Promise<PaymentEntity>;
+  listForUser(userId: string, limit: number, cursor?: string): Promise<PaymentEntity[]>;
+  listPending(limit: number): Promise<PaymentEntity[]>;
+}
+
+export interface IOrderRepositoryForWallet {
+  findById(
+    orderId: string,
+  ): Promise<{
+    id: string;
+    userId: string;
+    totalAmount: number;
+    currency: Currency;
+    status: string;
+  } | null>;
+  markPaid(orderId: string, paymentId: string): Promise<void>;
+}
