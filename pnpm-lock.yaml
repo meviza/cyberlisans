@@ -88,6 +88,24 @@ importers:
 
   apps/web:
     dependencies:
+      '@cyberlisans/3d':
+        specifier: workspace:*
+        version: link:../../packages/3d
+      '@cyberlisans/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@cyberlisans/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@react-three/drei':
+        specifier: 9.121.4
+        version: 9.121.4(@react-three/fiber@9.0.0-rc.1(@types/react@19.0.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(three@0.171.0))(@types/react@19.0.7)(@types/three@0.171.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(three@0.171.0)(use-sync-external-store@1.6.0(react@19.0.0))
+      '@react-three/fiber':
+        specifier: 9.0.0-rc.1
+        version: 9.0.0-rc.1(@types/react@19.0.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(three@0.171.0)
+      gsap:
+        specifier: 3.12.5
+        version: 3.12.5
       next:
         specifier: 15.1.4
         version: 15.1.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -97,6 +115,9 @@ importers:
       react-dom:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
+      three:
+        specifier: 0.171.0
+        version: 0.171.0
     devDependencies:
       '@types/react':
         specifier: 19.0.7
@@ -104,6 +125,9 @@ importers:
       '@types/react-dom':
         specifier: 19.0.3
         version: 19.0.3(@types/react@19.0.7)
+      '@types/three':
+        specifier: 0.171.0
+        version: 0.171.0
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.5.1)
