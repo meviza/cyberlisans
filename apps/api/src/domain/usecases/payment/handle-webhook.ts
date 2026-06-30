@@ -2,6 +2,7 @@ import { paymentRepository } from '../../../infrastructure/repositories/payment.
 import { walletRepository } from '../../../infrastructure/repositories/wallet.repository';
 import { orderRepository } from '../../../infrastructure/repositories/order.repository';
 import { auditRepository } from '../../../infrastructure/repositories/audit.repository';
+import { fulfillOrder } from '../order/fulfill-order';
 import { PaymentNotFoundError } from '../../errors/wallet';
 import type { WebhookPayload } from '@cyberlisans/payments/types';
 
@@ -47,6 +48,16 @@ export async function handlePaymentWebhook(payload: WebhookPayload) {
   });
   if (payment.orderId) {
     await orderRepository.markPaid(payment.orderId, payment.id);
+    try {
+      await fulfillOrder({
+        orderId: payment.orderId,
+        userId: payment.userId,
+        ipAddress: undefined,
+        userAgent: payload.provider,
+      });
+    } catch (err) {
+      console.error('[FULFILL_ORDER_AFTER_WEBHOOK_FAILED]', err);
+    }
   }
   await auditRepository.log({
     actorId: payment.userId,

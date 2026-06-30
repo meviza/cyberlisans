@@ -1,181 +1,134 @@
-'use client';
-
 import * as React from 'react';
 import Link from 'next/link';
-import { Search, Filter } from 'lucide-react';
-import { Input } from '@cyberlisans/ui/atoms';
-import { products, categories, type Product } from '@/lib/products';
+import type { Metadata } from 'next';
+import { ProductGrid } from '@/components/store/product-grid';
+import {
+  ProductFilters,
+  parseFilters,
+  type ProductFiltersState,
+} from '@/components/store/product-filters';
+import { EmptyState } from '@/components/store/empty-state';
+import { StorefrontHeader } from '@/components/store/storefront-header';
+import { products, getSoldCounts, type Product } from '@/lib/products';
+import { Package, Loader2 } from 'lucide-react';
 
-export default function ProductsPage() {
-  const [query, setQuery] = React.useState('');
-  const [activeCat, setActiveCat] = React.useState<string>('all');
-  const [activeBrand, setActiveBrand] = React.useState<string>('all');
-  const [page, setPage] = React.useState(1);
-  const perPage = 12;
+export const metadata: Metadata = {
+  title: 'Mağaza',
+  description: 'Tüm dijital lisans ürünlerimizi incele. Oyun, yazılım ve AI API kredileri.',
+  alternates: { canonical: 'https://cyberlisans.com/products' },
+};
 
-  const brands = Array.from(new Set(products.map((p) => p.brand)));
+const PAGE_SIZE = 12;
 
-  const filtered = products.filter((p) => {
-    if (activeCat !== 'all' && p.category !== activeCat) return false;
-    if (activeBrand !== 'all' && p.brand !== activeBrand) return false;
-    if (query && !p.title.toLowerCase().includes(query.toLowerCase())) return false;
-    return true;
-  });
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const paged = filtered.slice((page - 1) * perPage, page * perPage);
+function toSingle(v: string | string[] | undefined): string {
+  if (Array.isArray(v)) return v[0] ?? '';
+  return v ?? '';
+}
+
+export default async function ProductsPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    const single = toSingle(v);
+    if (single) params.set(k, single);
+  }
+  const filters = parseFilters(params);
+
+  const brands = Array.from(new Set(products.map((p) => p.brand))).sort();
+
+  const filtered = applyFilters(products, filters);
+  const total = filtered.length;
+  const shown = filtered.slice(0, PAGE_SIZE);
+
+  const soldCounts = getSoldCounts();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="font-orbitron text-3xl font-black text-white sm:text-4xl">
-          Tüm <span className="text-cyber-cyan text-glow-cyan">Ürünler</span>
-        </h1>
-        <p className="mt-2 text-white/60">İhtiyacın olan lisansı bul</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-            <Input
-              type="search"
-              placeholder="Ürün ara..."
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setPage(1);
-              }}
-              className="pl-9"
-            />
-          </div>
-
+    <>
+      <StorefrontHeader />
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white/80">
-              <Filter className="h-4 w-4 text-cyber-cyan" />
-              Kategoriler
-            </h3>
-            <div className="space-y-1">
-              <FilterButton active={activeCat === 'all'} onClick={() => { setActiveCat('all'); setPage(1); }}>
-                Tümü ({products.length})
-              </FilterButton>
-              {categories.map((c) => (
-                <FilterButton
-                  key={c.slug}
-                  active={activeCat === c.name}
-                  onClick={() => {
-                    setActiveCat(c.name);
-                    setPage(1);
-                  }}
-                >
-                  {c.name} ({products.filter((p) => p.category === c.name).length})
-                </FilterButton>
-              ))}
-            </div>
+            <h1 className="font-orbitron text-3xl font-black text-white sm:text-4xl">
+              Tüm <span className="text-cyber-cyan text-glow-cyan">Ürünler</span>
+            </h1>
+            <p className="mt-2 text-white/60">İhtiyacın olan dijital lisansı bul</p>
           </div>
-
-          <div>
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white/80">
-              <Filter className="h-4 w-4 text-cyber-cyan" />
-              Markalar
-            </h3>
-            <div className="space-y-1">
-              <FilterButton active={activeBrand === 'all'} onClick={() => { setActiveBrand('all'); setPage(1); }}>
-                Tümü
-              </FilterButton>
-              {brands.map((b) => (
-                <FilterButton
-                  key={b}
-                  active={activeBrand === b}
-                  onClick={() => {
-                    setActiveBrand(b);
-                    setPage(1);
-                  }}
-                >
-                  {b}
-                </FilterButton>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        <div>
-          <p className="mb-4 text-sm text-white/60">
-            {filtered.length} ürün bulundu
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {paged.map((p) => (
-              <ProductGridCard key={p.id} product={p} />
-            ))}
-          </div>
-
-          {totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="rounded border border-cyber-cyan/30 px-3 py-1.5 text-sm text-white/70 transition-colors hover:border-cyber-cyan hover:text-white disabled:opacity-40"
-              >
-                Önceki
-              </button>
-              <span className="px-3 text-sm text-white/60">
-                {page} / {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="rounded border border-cyber-cyan/30 px-3 py-1.5 text-sm text-white/70 transition-colors hover:border-cyber-cyan hover:text-white disabled:opacity-40"
-              >
-                Sonraki
-              </button>
-            </div>
-          )}
+          <p className="font-mono text-xs uppercase tracking-wider text-white/40">{total} sonuç</p>
         </div>
-      </div>
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
+          <ProductFilters brands={brands} />
+
+          <div>
+            {shown.length === 0 ? (
+              <EmptyState
+                icon={Package}
+                title="Sonuç bulunamadı"
+                description="Farklı filtre veya arama terimi deneyebilirsin."
+              />
+            ) : (
+              <>
+                <ProductGrid products={shown} soldCounts={soldCounts} />
+                {filtered.length > PAGE_SIZE && (
+                  <div className="mt-8 flex flex-col items-center gap-2">
+                    <LoadMoreButton total={filtered.length} shown={shown.length} />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}
+
+function applyFilters(all: Product[], f: ProductFiltersState): Product[] {
+  let list = all.slice();
+  if (f.search) {
+    const q = f.search.toLowerCase();
+    list = list.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.brand.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q),
+    );
+  }
+  if (f.category !== 'all') list = list.filter((p) => p.categorySlug === f.category);
+  if (f.brand !== 'all') list = list.filter((p) => p.brand === f.brand);
+  const min = f.minPrice ? Number(f.minPrice) : null;
+  const max = f.maxPrice ? Number(f.maxPrice) : null;
+  if (min !== null && Number.isFinite(min)) list = list.filter((p) => p.price >= min);
+  if (max !== null && Number.isFinite(max)) list = list.filter((p) => p.price <= max);
+
+  switch (f.sort) {
+    case 'price_asc':
+      list.sort((a, b) => a.price - b.price);
+      break;
+    case 'price_desc':
+      list.sort((a, b) => b.price - a.price);
+      break;
+    case 'popular':
+      list.sort((a, b) => b.sold - a.sold);
+      break;
+    case 'newest':
+    default:
+      list.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  }
+  return list;
+}
+
+function LoadMoreButton({ total, shown }: { total: number; shown: number }) {
+  return (
+    <div className="text-center text-sm text-white/50">
+      <Loader2 className="mx-auto mb-2 h-4 w-4 animate-spin text-cyber-cyan/60" />
+      <p>
+        {shown} / {total} ürün gösteriliyor · daha fazla için filtreleri daraltabilirsin
+      </p>
     </div>
-  );
-}
-
-function FilterButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={
-        active
-          ? 'block w-full rounded-md border border-cyber-cyan/50 bg-cyber-cyan/10 px-3 py-2 text-left text-sm text-cyber-cyan'
-          : 'block w-full rounded-md border border-transparent px-3 py-2 text-left text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white'
-      }
-    >
-      {children}
-    </button>
-  );
-}
-
-function ProductGridCard({ product }: { product: Product }) {
-  return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="group relative overflow-hidden rounded-xl border border-cyber-cyan/20 bg-cyber-darker/60 backdrop-blur-sm transition-all hover:scale-[1.02] hover:border-cyber-cyan/60 hover:shadow-glow-cyan"
-    >
-      <div className="aspect-square w-full" style={{ background: product.image }} />
-      <div className="p-4">
-        <div className="mb-1 text-xs uppercase tracking-wider text-cyber-magenta">{product.brand}</div>
-        <h3 className="mb-2 font-display text-base font-bold text-white">{product.title}</h3>
-        <div className="flex items-center justify-between">
-          <span className="font-display text-lg font-black text-cyber-cyan text-glow-cyan">
-            {product.price} ₺
-          </span>
-          <span className="text-xs text-cyber-cyan/60">{product.stock} stok</span>
-        </div>
-      </div>
-    </Link>
   );
 }

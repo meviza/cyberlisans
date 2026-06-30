@@ -8,6 +8,11 @@ import { profileRoutes } from './interface/routes/profile';
 import { sessionRoutes } from './interface/routes/sessions';
 import { walletRoutes } from './interface/routes/wallet';
 import { paymentsRoutes } from './interface/routes/payments';
+import { productsRoutes } from './interface/routes/products';
+import { adminProductsRoutes } from './interface/routes/admin/products';
+import { adminCategoriesRoutes } from './interface/routes/admin/categories';
+import { adminBrandsRoutes } from './interface/routes/admin/brands';
+import { ordersRoutes } from './interface/routes/orders';
 
 const app = new Hono();
 
@@ -31,6 +36,11 @@ app.route('/profile', profileRoutes);
 app.route('/sessions', sessionRoutes);
 app.route('/wallet', walletRoutes);
 app.route('/payments', paymentsRoutes);
+app.route('/products', productsRoutes);
+app.route('/admin/products', adminProductsRoutes);
+app.route('/admin/categories', adminCategoriesRoutes);
+app.route('/admin/brands', adminBrandsRoutes);
+app.route('/orders', ordersRoutes);
 
 app.notFound((c) => c.json({ error: 'Not found' }, 404));
 

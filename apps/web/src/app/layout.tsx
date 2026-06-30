@@ -3,7 +3,7 @@ import { Inter, Orbitron, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ScrollProgressBar } from '@/components/3d/scroll-progress-bar';
 import { MagneticCursor } from '@/components/motion/magnetic-cursor';
-import { AuthProvider } from '@/lib/auth-context';
+import { AppProviders } from '@/components/store/app-providers';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const orbitron = Orbitron({
@@ -53,7 +53,8 @@ export const metadata: Metadata = {
     url: 'https://cyberlisans.com',
     siteName: 'CyberLisans',
     title: 'CyberLisans — Dijital Lisansların Yeni Adresi',
-    description: 'Orijinal dijital lisanslar, yazılım anahtarları ve AI API kredileri. Anında teslim.',
+    description:
+      'Orijinal dijital lisanslar, yazılım anahtarları ve AI API kredileri. Anında teslim.',
     images: [{ url: '/og.png', width: 1200, height: 630, alt: 'CyberLisans' }],
   },
   twitter: {
@@ -79,14 +80,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="tr"
-      className={`${inter.variable} ${orbitron.variable} ${jetbrains.variable} dark`}
-    >
+    <html lang="tr" className={`${inter.variable} ${orbitron.variable} ${jetbrains.variable} dark`}>
       <body className="bg-cyber-darker font-body text-white antialiased">
         <ScrollProgressBar />
         <MagneticCursor />
-        <AuthProvider>{children}</AuthProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

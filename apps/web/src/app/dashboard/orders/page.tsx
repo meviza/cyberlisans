@@ -2,49 +2,83 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Receipt, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Card, CardContent, Badge, Button } from '@cyberlisans/ui/atoms';
-import { EmptyState } from '@/components/dashboard/empty-state';
+import { Receipt, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Card, CardContent, Badge, Button, Spinner } from '@cyberlisans/ui/atoms';
+import { EmptyState } from '@/components/store/empty-state';
+import { useCurrency } from '@/lib/currency-context';
+import { apiFetch } from '@/lib/api-client';
 
 interface Order {
   id: string;
-  date: string;
-  products: { name: string; qty: number }[];
-  total: number;
-  status: 'pending' | 'paid' | 'fulfilled' | 'cancelled';
+  totalAmount: number;
+  currency: string;
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED' | string;
+  paymentMethod?: string;
+  createdAt: string;
+  itemCount: number;
+  items: Array<{ title: string; qty: number }>;
 }
 
-const MOCK_ORDERS: Order[] = [
-  { id: 'ORD-2024-1842', date: '28 Haz 2026', products: [{ name: 'Steam Cüzdan 50 TL', qty: 1 }], total: 50, status: 'fulfilled' },
-  { id: 'ORD-2024-1839', date: '27 Haz 2026', products: [{ name: 'OpenAI API $10', qty: 1 }], total: 320, status: 'fulfilled' },
-  { id: 'ORD-2024-1835', date: '24 Haz 2026', products: [{ name: 'Windows 11 Pro Key', qty: 1 }], total: 1200, status: 'paid' },
-  { id: 'ORD-2024-1821', date: '19 Haz 2026', products: [{ name: 'Netflix Premium 1 Ay', qty: 1 }], total: 250, status: 'fulfilled' },
-  { id: 'ORD-2024-1810', date: '12 Haz 2026', products: [{ name: 'Discord Nitro 1 Ay', qty: 2 }], total: 400, status: 'cancelled' },
-];
-
-const STATUS_MAP: Record<Order['status'], { label: string; variant: 'success' | 'warning' | 'danger' | 'default' }> = {
-  pending: { label: 'Bekliyor', variant: 'warning' },
-  paid: { label: 'Ödendi', variant: 'warning' },
-  fulfilled: { label: 'Teslim Edildi', variant: 'success' },
-  cancelled: { label: 'İptal', variant: 'danger' },
+const STATUS_MAP: Record<
+  string,
+  { label: string; variant: 'success' | 'warning' | 'danger' | 'default' }
+> = {
+  PENDING: { label: 'Bekliyor', variant: 'warning' },
+  PAID: { label: 'Ödendi', variant: 'warning' },
+  FULFILLED: { label: 'Teslim Edildi', variant: 'success' },
+  CANCELLED: { label: 'İptal', variant: 'danger' },
+  REFUNDED: { label: 'İade Edildi', variant: 'default' },
 };
 
-const FILTERS: Array<{ value: 'all' | Order['status']; label: string }> = [
+const FILTERS: Array<{ value: 'all' | string; label: string }> = [
   { value: 'all', label: 'Tümü' },
-  { value: 'pending', label: 'Bekliyor' },
-  { value: 'paid', label: 'Ödendi' },
-  { value: 'fulfilled', label: 'Teslim Edildi' },
-  { value: 'cancelled', label: 'İptal' },
+  { value: 'PENDING', label: 'Bekliyor' },
+  { value: 'PAID', label: 'Ödendi' },
+  { value: 'CANCELLED', label: 'İptal' },
+  { value: 'REFUNDED', label: 'İade' },
 ];
 
 export default function DashboardOrdersPage() {
-  const [filter, setFilter] = React.useState<'all' | Order['status']>('all');
+  const { format } = useCurrency();
+  const [orders, setOrders] = React.useState<Order[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [filter, setFilter] = React.useState<'all' | string>('all');
   const [page, setPage] = React.useState(1);
   const perPage = 10;
 
-  const filtered = filter === 'all' ? MOCK_ORDERS : MOCK_ORDERS.filter((o) => o.status === filter);
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiFetch<{ items: Order[] }>('/orders?limit=100');
+        if (!cancelled) setOrders(res.items);
+      } catch {
+        if (!cancelled) {
+          setError('Siparişler yüklenemedi');
+          setOrders([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const paged = filtered.slice((page - 1) * perPage, page * perPage);
+  const safePage = Math.min(page, totalPages);
+  const paged = filtered.slice((safePage - 1) * perPage, safePage * perPage);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -72,11 +106,23 @@ export default function DashboardOrdersPage() {
         ))}
       </div>
 
+      {error && (
+        <div className="rounded-md border border-cyber-magenta/40 bg-cyber-magenta/10 px-4 py-3 text-sm text-cyber-magenta">
+          {error}
+        </div>
+      )}
+
       {paged.length === 0 ? (
         <EmptyState
           icon={Receipt}
-          title="Bu filtreyle sipariş yok"
-          description="Farklı bir filtre seçerek tekrar dene."
+          title={orders.length === 0 ? 'Henüz sipariş yok' : 'Bu filtreyle sipariş yok'}
+          description={
+            orders.length === 0
+              ? 'İlk siparişini oluşturmak için mağazayı gez.'
+              : 'Farklı bir filtre seçerek tekrar dene.'
+          }
+          ctaLabel={orders.length === 0 ? 'Mağazaya git' : undefined}
+          ctaHref={orders.length === 0 ? '/products' : undefined}
         />
       ) : (
         <Card>
@@ -89,30 +135,47 @@ export default function DashboardOrdersPage() {
                     <th className="px-4 py-3">Tarih</th>
                     <th className="px-4 py-3">Ürünler</th>
                     <th className="px-4 py-3 text-right">Toplam</th>
+                    <th className="px-4 py-3">Ödeme</th>
                     <th className="px-4 py-3">Durum</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {paged.map((o) => {
-                    const s = STATUS_MAP[o.status];
+                    const s = STATUS_MAP[o.status] ?? {
+                      label: o.status,
+                      variant: 'default' as const,
+                    };
                     return (
-                      <tr key={o.id} className="border-b border-cyber-cyan/10 transition-colors hover:bg-cyber-cyan/5">
+                      <tr
+                        key={o.id}
+                        className="border-b border-cyber-cyan/10 transition-colors hover:bg-cyber-cyan/5"
+                      >
                         <td className="px-4 py-3 font-mono text-cyber-cyan">{o.id}</td>
-                        <td className="px-4 py-3 text-white/70">{o.date}</td>
+                        <td className="px-4 py-3 text-white/70">
+                          {new Date(o.createdAt).toLocaleDateString('tr-TR')}
+                        </td>
                         <td className="px-4 py-3 text-white">
-                          {o.products.map((p) => (
-                            <div key={p.name} className="text-xs">
-                              {p.qty > 1 && <span className="text-white/50">{p.qty}x </span>}
-                              {p.name}
+                          {o.items.slice(0, 2).map((it, i) => (
+                            <div key={i} className="text-xs">
+                              {it.qty > 1 && <span className="text-white/50">{it.qty}x </span>}
+                              {it.title}
                             </div>
                           ))}
+                          {o.items.length > 2 && (
+                            <div className="text-xs text-white/40">
+                              +{o.items.length - 2} ürün daha
+                            </div>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-right font-medium text-white">
-                          ₺{o.total.toLocaleString()}
+                          {format(o.totalAmount)}
                         </td>
+                        <td className="px-4 py-3 text-white/70">{o.paymentMethod ?? '—'}</td>
                         <td className="px-4 py-3">
-                          <Badge variant={s.variant} size="sm">{s.label}</Badge>
+                          <Badge variant={s.variant} size="sm">
+                            {s.label}
+                          </Badge>
                         </td>
                         <td className="px-4 py-3 text-right">
                           <Link
@@ -135,18 +198,34 @@ export default function DashboardOrdersPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-white/60">
-            Sayfa {page} / {totalPages}
+            Sayfa {safePage} / {totalPages}
           </p>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
               <ChevronLeft className="h-4 w-4" />
               Önceki
             </Button>
-            <Button variant="ghost" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
               Sonraki
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+      )}
+
+      {loading === false && orders.length === 0 && !error && (
+        <div className="hidden items-center justify-center text-xs text-white/40">
+          <Loader2 className="mr-2 h-3 w-3 animate-spin" /> Veriler önbellekten tazelendi
         </div>
       )}
     </div>

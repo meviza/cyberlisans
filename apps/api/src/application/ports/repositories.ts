@@ -99,6 +99,17 @@ import type {
   WalletTxType,
   Currency,
 } from '../../domain/entities/wallet';
+import type {
+  ProductEntity,
+  ProductKeyEntity,
+  CategoryEntity,
+  BrandEntity,
+  OrderEntity,
+  OrderItemEntity,
+  OrderStatus,
+  PaymentMethod,
+  DeliveryType,
+} from '../../domain/entities/product';
 
 export interface IWalletRepository {
   findByUserId(userId: string): Promise<WalletEntity | null>;
@@ -164,9 +175,7 @@ export interface IPaymentRepository {
 }
 
 export interface IOrderRepositoryForWallet {
-  findById(
-    orderId: string,
-  ): Promise<{
+  findById(orderId: string): Promise<{
     id: string;
     userId: string;
     totalAmount: number;
@@ -174,4 +183,167 @@ export interface IOrderRepositoryForWallet {
     status: string;
   } | null>;
   markPaid(orderId: string, paymentId: string): Promise<void>;
+}
+
+export interface ProductFilter {
+  categoryId?: string;
+  categorySlug?: string;
+  brandId?: string;
+  brandSlug?: string;
+  isActive?: boolean;
+  isFeatured?: boolean;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  currency?: Currency;
+  tags?: string[];
+}
+
+export type ProductSort = 'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'popular' | 'featured';
+
+export interface ProductListOptions {
+  filter: ProductFilter;
+  sort: ProductSort;
+  page: number;
+  limit: number;
+}
+
+export interface CreateProductInput {
+  categoryId: string;
+  brandId?: string | null;
+  slug: string;
+  title: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  modelUrl?: string | null;
+  priceTry: number;
+  priceUsd: number;
+  priceEur: number;
+  priceUsdt: number;
+  stock: number;
+  deliveryType: DeliveryType;
+  isActive?: boolean;
+  isFeatured?: boolean;
+  tags?: string[];
+  metadata?: Record<string, unknown> | null;
+  sortOrder?: number;
+}
+
+export type UpdateProductInput = Partial<CreateProductInput>;
+
+export interface IProductRepository {
+  list(opts: ProductListOptions): Promise<{ items: ProductEntity[]; total: number }>;
+  findById(id: string): Promise<ProductEntity | null>;
+  findBySlug(slug: string): Promise<ProductEntity | null>;
+  findByIdWithRelations(id: string): Promise<ProductEntity | null>;
+  findBySlugWithRelations(slug: string): Promise<ProductEntity | null>;
+  create(data: CreateProductInput): Promise<ProductEntity>;
+  update(id: string, data: UpdateProductInput): Promise<ProductEntity>;
+  softDelete(id: string): Promise<ProductEntity>;
+  countActive(): Promise<number>;
+  getFeatured(limit: number): Promise<ProductEntity[]>;
+  decrementStock(productId: string, qty: number): Promise<void>;
+  incrementStock(productId: string, qty: number): Promise<void>;
+}
+
+export interface IProductKeyRepository {
+  listByProduct(
+    productId: string,
+    options: { availableOnly?: boolean; page: number; limit: number },
+  ): Promise<{ items: ProductKeyEntity[]; total: number }>;
+  reserve(productId: string, qty: number, userId: string): Promise<ProductKeyEntity[]>;
+  markUsedByOrderItem(orderItemId: string, userId: string): Promise<void>;
+  returnKeysForOrderItem(orderItemId: string): Promise<void>;
+  countAvailable(productId: string): Promise<number>;
+  bulkCreate(productId: string, codes: string[]): Promise<number>;
+  deleteById(id: string): Promise<void>;
+  findById(id: string): Promise<ProductKeyEntity | null>;
+}
+
+export interface ICategoryRepository {
+  list(filter: { isActive?: boolean }): Promise<CategoryEntity[]>;
+  findById(id: string): Promise<CategoryEntity | null>;
+  findBySlug(slug: string): Promise<CategoryEntity | null>;
+  create(data: {
+    slug: string;
+    name: string;
+    nameEn?: string | null;
+    nameDe?: string | null;
+    nameAr?: string | null;
+    nameRu?: string | null;
+    icon?: string | null;
+    description?: string | null;
+    sortOrder?: number;
+    isActive?: boolean;
+  }): Promise<CategoryEntity>;
+  update(id: string, data: Partial<CategoryEntity>): Promise<CategoryEntity>;
+  delete(id: string): Promise<void>;
+}
+
+export interface IBrandRepository {
+  list(filter: { isActive?: boolean }): Promise<BrandEntity[]>;
+  findById(id: string): Promise<BrandEntity | null>;
+  findBySlug(slug: string): Promise<BrandEntity | null>;
+  create(data: {
+    slug: string;
+    name: string;
+    logoUrl?: string | null;
+    websiteUrl?: string | null;
+    isActive?: boolean;
+  }): Promise<BrandEntity>;
+  update(id: string, data: Partial<BrandEntity>): Promise<BrandEntity>;
+  delete(id: string): Promise<void>;
+}
+
+export interface CreateOrderItemInput {
+  productId: string;
+  productKeyId?: string | null;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface CreateOrderInput {
+  userId: string;
+  totalAmount: number;
+  currency: Currency;
+  paymentMethod: PaymentMethod;
+  notes?: string | null;
+  items: CreateOrderItemInput[];
+}
+
+export interface IOrderRepository {
+  createWithItems(data: CreateOrderInput): Promise<OrderEntity>;
+  findById(orderId: string, withItems?: boolean): Promise<OrderEntity | null>;
+  findByIdForUser(
+    orderId: string,
+    userId: string,
+    withItems?: boolean,
+  ): Promise<OrderEntity | null>;
+  findByUserId(
+    userId: string,
+    options: { status?: OrderStatus; page: number; limit: number },
+  ): Promise<{
+    items: OrderEntity[];
+    total: number;
+  }>;
+  findByUserIdWithItems(
+    userId: string,
+    page: number,
+    limit: number,
+  ): Promise<{
+    items: OrderEntity[];
+    total: number;
+  }>;
+  listAll(options: { status?: OrderStatus; page: number; limit: number }): Promise<{
+    items: OrderEntity[];
+    total: number;
+  }>;
+  updateStatus(
+    orderId: string,
+    status: OrderStatus,
+    extras?: { paidAt?: Date; fulfilledAt?: Date; cancelledAt?: Date; refundedAt?: Date },
+  ): Promise<OrderEntity>;
+  markPaid(orderId: string, paymentId: string): Promise<void>;
+  markFulfilled(orderId: string): Promise<void>;
 }
