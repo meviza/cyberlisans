@@ -17,6 +17,7 @@
     "@cyberlisans/db": "workspace:*",
     "@cyberlisans/ui": "workspace:*",
     "@cyberlisans/validators": "workspace:*",
+    "@prisma/client": "6.2.1",
     "@radix-ui/react-dialog": "1.1.4",
     "@react-three/drei": "9.121.4",
     "@react-three/fiber": "9.0.0-rc.1",

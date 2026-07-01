@@ -21,9 +21,17 @@
     "@types/node": "22.10.10"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma", "esbuild", "sharp", "unrs-resolver"]
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,md,json,css}": ["prettier --write"]
+    "*.{ts,tsx,js,jsx,md,json,css}": [
+      "prettier --write"
+    ]
   }
 }
