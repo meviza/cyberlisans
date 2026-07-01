@@ -12,6 +12,12 @@ import { productsRoutes } from './interface/routes/products';
 import { adminProductsRoutes } from './interface/routes/admin/products';
 import { adminCategoriesRoutes } from './interface/routes/admin/categories';
 import { adminBrandsRoutes } from './interface/routes/admin/brands';
+import { adminUsersRoutes } from './interface/routes/admin/users';
+import { adminOrdersRoutes } from './interface/routes/admin/orders';
+import { adminPaymentsRoutes } from './interface/routes/admin/payments';
+import { adminAuditRoutes } from './interface/routes/admin/audit';
+import { adminPrivacyRoutes } from './interface/routes/admin/privacy';
+import { adminSettingsRoutes } from './interface/routes/admin/settings';
 import { ordersRoutes } from './interface/routes/orders';
 
 const app = new Hono();
@@ -40,6 +46,12 @@ app.route('/products', productsRoutes);
 app.route('/admin/products', adminProductsRoutes);
 app.route('/admin/categories', adminCategoriesRoutes);
 app.route('/admin/brands', adminBrandsRoutes);
+app.route('/admin/users', adminUsersRoutes);
+app.route('/admin/orders', adminOrdersRoutes);
+app.route('/admin/payments', adminPaymentsRoutes);
+app.route('/admin/audit', adminAuditRoutes);
+app.route('/admin/privacy', adminPrivacyRoutes);
+app.route('/admin/settings', adminSettingsRoutes);
 app.route('/orders', ordersRoutes);
 
 app.notFound((c) => c.json({ error: 'Not found' }, 404));

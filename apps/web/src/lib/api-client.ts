@@ -65,8 +65,12 @@ async function refreshAccessToken(): Promise<boolean> {
   }
 }
 
-export async function apiFetch<T = unknown>(path: string, options: RequestInit = {}, retry = true): Promise<T> {
-  const url = `${API_URL}${path}`;
+export async function apiFetch<T = unknown>(
+  path: string,
+  options: RequestInit = {},
+  retry = true,
+): Promise<T> {
+  const url = path.startsWith('/api/') ? path : `${API_URL}${path}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> | undefined),

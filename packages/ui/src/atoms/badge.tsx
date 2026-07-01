@@ -13,7 +13,9 @@ const badgeVariants = cva(
         success: 'bg-cyber-lime/20 text-cyber-lime border border-cyber-lime/50',
         warning: 'bg-cyber-yellow/20 text-cyber-yellow border border-cyber-yellow/50',
         danger: 'bg-cyber-pink/20 text-cyber-pink border border-cyber-pink/50',
+        cyan: 'bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50',
         magenta: 'bg-cyber-magenta/20 text-cyber-magenta border border-cyber-magenta/50',
+        purple: 'bg-cyber-purple/20 text-cyber-purple border border-cyber-purple/50',
         outline: 'bg-transparent text-cyber-text border border-cyber-text/30',
       },
       size: {
