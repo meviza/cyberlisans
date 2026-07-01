@@ -40,6 +40,29 @@ export function requireSuperAdmin() {
   return requireRole('SUPER_ADMIN');
 }
 
+export function requireTwoFactor(isTwoFactorEnabled: (userId: string) => Promise<boolean>) {
+  return async (c: Context, next: Next) => {
+    const user = c.get('user');
+    if (!user) return c.json({ error: 'Unauthorized' }, 401);
+    if (user.role === 'CUSTOMER') {
+      await next();
+      return;
+    }
+    const enabled = await isTwoFactorEnabled(user.sub);
+    if (!enabled) {
+      return c.json(
+        {
+          error: 'Bu hesap için iki faktörlü doğrulama zorunludur.',
+          code: '2FA_REQUIRED',
+          twoFactorSetupUrl: '/auth/2fa/setup',
+        },
+        403,
+      );
+    }
+    await next();
+  };
+}
+
 export function optionalAuth() {
   return async (c: Context, next: Next) => {
     const header = c.req.header('Authorization');

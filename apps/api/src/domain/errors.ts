@@ -95,3 +95,10 @@ export class MissingConsentError extends Error {
     super(message);
   }
 }
+
+export class TwoFactorMandatoryError extends Error {
+  readonly code = '2FA_MANDATORY';
+  constructor(message = 'Yönetici hesapları için 2FA zorunludur ve kapatılamaz') {
+    super(message);
+  }
+}

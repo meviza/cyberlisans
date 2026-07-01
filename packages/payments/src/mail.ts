@@ -101,4 +101,44 @@ export const mailTemplates = {
       <pre style="background: #050510; padding: 16px; border-radius: 8px; color: #00F0FF;">${codes.join('\n')}</pre>
     </div>`,
   }),
+  newDeviceLogin: (info: { email: string; ip: string; device: string; time: string }) => ({
+    subject: 'Yeni Cihazdan Giriş — CyberLisans',
+    html: `<div style="font-family: sans-serif; padding: 24px; background: #0A0A1F; color: #fff;">
+      <h1 style="color: #FF00C8;">Yeni Cihazdan Giriş</h1>
+      <p>Yönetici hesabınıza yeni bir cihazdan giriş yapıldı.</p>
+      <ul>
+        <li><strong>E-posta:</strong> ${info.email}</li>
+        <li><strong>IP:</strong> ${info.ip}</li>
+        <li><strong>Cihaz:</strong> ${info.device}</li>
+        <li><strong>Zaman:</strong> ${info.time}</li>
+      </ul>
+      <p>Bu girişi tanımıyorsanız hemen şifrenizi sıfırlayın.</p>
+    </div>`,
+    text: `Yeni cihazdan giriş: ${info.email} ${info.ip} ${info.time}`,
+  }),
+  dealerNewDeviceLogin: (info: { email: string; ip: string; device: string; time: string }) => ({
+    subject: 'Yeni Cihazdan Bayi Girişi — CyberLisans',
+    html: `<div style="font-family: sans-serif; padding: 24px; background: #0A0A1F; color: #fff;">
+      <h1 style="color: #FF00C8;">Yeni Cihazdan Bayi Girişi</h1>
+      <p>Bayi hesabınıza yeni bir cihazdan giriş yapıldı.</p>
+      <ul>
+        <li><strong>E-posta:</strong> ${info.email}</li>
+        <li><strong>IP:</strong> ${info.ip}</li>
+        <li><strong>Cihaz:</strong> ${info.device}</li>
+        <li><strong>Zaman:</strong> ${info.time}</li>
+      </ul>
+      <p>Bu girişi tanımıyorsanız hemen şifrenizi sıfırlayın.</p>
+    </div>`,
+    text: `Yeni bayi girişi: ${info.email} ${info.ip} ${info.time}`,
+  }),
+  twoFactorMandatoryWarning: (info: { email: string; setupUrl: string }) => ({
+    subject: 'İki Faktörlü Doğrulama Zorunludur — CyberLisans',
+    html: `<div style="font-family: sans-serif; padding: 24px; background: #0A0A1F; color: #fff;">
+      <h1 style="color: #FF00C8;">2FA Zorunludur</h1>
+      <p>Yönetici hesabınız için iki faktörlü doğrulama zorunludur.</p>
+      <p>Lütfen aşağıdaki bağlantıdan 2FA kurulumunu tamamlayın:</p>
+      <p><a href="${info.setupUrl}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #00F0FF, #FF00C8); color: #050510; text-decoration: none; border-radius: 8px; font-weight: bold;">2FA Kur</a></p>
+    </div>`,
+    text: `2FA kurulumu: ${info.setupUrl}`,
+  }),
 };

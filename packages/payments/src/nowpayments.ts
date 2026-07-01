@@ -14,6 +14,7 @@ import {
   WebhookPayloadError,
   RefundFailedError,
 } from './errors';
+import { constantTimeEqual } from './webhook-security';
 
 interface NowPaymentsConfig {
   apiKey: string;
@@ -126,7 +127,9 @@ export class NowPaymentsProvider implements IPaymentProvider {
     const expectedSig = createHmac('sha512', this.config.ipnSecret)
       .update(sortedJson)
       .digest('hex');
-    if (expectedSig !== signature) throw new WebhookSignatureError('NOWPAYMENTS');
+    if (!constantTimeEqual(expectedSig, signature)) {
+      throw new WebhookSignatureError('NOWPAYMENTS');
+    }
     const status = STATUS_MAP[parsed.payment_status as string] ?? 'PENDING';
     return {
       provider: 'NOWPAYMENTS',
@@ -137,6 +140,10 @@ export class NowPaymentsProvider implements IPaymentProvider {
       raw: parsed,
       receivedAt: new Date(),
     };
+  }
+
+  async verifyWebhookAsync(headers: Record<string, string>, body: string): Promise<WebhookPayload> {
+    return this.verifyWebhook(headers, body);
   }
 
   async refund(input: RefundInput): Promise<RefundResult> {

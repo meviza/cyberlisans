@@ -10,7 +10,9 @@
     "./password": "./src/password.ts",
     "./two-factor": "./src/two-factor.ts",
     "./supabase": "./src/supabase.ts",
-    "./middleware": "./src/middleware.ts"
+    "./middleware": "./src/middleware.ts",
+    "./crypto": "./src/crypto.ts",
+    "./backup-codes": "./src/backup-codes.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -19,8 +21,8 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "jose": "5.9.6",
     "bcryptjs": "2.4.3",
+    "jose": "5.9.6",
     "otplib": "12.0.1",
     "qrcode": "1.5.4",
     "@supabase/supabase-js": "2.47.10",

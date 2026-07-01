@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ChevronRight, Star } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 import { ProductGallery } from '@/components/store/product-gallery';
 import { ProductDetail } from '@/components/store/product-detail';
 import { ProductCard } from '@/components/store/product-card';

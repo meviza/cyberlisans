@@ -1,7 +1,5 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { ZodError } from 'zod';
-import { authMiddleware, requireAdmin } from '../../../infrastructure/auth';
 import { createProduct } from '../../../domain/usecases/product/create-product';
 import { updateProduct } from '../../../domain/usecases/product/update-product';
 import { deleteProduct } from '../../../domain/usecases/product/delete-product';
@@ -10,7 +8,7 @@ import { bulkAddKeys } from '../../../domain/usecases/product/bulk-add-keys';
 import { deleteProductKey } from '../../../domain/usecases/product/delete-key';
 import { getProduct } from '../../../domain/usecases/product/get-product';
 import { getRequestMeta } from '../../middleware/request-meta';
-import { PaymentError } from '@cyberlisans/payments/errors';
+import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
 import {
   bulkAddKeysSchema,
   createProductSchema,
@@ -20,23 +18,14 @@ import {
 
 export const adminProductsRoutes = new Hono();
 
-adminProductsRoutes.use('*', authMiddleware, requireAdmin());
+const adminStack = createAdminStack();
+adminProductsRoutes.use('*', ...adminStack);
 
 adminProductsRoutes.use('*', async (c, next) => {
   try {
     await next();
   } catch (err) {
-    if (err instanceof ZodError) {
-      return c.json({ error: 'Validation', issues: err.issues }, 400);
-    }
-    if (err instanceof PaymentError) {
-      return c.json(
-        { error: err.message, code: err.code },
-        err.statusCode as 400 | 401 | 403 | 404 | 409,
-      );
-    }
-    console.error('[ADMIN PRODUCTS ERROR]', err);
-    return c.json({ error: 'Internal error' }, 500);
+    return errorHandler(err, c);
   }
 });
 

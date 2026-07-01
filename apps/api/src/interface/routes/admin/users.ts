@@ -1,8 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { ZodError } from 'zod';
-import { authMiddleware, requireAdmin } from '../../../infrastructure/auth';
+import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
 import { listAdminUsers } from '../../../domain/usecases/user/list-admin-users';
 import { getAdminUser } from '../../../domain/usecases/user/get-admin-user';
 import { updateAdminUser } from '../../../domain/usecases/user/update-admin-user';
@@ -11,27 +10,16 @@ import { sendPasswordResetToUser } from '../../../domain/usecases/user/send-pass
 import { reset2FAForUser } from '../../../domain/usecases/user/reset-2fa';
 import { deleteAdminUser } from '../../../domain/usecases/user/delete-admin-user';
 import { getRequestMeta } from '../../middleware/request-meta';
-import { PaymentError } from '@cyberlisans/payments/errors';
 
 export const adminUsersRoutes = new Hono();
 
-adminUsersRoutes.use('*', authMiddleware, requireAdmin());
+adminUsersRoutes.use('*', ...createAdminStack());
 
 adminUsersRoutes.use('*', async (c, next) => {
   try {
     await next();
   } catch (err) {
-    if (err instanceof ZodError) {
-      return c.json({ error: 'Validation', issues: err.issues }, 400);
-    }
-    if (err instanceof PaymentError) {
-      return c.json(
-        { error: err.message, code: err.code },
-        err.statusCode as 400 | 401 | 403 | 404 | 409,
-      );
-    }
-    console.error('[ADMIN USERS ERROR]', err);
-    return c.json({ error: 'Internal error' }, 500);
+    return errorHandler(err, c);
   }
 });
 

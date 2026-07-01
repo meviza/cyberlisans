@@ -1,12 +1,13 @@
 import { z } from 'zod';
 import { verifyPassword } from '../../../infrastructure/auth';
 import { userRepository } from '../../../infrastructure/repositories/user.repository';
+import { userTwoFactorRepository } from '../../../infrastructure/repositories/user-two-factor.repository';
 import { auditRepository } from '../../../infrastructure/repositories/audit.repository';
-import { UserNotFoundError, InvalidCredentialsError } from '../../errors';
+import { UserNotFoundError, InvalidCredentialsError, TwoFactorMandatoryError } from '../../errors';
 import type { RequestMeta } from './register-user';
 
 export const disable2FASchema = z.object({
-  password: z.string().min(1),
+  password: z.string().min(1).max(128),
 });
 export type Disable2FAInput = z.infer<typeof disable2FASchema>;
 
@@ -24,11 +25,16 @@ export async function disable2FA(
   const user = await userRepository.findById(userId);
   if (!user) throw new UserNotFoundError();
 
+  if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+    throw new TwoFactorMandatoryError();
+  }
+
   const hash = await userRepository.getPasswordHash(userId);
   if (!hash) throw new InvalidCredentialsError();
   const ok = await verifyPassword(data.password, hash);
   if (!ok) throw new InvalidCredentialsError('Şifre hatalı');
 
+  await userTwoFactorRepository.disable(userId);
   await userRepository.setTwoFactor(userId, null, false);
 
   await auditRepository.log({

@@ -11,8 +11,10 @@ import {
   CurrencyNotSupportedError,
   ProviderConfigError,
   WebhookPayloadError,
+  WebhookSignatureError,
   RefundFailedError,
 } from './errors';
+import { verifyTimestampInWindow } from './webhook-security';
 
 interface PaparaConfig {
   apiKey: string;
@@ -93,6 +95,8 @@ export class PaparaProvider implements IPaymentProvider {
     }
     const { id, status, amount, referenceId } = parsed;
     if (!id || status === undefined) throw new WebhookPayloadError('PAPARA', 'missing id/status');
+    const tsCheck = verifyTimestampInWindow(parsed.timestamp ?? headers['x-papara-timestamp']);
+    if (!tsCheck.valid) throw new WebhookSignatureError('PAPARA');
     return {
       provider: 'PAPARA',
       providerRef: id,
@@ -102,6 +106,10 @@ export class PaparaProvider implements IPaymentProvider {
       raw: parsed,
       receivedAt: new Date(),
     };
+  }
+
+  async verifyWebhookAsync(headers: Record<string, string>, body: string): Promise<WebhookPayload> {
+    return this.verifyWebhook(headers, body);
   }
 
   async refund(input: RefundInput): Promise<RefundResult> {

@@ -15,6 +15,7 @@ import {
   RefundFailedError,
 } from './errors';
 import type { Currency } from './types';
+import { constantTimeEqual, verifyTimestampInWindow } from './webhook-security';
 
 interface StripeConfig {
   secretKey: string;
@@ -159,16 +160,15 @@ export class StripeProvider implements IPaymentProvider {
       else if (k === 'v1') v1Sig = v ?? '';
     }
     if (!timestamp || !v1Sig) throw new WebhookSignatureError('STRIPE');
-    const tolerance = 300;
-    if (Math.abs(Date.now() / 1000 - timestamp) > tolerance)
-      throw new WebhookSignatureError('STRIPE');
+    const replayCheck = verifyTimestampInWindow(String(timestamp), 5 * 60_000, Date.now());
+    if (!replayCheck.valid) throw new WebhookSignatureError('STRIPE');
     const signedPayload = `${timestamp}.${payload}`;
     const crypto = await import('crypto');
     const expected = crypto
       .createHmac('sha256', this.config.webhookSecret)
       .update(signedPayload)
       .digest('hex');
-    if (expected !== v1Sig) throw new WebhookSignatureError('STRIPE');
+    if (!constantTimeEqual(expected, v1Sig)) throw new WebhookSignatureError('STRIPE');
     return JSON.parse(payload);
   }
 

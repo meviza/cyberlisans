@@ -3,6 +3,7 @@ import { userRepository } from '../../../infrastructure/repositories/user.reposi
 import { auditRepository } from '../../../infrastructure/repositories/audit.repository';
 import { DealerProfileExistsError, DealerNotFoundError } from '../../errors/dealer';
 import { UserNotFoundForAdminError } from '../../errors/wallet';
+import { mailTemplates, getMailService } from '../../../infrastructure/mail';
 
 export interface RegisterDealerInput {
   userId: string;
@@ -17,7 +18,16 @@ export interface RegisterDealerInput {
   userAgent?: string;
 }
 
-export async function registerDealer(input: RegisterDealerInput) {
+export interface RegisterDealerResult {
+  id: string;
+  userId: string;
+  companyName: string;
+  status: string;
+  twoFactorRequired: boolean;
+  twoFactorSetupUrl: string;
+}
+
+export async function registerDealer(input: RegisterDealerInput): Promise<RegisterDealerResult> {
   const user = await userRepository.findById(input.userId);
   if (!user) throw new UserNotFoundForAdminError();
   const existing = await dealerRepository.findByUserId(input.userId);
@@ -41,7 +51,31 @@ export async function registerDealer(input: RegisterDealerInput) {
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
   });
-  return profile;
+
+  const twoFactorRequired = !user.twoFactorEnabled;
+  const appUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000';
+  const twoFactorSetupUrl = `${appUrl}/auth/2fa/setup`;
+
+  if (twoFactorRequired) {
+    try {
+      const tpl = mailTemplates.twoFactorMandatoryWarning({
+        email: user.email,
+        setupUrl: twoFactorSetupUrl,
+      });
+      await getMailService().send({ to: user.email, ...tpl });
+    } catch (err) {
+      console.error('[register-dealer] 2fa mail failed', err);
+    }
+  }
+
+  return {
+    id: profile.id,
+    userId: profile.userId,
+    companyName: profile.companyName,
+    status: profile.status,
+    twoFactorRequired,
+    twoFactorSetupUrl,
+  };
 }
 
 export async function getDealerById(id: string) {

@@ -64,6 +64,7 @@ export interface IPaymentProvider {
   readonly name: PaymentProvider;
   init(input: PaymentInitInput): Promise<PaymentInitResult>;
   verifyWebhook(headers: Record<string, string>, body: string): WebhookPayload;
+  verifyWebhookAsync?(headers: Record<string, string>, body: string): Promise<WebhookPayload>;
   refund(input: RefundInput): Promise<RefundResult>;
 }
 

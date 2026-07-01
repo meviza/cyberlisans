@@ -410,6 +410,31 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model FailedLoginAttempt {
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String
+  ipAddress   String?
+  userAgent   String?
+  attemptedAt DateTime @default(now())
+  lockedUntil DateTime?
+
+  @@index([email, attemptedAt])
+  @@index([ipAddress, attemptedAt])
+  @@map("failed_login_attempts")
+}
+
+model UserTwoFactor {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @db.Uuid
+  secretCipher    String
+  backupCodesHash String[]
+  enabled         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("user_two_factors")
+}
+
 model ConsentRecord {
   id              String   @id @default(uuid()) @db.Uuid
   userId          String?  @db.Uuid

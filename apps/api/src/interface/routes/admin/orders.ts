@@ -1,8 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { ZodError } from 'zod';
-import { authMiddleware, requireAdmin } from '../../../infrastructure/auth';
+import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
 import { listAdminOrders } from '../../../domain/usecases/order/list-admin-orders';
 import { getAdminOrder } from '../../../domain/usecases/order/get-admin-order';
 import { adminFulfillOrder } from '../../../domain/usecases/order/admin-fulfill-order';
@@ -11,27 +10,16 @@ import { adminCancelOrder } from '../../../domain/usecases/order/admin-cancel-or
 import { adminResendOrderConfirmation } from '../../../domain/usecases/order/admin-resend-confirmation';
 import { prisma } from '../../../infrastructure/db';
 import { getRequestMeta } from '../../middleware/request-meta';
-import { PaymentError } from '@cyberlisans/payments/errors';
 
 export const adminOrdersRoutes = new Hono();
 
-adminOrdersRoutes.use('*', authMiddleware, requireAdmin());
+adminOrdersRoutes.use('*', ...createAdminStack());
 
 adminOrdersRoutes.use('*', async (c, next) => {
   try {
     await next();
   } catch (err) {
-    if (err instanceof ZodError) {
-      return c.json({ error: 'Validation', issues: err.issues }, 400);
-    }
-    if (err instanceof PaymentError) {
-      return c.json(
-        { error: err.message, code: err.code },
-        err.statusCode as 400 | 401 | 403 | 404 | 409,
-      );
-    }
-    console.error('[ADMIN ORDERS ERROR]', err);
-    return c.json({ error: 'Internal error' }, 500);
+    return errorHandler(err, c);
   }
 });
 

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { ZodError } from 'zod';
-import { authMiddleware } from '../../infrastructure/auth';
+import { authMiddleware, requireTwoFactor } from '../../infrastructure/auth';
 import { getDealerProfile } from '../../domain/usecases/dealer/get-dealer-profile';
 import { registerDealer } from '../../domain/usecases/dealer/register-dealer';
 import { updateDealerProfile } from '../../domain/usecases/dealer/update-dealer-profile';
@@ -18,6 +18,8 @@ import {
 } from '../../domain/usecases/dealer/request-dealer-payout';
 import { getRequestMeta } from '../middleware/request-meta';
 import { PaymentError } from '@cyberlisans/payments/errors';
+import { createRateLimiter, RATE_LIMIT_CONFIGS } from '../middleware/security/rate-limit';
+import { userTwoFactorRepository } from '../../infrastructure/repositories/user-two-factor.repository';
 import {
   dealerRegisterSchema,
   dealerUpdateSchema,
@@ -31,14 +33,22 @@ import {
 
 export const dealerRoutes = new Hono();
 
+const dealerRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.dealer });
+const twoFaGuard = requireTwoFactor(async (userId: string) => {
+  const rec = await userTwoFactorRepository.findByUserId(userId);
+  return rec?.enabled === true;
+});
+
 dealerRoutes.use('*', authMiddleware);
+dealerRoutes.use('*', dealerRateLimit);
+dealerRoutes.use('*', twoFaGuard);
 
 dealerRoutes.use('*', async (c, next) => {
   try {
     await next();
   } catch (err) {
     if (err instanceof ZodError) {
-      return c.json({ error: 'Validation', issues: err.issues }, 400);
+      return c.json({ error: 'Validation', code: 'VALIDATION_ERROR', issues: err.issues }, 400);
     }
     if (err instanceof PaymentError) {
       return c.json(
@@ -47,7 +57,7 @@ dealerRoutes.use('*', async (c, next) => {
       );
     }
     console.error('[DEALER ERROR]', err);
-    return c.json({ error: 'Internal error' }, 500);
+    return c.json({ error: 'Bir hata oluştu, lütfen tekrar deneyin', code: 'INTERNAL_ERROR' }, 500);
   }
 });
 

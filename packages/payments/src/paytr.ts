@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import type {
   IPaymentProvider,
   PaymentInitInput,
@@ -15,6 +15,7 @@ import {
   WebhookPayloadError,
   RefundFailedError,
 } from './errors';
+import { constantTimeEqual, verifyTimestampInWindow } from './webhook-security';
 
 interface PayTRConfig {
   merchantId: string;
@@ -146,7 +147,7 @@ export class PayTRProvider implements IPaymentProvider {
     const expectedHash = createHmac('sha256', this.config.merchantSalt)
       .update(merchantOid + this.config.merchantSalt + status + totalAmount)
       .digest('base64');
-    if (expectedHash !== hash) throw new WebhookSignatureError('PAYTR');
+    if (!constantTimeEqual(expectedHash, hash)) throw new WebhookSignatureError('PAYTR');
     return {
       provider: 'PAYTR',
       providerRef: merchantOid,
@@ -156,6 +157,10 @@ export class PayTRProvider implements IPaymentProvider {
       raw: Object.fromEntries(params),
       receivedAt: new Date(),
     };
+  }
+
+  async verifyWebhookAsync(headers: Record<string, string>, body: string): Promise<WebhookPayload> {
+    return this.verifyWebhook(headers, body);
   }
 
   async refund(input: RefundInput): Promise<RefundResult> {

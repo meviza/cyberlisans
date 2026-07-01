@@ -1,15 +1,17 @@
 import { enable2FASchema } from '../../../infrastructure/validators';
 import type { Enable2FAInput } from '../../../infrastructure/validators';
-import { verify2FAToken } from '../../../infrastructure/auth';
+import { verify2FAToken, decryptFromString } from '../../../infrastructure/auth';
 
 import { mailTemplates, getMailService } from '../../../infrastructure/mail';
 import { userRepository } from '../../../infrastructure/repositories/user.repository';
+import { userTwoFactorRepository } from '../../../infrastructure/repositories/user-two-factor.repository';
 import { auditRepository } from '../../../infrastructure/repositories/audit.repository';
 import { UserNotFoundError, InvalidTwoFactorError } from '../../errors';
 import type { RequestMeta } from './register-user';
 
 export interface Verify2FAResult {
   message: string;
+  backupCodesRemaining: number;
 }
 
 export async function verify2FA(
@@ -21,12 +23,25 @@ export async function verify2FA(
 
   const user = await userRepository.findById(userId);
   if (!user) throw new UserNotFoundError();
-  if (!user.twoFactorSecret) throw new InvalidTwoFactorError('2FA başlatılmamış');
 
-  const valid = verify2FAToken(data.token, user.twoFactorSecret);
+  const twoFaRecord = await userTwoFactorRepository.findByUserId(userId);
+  if (!twoFaRecord?.secretCipher) throw new InvalidTwoFactorError('2FA başlatılmamış');
+
+  let secret: string;
+  try {
+    secret = decryptFromString(twoFaRecord.secretCipher);
+  } catch {
+    throw new InvalidTwoFactorError('2FA secret çözümlenemedi');
+  }
+
+  const valid = verify2FAToken(data.token, secret);
   if (!valid) throw new InvalidTwoFactorError();
 
-  await userRepository.setTwoFactor(userId, user.twoFactorSecret, true);
+  await userTwoFactorRepository.upsert(userId, {
+    secretCipher: twoFaRecord.secretCipher,
+    backupCodesHash: twoFaRecord.backupCodesHash,
+    enabled: true,
+  });
 
   await auditRepository.log({
     actorId: userId,
@@ -45,5 +60,8 @@ export async function verify2FA(
     console.error('[2fa] mail send failed', err);
   }
 
-  return { message: '2FA başarıyla etkinleştirildi.' };
+  return {
+    message: '2FA başarıyla etkinleştirildi.',
+    backupCodesRemaining: twoFaRecord.backupCodesHash.length,
+  };
 }

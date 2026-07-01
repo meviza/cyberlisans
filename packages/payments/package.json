@@ -16,7 +16,8 @@
     "./papara": "./src/papara.ts",
     "./nowpayments": "./src/nowpayments.ts",
     "./stripe": "./src/stripe.ts",
-    "./bank-transfer": "./src/bank-transfer.ts"
+    "./bank-transfer": "./src/bank-transfer.ts",
+    "./webhook-security": "./src/webhook-security.ts"
   },
   "scripts": {
     "build": "tsc",

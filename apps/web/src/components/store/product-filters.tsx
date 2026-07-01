@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Input, Button } from '@cyberlisans/ui/atoms';
 import { categories } from '@/lib/products';
@@ -57,6 +58,8 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslations('products');
+  const tCommon = useTranslations('common');
   const state = React.useMemo(
     () => parseFilters(new URLSearchParams(searchParams.toString())),
     [searchParams],
@@ -90,13 +93,20 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
     return () => window.clearTimeout(t);
   }, [searchInput, state.search, apply]);
 
+  const sortLabels: Record<SortKey, string> = {
+    newest: t('sortNewest'),
+    price_asc: t('sortPriceAsc'),
+    price_desc: t('sortPriceDesc'),
+    popular: t('sortPopular'),
+  };
+
   const content = (
     <div className="space-y-6">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
         <Input
           type="search"
-          placeholder="Ürün ara..."
+          placeholder={t('searchPlaceholder')}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="pl-9"
@@ -105,14 +115,14 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
 
       <div>
         <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/80">
-          Kategoriler
+          {t('categories')}
         </h3>
         <div className="space-y-1">
           <FilterButton
             active={state.category === 'all'}
             onClick={() => apply({ category: 'all' })}
           >
-            Tümü
+            {t('allFilter')}
           </FilterButton>
           {categories.map((c) => (
             <FilterButton
@@ -127,10 +137,12 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/80">Markalar</h3>
+        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/80">
+          {t('brands')}
+        </h3>
         <div className="space-y-1">
           <FilterButton active={state.brand === 'all'} onClick={() => apply({ brand: 'all' })}>
-            Tümü
+            {t('allFilter')}
           </FilterButton>
           {brands.map((b) => (
             <FilterButton key={b} active={state.brand === b} onClick={() => apply({ brand: b })}>
@@ -141,12 +153,14 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/80">Fiyat (₺)</h3>
+        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/80">
+          {t('priceCurrency')}
+        </h3>
         <div className="flex items-center gap-2">
           <Input
             type="number"
             inputMode="numeric"
-            placeholder="Min"
+            placeholder={t('min')}
             value={state.minPrice}
             onChange={(e) => apply({ minPrice: e.target.value })}
             className="w-full"
@@ -156,7 +170,7 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
           <Input
             type="number"
             inputMode="numeric"
-            placeholder="Max"
+            placeholder={t('max')}
             value={state.maxPrice}
             onChange={(e) => apply({ maxPrice: e.target.value })}
             className="w-full"
@@ -166,22 +180,13 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/80">Sıralama</h3>
+        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/80">
+          {t('sort')}
+        </h3>
         <div className="space-y-1">
-          {(
-            [
-              { value: 'newest', label: 'En Yeni' },
-              { value: 'price_asc', label: 'Fiyat: Düşükten Yükseğe' },
-              { value: 'price_desc', label: 'Fiyat: Yüksekten Düşüğe' },
-              { value: 'popular', label: 'En Popüler' },
-            ] as Array<{ value: SortKey; label: string }>
-          ).map((s) => (
-            <FilterButton
-              key={s.value}
-              active={state.sort === s.value}
-              onClick={() => apply({ sort: s.value })}
-            >
-              {s.label}
+          {(Object.keys(sortLabels) as SortKey[]).map((s) => (
+            <FilterButton key={s} active={state.sort === s} onClick={() => apply({ sort: s })}>
+              {sortLabels[s]}
             </FilterButton>
           ))}
         </div>
@@ -189,7 +194,7 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
 
       <Button variant="outline" onClick={clear} className="w-full">
         <X className="h-4 w-4" />
-        Filtreleri Temizle
+        {t('clearFilters')}
       </Button>
     </div>
   );
@@ -199,7 +204,7 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
       <div className="lg:hidden">
         <Button variant="outline" className="w-full" onClick={() => setDrawerOpen(true)}>
           <SlidersHorizontal className="h-4 w-4" />
-          Filtreler
+          {t('openFilters')}
         </Button>
       </div>
 
@@ -209,25 +214,25 @@ export function ProductFilters({ brands }: ProductFiltersProps) {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            aria-label="Kapat"
+            aria-label={tCommon('close')}
             onClick={() => setDrawerOpen(false)}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
           <div className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col border-l border-cyber-cyan/30 bg-cyber-darker p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-orbitron text-lg font-bold text-white">Filtreler</h2>
+              <h2 className="font-orbitron text-lg font-bold text-white">{t('openFilters')}</h2>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
                 className="rounded-md p-1 text-white/60 hover:text-white"
-                aria-label="Kapat"
+                aria-label={tCommon('close')}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">{content}</div>
             <Button onClick={() => setDrawerOpen(false)} className="mt-4 w-full">
-              Sonuçları Göster
+              {t('showResults')}
             </Button>
           </div>
         </div>

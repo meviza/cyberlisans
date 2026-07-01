@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
 import { ShoppingCart, Star, Flame } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@cyberlisans/ui/atoms';
 import { useCart } from '@/lib/cart-store';
 import { useCurrency } from '@/lib/currency-context';
@@ -17,10 +17,16 @@ export interface ProductCardProps {
 export function ProductCard({ product, showSold = true, soldCount }: ProductCardProps) {
   const { addItem } = useCart();
   const { format } = useCurrency();
+  const t = useTranslations('products');
   const [added, setAdded] = React.useState(false);
 
   const stock = product.stock;
-  const stockLabel = stock === 0 ? 'Tükendi' : stock <= 5 ? `Son ${stock} adet` : `${stock} stokta`;
+  const stockLabel =
+    stock === 0
+      ? t('outOfStock')
+      : stock <= 5
+        ? t('lowStock', { count: stock })
+        : t('stockLabel', { count: stock });
   const stockVariant: 'danger' | 'warning' | 'success' =
     stock === 0 ? 'danger' : stock <= 5 ? 'warning' : 'success';
 
@@ -43,7 +49,7 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
   };
 
   return (
-    <Link
+    <a
       href={`/products/${product.slug}`}
       className="group relative flex flex-col overflow-hidden rounded-xl border border-cyber-cyan/20 bg-cyber-darker/60 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-cyber-cyan/60 hover:shadow-glow-cyan"
     >
@@ -55,7 +61,7 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
           <div className="absolute left-3 top-3 z-10">
             <Badge variant="magenta" size="sm">
               <Flame className="mr-1 h-3 w-3" />
-              Öne Çıkan
+              {t('featured')}
             </Badge>
           </div>
         )}
@@ -81,7 +87,7 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
           {showSold && (soldCount ?? 0) > 0 && (
             <span className="inline-flex items-center gap-1">
               <Star className="h-3 w-3 text-cyber-cyan/60" />
-              {soldCount} satıldı
+              {t('sold', { count: soldCount ?? 0 })}
             </span>
           )}
         </div>
@@ -94,7 +100,7 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
             type="button"
             onClick={onAdd}
             disabled={stock === 0}
-            aria-label="Sepete ekle"
+            aria-label={t('addToCart')}
             className={
               added
                 ? 'inline-flex items-center gap-1 rounded-md bg-cyber-lime/20 px-2.5 py-1.5 text-xs font-bold text-cyber-lime'
@@ -102,10 +108,10 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
             }
           >
             <ShoppingCart className="h-3.5 w-3.5" />
-            {added ? 'Eklendi' : 'Ekle'}
+            {added ? t('added') : t('addToCart')}
           </button>
         </div>
       </div>
-    </Link>
+    </a>
   );
 }

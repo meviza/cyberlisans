@@ -1,8 +1,6 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { secureHeaders } from 'hono/secure-headers';
 import { authRoutes } from './interface/routes/auth';
 import { profileRoutes } from './interface/routes/profile';
 import { sessionRoutes } from './interface/routes/sessions';
@@ -22,20 +20,26 @@ import { ordersRoutes } from './interface/routes/orders';
 import { dealerRoutes } from './interface/routes/dealer';
 import { dealerPublicRoutes } from './interface/routes/dealer-public';
 import { adminDealersRoutes } from './interface/routes/admin/dealers';
+import { createCorsMiddleware } from './interface/middleware/cors';
+import { honoSecureHeaders, securityHeaders } from './interface/middleware/security-headers';
+import { errorHandler } from './interface/middleware/error-handler';
+import { createRateLimiter, RATE_LIMIT_CONFIGS } from './interface/middleware/security/rate-limit';
 
 const app = new Hono();
 
 app.use('*', logger());
-app.use('*', secureHeaders());
+app.use('*', honoSecureHeaders());
+app.use('*', securityHeaders());
+app.use('*', createCorsMiddleware());
+
 app.use(
   '*',
-  cors({
-    origin: process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
-    credentials: true,
-    allowMethods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+  createRateLimiter({
+    config: { ...RATE_LIMIT_CONFIGS.api, keyPrefix: 'rl:global' },
   }),
 );
+
+app.onError((err, c) => errorHandler(err, c));
 
 app.get('/', (c) => c.json({ name: 'CyberLisans API', version: '0.1.0', status: 'ok' }));
 app.get('/health', (c) => c.json({ status: 'healthy', timestamp: new Date().toISOString() }));
@@ -60,7 +64,7 @@ app.route('/dealer', dealerRoutes);
 app.route('/dealer-public', dealerPublicRoutes);
 app.route('/admin/dealers', adminDealersRoutes);
 
-app.notFound((c) => c.json({ error: 'Not found' }, 404));
+app.notFound((c) => c.json({ error: 'Not found', code: 'NOT_FOUND' }, 404));
 
 const port = Number(process.env['PORT'] ?? 3001);
 

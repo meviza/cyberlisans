@@ -20,15 +20,32 @@ import {
 } from '@cyberlisans/payments/errors';
 import type { WebhookPayload } from '@cyberlisans/payments/types';
 import { PaymentNotFoundError } from '../../domain/errors/wallet';
+import { createRateLimiter, RATE_LIMIT_CONFIGS } from '../middleware/security/rate-limit';
+import { getRequestMeta } from '../middleware/request-meta';
+import { isIpWhitelisted, verifyTimestampInWindow } from '@cyberlisans/payments/webhook-security';
+import _payments from '@cyberlisans/payments';
+
+const paymentsPkg = _payments as any;
+const createPaymentProvider = paymentsPkg.createPaymentProvider as (
+  provider: WebhookPayload['provider'],
+) => any;
 
 export const paymentsRoutes = new Hono();
+
+const apiRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.api });
+const webhookRateLimit = createRateLimiter({
+  config: RATE_LIMIT_CONFIGS.webhook,
+  identifier: (c) => c.req.param('provider') ?? 'unknown',
+});
+
+paymentsRoutes.use('*', apiRateLimit);
 
 paymentsRoutes.use('*', async (c, next) => {
   try {
     await next();
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof ZodError) {
-      return c.json({ error: 'Validation', issues: err.issues }, 400);
+      return c.json({ error: 'Validation', code: 'VALIDATION_ERROR' }, 400);
     }
     if (err instanceof PaymentError) {
       return c.json(
@@ -52,7 +69,7 @@ paymentsRoutes.use('*', async (c, next) => {
       );
     }
     console.error('[PAYMENTS ERROR]', err);
-    return c.json({ error: 'Internal error' }, 500);
+    return c.json({ error: 'Bir hata oluştu, lütfen tekrar deneyin', code: 'INTERNAL_ERROR' }, 500);
   }
 });
 
@@ -67,32 +84,51 @@ paymentsRoutes.post(
   },
 );
 
-paymentsRoutes.post('/webhook/:provider', async (c) => {
+paymentsRoutes.post('/webhook/:provider', webhookRateLimit, async (c) => {
   const provider = c.req.param('provider').toUpperCase() as WebhookPayload['provider'];
-  const rawBody = await c.req.text();
-  let parsed: {
-    amount: number;
-    currency: WebhookPayload['currency'];
-    providerRef: string;
-    status: WebhookPayload['status'];
-    signature?: string;
-  };
-  try {
-    parsed = JSON.parse(rawBody);
-  } catch {
-    return c.json({ error: 'Geçersiz JSON', code: 'WEBHOOK_PAYLOAD_INVALID' }, 400);
+  const meta = getRequestMeta(c);
+  const ip = meta.ipAddress ?? 'unknown';
+
+  const envKey = `CYBERLISANS_WEBHOOK_IP_WHITELIST_${provider}`;
+  const whitelistRaw = process.env[envKey];
+  const whitelist = whitelistRaw ? whitelistRaw.split(',').map((s: string) => s.trim()) : undefined;
+  if (whitelist && !isIpWhitelisted(ip, whitelist)) {
+    return c.json({ error: 'Webhook IP whitelist reddi', code: 'WEBHOOK_IP_NOT_ALLOWED' }, 403);
   }
-  const signature = c.req.header('x-signature') ?? parsed.signature;
-  const payload: WebhookPayload = {
-    provider,
-    providerRef: parsed.providerRef,
-    status: parsed.status,
-    amount: Number(parsed.amount),
-    currency: parsed.currency,
-    raw: parsed,
-    signature,
-    receivedAt: new Date(),
-  };
+
+  const rawBody = await c.req.text();
+  const headers: Record<string, string> = {};
+  c.req.raw.headers.forEach((v, k) => {
+    headers[k.toLowerCase()] = v;
+  });
+  headers['x-forwarded-for'] = ip;
+
+  const stripeSig = headers['stripe-signature'];
+  const stripeTs = typeof stripeSig === 'string' ? stripeSig.match(/t=(\d+)/)?.[1] : undefined;
+  const tsCheck = verifyTimestampInWindow(headers['x-timestamp'] ?? stripeTs);
+  if (!tsCheck.valid) {
+    return c.json({ error: 'Webhook replay/time window hatası', code: 'WEBHOOK_REJECTED' }, 401);
+  }
+
+  let providerInstance: any;
+  try {
+    providerInstance = createPaymentProvider(provider);
+  } catch {
+    return c.json({ error: 'Provider yapılandırması eksik', code: 'PROVIDER_CONFIG_MISSING' }, 500);
+  }
+
+  let payload: WebhookPayload;
+  try {
+    payload = providerInstance.verifyWebhookAsync
+      ? await providerInstance.verifyWebhookAsync(headers, rawBody)
+      : providerInstance.verifyWebhook(headers, rawBody);
+  } catch (err: unknown) {
+    if (err instanceof ProviderWebhookSignatureError) {
+      return c.json({ error: 'Webhook imzası geçersiz', code: 'WEBHOOK_SIGNATURE_INVALID' }, 401);
+    }
+    throw err;
+  }
+
   const result = await handlePaymentWebhook(payload);
   return c.json(result);
 });
@@ -107,16 +143,27 @@ paymentsRoutes.get('/', authMiddleware, async (c) => {
     cursor,
   );
   return c.json({
-    items: items.map((p) => ({
-      id: p.id,
-      orderId: p.orderId,
-      provider: p.provider,
-      amount: p.amount,
-      currency: p.currency,
-      status: p.status,
-      paidAt: p.paidAt,
-      createdAt: p.createdAt,
-    })),
+    items: items.map(
+      (p: {
+        id: string;
+        orderId: string | null;
+        provider: string;
+        amount: unknown;
+        currency: string;
+        status: string;
+        paidAt: Date | null;
+        createdAt: Date;
+      }) => ({
+        id: p.id,
+        orderId: p.orderId,
+        provider: p.provider,
+        amount: p.amount,
+        currency: p.currency,
+        status: p.status,
+        paidAt: p.paidAt,
+        createdAt: p.createdAt,
+      }),
+    ),
     nextCursor: items.length > limit ? (items[limit]?.id ?? null) : null,
   });
 });

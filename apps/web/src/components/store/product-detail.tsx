@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { ShoppingCart, Shield, RefreshCcw, Zap, Gift } from 'lucide-react';
 import { Button, Badge } from '@cyberlisans/ui/atoms';
 import type { Product } from '@/lib/products';
@@ -31,16 +32,17 @@ function TrustBadge({
 export function ProductDetail({ product, description }: ProductDetailProps) {
   const { format } = useCurrency();
   const { addItem } = useCart();
+  const t = useTranslations('product');
   const [qty, setQty] = React.useState(1);
   const [added, setAdded] = React.useState(false);
 
   const stock = product.stock;
   const stockBadge =
     stock === 0
-      ? { variant: 'danger' as const, label: 'Stokta yok' }
+      ? { variant: 'danger' as const, label: t('stockOut') }
       : stock <= 5
-        ? { variant: 'warning' as const, label: `Son ${stock} adet` }
-        : { variant: 'success' as const, label: 'Stokta' };
+        ? { variant: 'warning' as const, label: t('stockLow', { count: stock }) }
+        : { variant: 'success' as const, label: t('stockIn') };
 
   const onAdd = () => {
     if (stock === 0) return;
@@ -76,37 +78,38 @@ export function ProductDetail({ product, description }: ProductDetailProps) {
           <span className="font-orbitron text-4xl font-black text-cyber-cyan text-glow-cyan">
             {format(product.price)}
           </span>
-          <span className="text-sm text-white/60">KDV dahil</span>
+          <span className="text-sm text-white/60">{t('taxIncluded')}</span>
         </div>
       </div>
 
       <div className="prose prose-invert max-w-none rounded-xl border border-cyber-cyan/20 bg-cyber-darker/40 p-5 text-sm leading-relaxed text-white/80">
+        <h2 className="mb-2 font-orbitron text-lg font-bold text-white">{t('description')}</h2>
         {description}
       </div>
 
       <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-end">
         <div>
-          <label className="mb-2 block text-sm text-white/80">Adet</label>
+          <label className="mb-2 block text-sm text-white/80">{t('quantity')}</label>
           <QuantitySelector value={qty} min={1} max={stock || 1} onChange={setQty} />
         </div>
         <div className="flex-1">
           <span className="mb-2 hidden text-sm text-white/80 sm:block">&nbsp;</span>
           <Button size="lg" disabled={stock === 0} onClick={onAdd} className="w-full">
             <ShoppingCart className="h-5 w-5" />
-            {added ? 'Sepete Eklendi ✓' : stock === 0 ? 'Stokta yok' : 'Sepete Ekle'}
+            {added ? t('addedToCart') : stock === 0 ? t('stockOut') : t('addToCart')}
           </Button>
         </div>
       </div>
 
       <Button size="lg" variant="outline" className="w-full" disabled={stock === 0}>
         <Gift className="h-5 w-5" />
-        Hediye Olarak Gönder
+        {t('sendAsGift')}
       </Button>
 
       <div className="grid grid-cols-3 gap-3 pt-2">
-        <TrustBadge icon={Zap} label="Anında Teslim" />
-        <TrustBadge icon={Shield} label="%100 Orijinal" />
-        <TrustBadge icon={RefreshCcw} label="14 Gün İade" />
+        <TrustBadge icon={Zap} label={t('trustInstant')} />
+        <TrustBadge icon={Shield} label={t('trustOriginal')} />
+        <TrustBadge icon={RefreshCcw} label={t('trustRefund')} />
       </div>
     </div>
   );

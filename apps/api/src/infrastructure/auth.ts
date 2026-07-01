@@ -19,7 +19,15 @@ export const authMiddleware = auth.authMiddleware;
 export const requireRole = auth.requireRole;
 export const requireAdmin = auth.requireAdmin;
 export const requireSuperAdmin = auth.requireSuperAdmin;
+export const requireTwoFactor = auth.requireTwoFactor;
 export const optionalAuth = auth.optionalAuth;
+export const encryptToString = auth.encryptToString;
+export const decryptFromString = auth.decryptFromString;
+export const encrypt = auth.encrypt;
+export const decrypt = auth.decrypt;
+export const generateBackupCodes = auth.generateBackupCodes;
+export const hashBackupCodes = auth.hashBackupCodes;
+export const verifyBackupCode = auth.verifyBackupCode;
 
 export type AccessTokenPayload = any;
 export type RefreshTokenPayload = any;

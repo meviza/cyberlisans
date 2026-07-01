@@ -26,10 +26,6 @@ export interface RegisterResult {
   message: string;
 }
 
-function generateUniqueReferralCode(): string {
-  return 'CL-' + randomBytes(4).toString('hex').toUpperCase();
-}
-
 function generateUniqueCode(): string {
   return randomBytes(8).toString('hex').toUpperCase();
 }
@@ -120,5 +116,34 @@ export async function registerUser(
     userId: user.id,
     email: user.email,
     message: 'Kayıt başarılı. E-posta adresinizi doğrulayın.',
+  };
+}
+
+export interface GenericRegisterResult {
+  message: string;
+}
+
+export async function registerUserGeneric(
+  input: RegisterInput,
+  meta: RequestMeta,
+): Promise<GenericRegisterResult> {
+  try {
+    await registerUser(input, meta);
+  } catch (err) {
+    if (err instanceof EmailAlreadyExistsError || err instanceof UsernameTakenError) {
+      return {
+        message: 'Eğer bu bilgilerle yeni bir hesap oluşturulabilirse e-posta gönderildi.',
+      };
+    }
+    if (
+      err instanceof AgeRestrictionError ||
+      err instanceof MissingConsentError ||
+      err instanceof InvalidReferralError
+    ) {
+      throw err;
+    }
+  }
+  return {
+    message: 'Eğer bu bilgilerle yeni bir hesap oluşturulabilirse e-posta gönderildi.',
   };
 }

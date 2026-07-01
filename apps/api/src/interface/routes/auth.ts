@@ -1,12 +1,19 @@
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema, enable2FASchema } from '../../infrastructure/validators';
+import {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  verifyEmailSchema,
+  enable2FASchema,
+} from '../../infrastructure/validators';
 import { authMiddleware } from '../../infrastructure/auth';
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { ZodError } from 'zod';
 
-import { rateLimit } from '../middleware/rate-limit';
 import { getRequestMeta } from '../middleware/request-meta';
-import { registerUser } from '../../domain/usecases/auth/register-user';
+import { createRateLimiter, RATE_LIMIT_CONFIGS } from '../middleware/security/rate-limit';
+import { registerUserGeneric } from '../../domain/usecases/auth/register-user';
 import { loginUser } from '../../domain/usecases/auth/login-user';
 import { refreshToken } from '../../domain/usecases/auth/refresh-token';
 import { logout } from '../../domain/usecases/auth/logout';
@@ -31,9 +38,17 @@ import {
   InvalidTokenError,
   UserNotFoundError,
   MissingConsentError,
+  TwoFactorMandatoryError,
 } from '../../domain/errors';
 
 export const authRoutes = new Hono();
+
+const registerRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.register });
+const loginRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.login });
+const forgotRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.forgotPassword });
+const resetRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.resetPassword });
+const verifyEmailRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.verifyEmail });
+const twoFactorRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.twoFactor });
 
 authRoutes.use('*', async (c, next) => {
   try {
@@ -43,42 +58,28 @@ authRoutes.use('*', async (c, next) => {
   }
 });
 
-authRoutes.post(
-  '/register',
-  rateLimit({ max: 5, windowMs: 60_000 }),
-  zValidator('json', registerSchema),
-  async (c) => {
-    const body = c.req.valid('json');
-    const meta = getRequestMeta(c);
-    const result = await registerUser(body, meta);
-    return c.json(result, 201);
-  },
-);
+authRoutes.post('/register', registerRateLimit, zValidator('json', registerSchema), async (c) => {
+  const body = c.req.valid('json');
+  const meta = getRequestMeta(c);
+  const result = await registerUserGeneric(body, meta);
+  return c.json(result, 201);
+});
 
-authRoutes.post(
-  '/login',
-  rateLimit({ max: 10, windowMs: 60_000 }),
-  zValidator('json', loginSchema),
-  async (c) => {
-    const body = c.req.valid('json');
-    const meta = getRequestMeta(c);
-    const result = await loginUser(body, meta);
-    return c.json(result, 200);
-  },
-);
+authRoutes.post('/login', loginRateLimit, zValidator('json', loginSchema), async (c) => {
+  const body = c.req.valid('json');
+  const meta = getRequestMeta(c);
+  const result = await loginUser(body, meta);
+  return c.json(result, 200);
+});
 
-authRoutes.post(
-  '/refresh',
-  rateLimit({ max: 30, windowMs: 60_000 }),
-  async (c) => {
-    const body = await c.req.json().catch(() => null);
-    const token = body?.refreshToken as string | undefined;
-    if (!token) return c.json({ error: 'refreshToken gerekli' }, 400);
-    const meta = getRequestMeta(c);
-    const result = await refreshToken(token, meta);
-    return c.json(result, 200);
-  },
-);
+authRoutes.post('/refresh', async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const token = body?.refreshToken as string | undefined;
+  if (!token) return c.json({ error: 'refreshToken gerekli' }, 400);
+  const meta = getRequestMeta(c);
+  const result = await refreshToken(token, meta);
+  return c.json(result, 200);
+});
 
 authRoutes.post('/logout', authMiddleware, async (c) => {
   const user = c.get('user');
@@ -91,7 +92,7 @@ authRoutes.post('/logout', authMiddleware, async (c) => {
 
 authRoutes.post(
   '/forgot-password',
-  rateLimit({ max: 3, windowMs: 60_000 }),
+  forgotRateLimit,
   zValidator('json', forgotPasswordSchema),
   async (c) => {
     const body = c.req.valid('json');
@@ -103,7 +104,7 @@ authRoutes.post(
 
 authRoutes.post(
   '/reset-password',
-  rateLimit({ max: 5, windowMs: 60_000 }),
+  resetRateLimit,
   zValidator('json', resetPasswordSchema),
   async (c) => {
     const body = c.req.valid('json');
@@ -113,7 +114,7 @@ authRoutes.post(
   },
 );
 
-authRoutes.get('/verify-email', async (c) => {
+authRoutes.get('/verify-email', verifyEmailRateLimit, async (c) => {
   const token = c.req.query('token');
   if (!token) return c.json({ error: 'token gerekli' }, 400);
   const parsed = verifyEmailSchema.safeParse({ token });
@@ -133,7 +134,7 @@ authRoutes.post('/2fa/setup', authMiddleware, async (c) => {
 authRoutes.post(
   '/2fa/verify',
   authMiddleware,
-  rateLimit({ max: 5, windowMs: 60_000 }),
+  twoFactorRateLimit,
   zValidator('json', enable2FASchema),
   async (c) => {
     const user = c.get('user');
@@ -144,38 +145,44 @@ authRoutes.post(
   },
 );
 
-authRoutes.post(
-  '/2fa/disable',
-  authMiddleware,
-  rateLimit({ max: 5, windowMs: 60_000 }),
-  async (c) => {
-    const user = c.get('user');
-    const body = await c.req.json().catch(() => null);
-    if (!body?.password) return c.json({ error: 'password gerekli' }, 400);
-    const meta = getRequestMeta(c);
-    const result = await disable2FA(user.sub, { password: body.password }, meta);
-    return c.json(result, 200);
-  },
-);
+authRoutes.post('/2fa/disable', authMiddleware, twoFactorRateLimit, async (c) => {
+  const user = c.get('user');
+  const body = await c.req.json().catch(() => null);
+  if (!body?.password) return c.json({ error: 'password gerekli' }, 400);
+  const meta = getRequestMeta(c);
+  const result = await disable2FA(user.sub, { password: body.password }, meta);
+  return c.json(result, 200);
+});
 
 async function handleAuthError(c: any, err: unknown) {
   if (err instanceof ZodError) {
-    return c.json({ error: 'Validation', issues: err.issues }, 400);
+    return c.json({ error: 'Validation', code: 'VALIDATION_ERROR', issues: err.issues }, 400);
   }
-  if (err instanceof EmailAlreadyExistsError) return c.json({ error: err.message, code: err.code }, 409);
+  if (err instanceof EmailAlreadyExistsError)
+    return c.json({ error: err.message, code: err.code }, 409);
   if (err instanceof UsernameTakenError) return c.json({ error: err.message, code: err.code }, 409);
-  if (err instanceof InvalidCredentialsError) return c.json({ error: err.message, code: err.code }, 401);
+  if (err instanceof InvalidCredentialsError)
+    return c.json({ error: err.message, code: err.code }, 401);
   if (err instanceof AccountLockedError) return c.json({ error: err.message, code: err.code }, 403);
   if (err instanceof AccountBannedError) return c.json({ error: err.message, code: err.code }, 403);
-  if (err instanceof AccountPendingError) return c.json({ error: err.message, code: err.code }, 403);
-  if (err instanceof TwoFactorRequiredError) return c.json({ error: err.message, code: err.code }, 401);
-  if (err instanceof InvalidTwoFactorError) return c.json({ error: err.message, code: err.code }, 401);
-  if (err instanceof InvalidReferralError) return c.json({ error: err.message, code: err.code }, 400);
-  if (err instanceof AgeRestrictionError) return c.json({ error: err.message, code: err.code }, 403);
-  if (err instanceof EmailNotVerifiedError) return c.json({ error: err.message, code: err.code }, 403);
+  if (err instanceof AccountPendingError)
+    return c.json({ error: err.message, code: err.code }, 403);
+  if (err instanceof TwoFactorRequiredError)
+    return c.json({ error: err.message, code: err.code }, 401);
+  if (err instanceof TwoFactorMandatoryError)
+    return c.json({ error: err.message, code: err.code }, 403);
+  if (err instanceof InvalidTwoFactorError)
+    return c.json({ error: err.message, code: err.code }, 401);
+  if (err instanceof InvalidReferralError)
+    return c.json({ error: err.message, code: err.code }, 400);
+  if (err instanceof AgeRestrictionError)
+    return c.json({ error: err.message, code: err.code }, 403);
+  if (err instanceof EmailNotVerifiedError)
+    return c.json({ error: err.message, code: err.code }, 403);
   if (err instanceof InvalidTokenError) return c.json({ error: err.message, code: err.code }, 400);
   if (err instanceof UserNotFoundError) return c.json({ error: err.message, code: err.code }, 404);
-  if (err instanceof MissingConsentError) return c.json({ error: err.message, code: err.code }, 400);
+  if (err instanceof MissingConsentError)
+    return c.json({ error: err.message, code: err.code }, 400);
   console.error('[AUTH ERROR]', err);
-  return c.json({ error: 'Internal error' }, 500);
+  return c.json({ error: 'Bir hata oluştu, lütfen tekrar deneyin', code: 'INTERNAL_ERROR' }, 500);
 }
