@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import { Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@cyberlisans/ui/atoms';
 import { QuantitySelector } from './quantity-selector';
@@ -16,7 +15,6 @@ export interface CartLineItemProps {
 
 export function CartLineItem({ item, onQtyChange, onRemove }: CartLineItemProps) {
   const { format } = useCurrency();
-  const t = useTranslations('cart');
   const lineTotal = item.unitPrice * item.qty;
 
   return (
@@ -59,7 +57,7 @@ export function CartLineItem({ item, onQtyChange, onRemove }: CartLineItemProps)
           <button
             type="button"
             onClick={() => onRemove(item.id)}
-            aria-label={t('remove')}
+            aria-label="Sepetten çıkar"
             className="rounded p-2 text-white/50 transition-colors hover:bg-cyber-magenta/10 hover:text-cyber-magenta"
           >
             <Trash2 className="h-4 w-4" />
