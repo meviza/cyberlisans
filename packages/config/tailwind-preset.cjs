@@ -9,6 +9,10 @@ module.exports = {
           dark: '#0A0A1F',
           darker: '#050510',
           lime: '#BEF264',
+          text: '#E5E7EB',
+          'text-dim': '#9CA3AF',
+          bg: '#0A0A1F',
+          border: '#1F2937',
         },
       },
       fontFamily: {

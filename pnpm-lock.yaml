@@ -109,12 +109,21 @@ importers:
       '@cyberlisans/3d':
         specifier: workspace:*
         version: link:../../packages/3d
+      '@cyberlisans/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@cyberlisans/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@cyberlisans/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@cyberlisans/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@cyberlisans/validators':
+        specifier: workspace:*
+        version: link:../../packages/validators
       '@radix-ui/react-dialog':
         specifier: 1.1.4
         version: 1.1.4(@types/react-dom@19.0.3(@types/react@19.0.7))(@types/react@19.0.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -127,6 +136,9 @@ importers:
       gsap:
         specifier: 3.12.5
         version: 3.12.5
+      jose:
+        specifier: 5.9.6
+        version: 5.9.6
       lucide-react:
         specifier: 0.469.0
         version: 0.469.0(react@19.0.0)
@@ -145,6 +157,9 @@ importers:
       three:
         specifier: 0.171.0
         version: 0.171.0
+      zod:
+        specifier: 3.24.1
+        version: 3.24.1
     devDependencies:
       '@types/qrcode':
         specifier: 1.5.5
