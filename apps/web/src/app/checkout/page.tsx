@@ -70,7 +70,7 @@ interface CreatedOrder {
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const { items, getTotal, clearCart, hydrated } = useCart();
+  const { items, getTotal, clearCart, hydrated, refCode } = useCart();
   const { format, convert, currency } = useCurrency();
 
   const [step, setStep] = React.useState<Step>(1);
@@ -140,12 +140,22 @@ export default function CheckoutPage() {
     setError(null);
     setLoading(true);
     try {
+      const refCode =
+        typeof document !== 'undefined'
+          ? (document.cookie
+              .split('; ')
+              .find((c) => c.startsWith('cl_ref='))
+              ?.split('=')[1] ??
+            new URLSearchParams(window.location.search).get('ref') ??
+            null)
+          : null;
       const res = await apiFetch<{ orderId: string; redirectUrl?: string }>('/orders', {
         method: 'POST',
         body: JSON.stringify({
           items: items.map((it) => ({ productId: it.id, qty: it.qty })),
           paymentMethod: method,
           currency,
+          refCode: refCode ?? undefined,
         }),
       });
       const created: CreatedOrder = { orderId: res.orderId, redirectUrl: res.redirectUrl, method };

@@ -51,12 +51,14 @@ ordersRoutes.post('/', zValidator('json', createOrderSchema), async (c) => {
   const user = c.get('user');
   const body = c.req.valid('json');
   const meta = getRequestMeta(c);
+  const refCode = body.refCode ?? c.req.header('x-ref-code') ?? null;
   const order = await createOrder({
     userId: user.sub,
     items: body.items,
     currency: body.currency,
     paymentMethod: body.paymentMethod,
     notes: body.notes ?? null,
+    refCode,
     ...meta,
   });
   return c.json(order, 201);

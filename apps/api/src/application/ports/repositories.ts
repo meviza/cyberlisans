@@ -110,6 +110,15 @@ import type {
   PaymentMethod,
   DeliveryType,
 } from '../../domain/entities/product';
+import type {
+  DealerProfileEntity,
+  DealerLinkEntity,
+  DealerSaleEntity,
+  DealerPayoutEntity,
+  DealerStatus,
+  DealerPayoutStatus,
+  DealerSaleStatus,
+} from '../../domain/entities/dealer';
 
 export interface IWalletRepository {
   findByUserId(userId: string): Promise<WalletEntity | null>;
@@ -346,4 +355,148 @@ export interface IOrderRepository {
   ): Promise<OrderEntity>;
   markPaid(orderId: string, paymentId: string): Promise<void>;
   markFulfilled(orderId: string): Promise<void>;
+}
+
+export interface CreateDealerInput {
+  userId: string;
+  companyName: string;
+  taxId: string;
+  taxOffice?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  websiteUrl?: string | null;
+  logoUrl?: string | null;
+  commissionRate?: number;
+}
+
+export interface DealerListFilter {
+  status?: DealerStatus;
+  search?: string;
+  page: number;
+  limit: number;
+}
+
+export interface DealerStats {
+  totalSales: number;
+  totalGross: number;
+  totalDiscount: number;
+  totalCommission: number;
+  totalNet: number;
+  pendingSettlement: number;
+  balance: number;
+  linksCount: number;
+}
+
+export interface IDealerRepository {
+  findByUserId(userId: string): Promise<DealerProfileEntity | null>;
+  findById(id: string): Promise<DealerProfileEntity | null>;
+  list(filter: DealerListFilter): Promise<{ items: DealerProfileEntity[]; total: number }>;
+  create(data: CreateDealerInput): Promise<DealerProfileEntity>;
+  update(
+    id: string,
+    data: Partial<{
+      companyName: string;
+      taxOffice: string | null;
+      address: string | null;
+      phone: string | null;
+      websiteUrl: string | null;
+      logoUrl: string | null;
+      notes: string | null;
+      commissionRate: number;
+    }>,
+  ): Promise<DealerProfileEntity>;
+  setStatus(
+    id: string,
+    status: DealerStatus,
+    extras?: { approvedById?: string; rejectionReason?: string },
+  ): Promise<DealerProfileEntity>;
+  delete(id: string): Promise<void>;
+  getStats(dealerId: string): Promise<DealerStats>;
+  incrementBalance(dealerId: string, amount: number): Promise<void>;
+  decrementBalance(dealerId: string, amount: number): Promise<void>;
+}
+
+export interface CreateDealerLinkInput {
+  dealerId: string;
+  code: string;
+  productId?: string | null;
+  discountPercent?: number;
+  maxUses?: number | null;
+  expiresAt?: Date | null;
+}
+
+export interface IDealerLinkRepository {
+  listByDealer(
+    dealerId: string,
+    options: { page: number; limit: number },
+  ): Promise<{ items: DealerLinkEntity[]; total: number }>;
+  findById(id: string): Promise<DealerLinkEntity | null>;
+  findByCode(code: string): Promise<DealerLinkEntity | null>;
+  create(data: CreateDealerLinkInput): Promise<DealerLinkEntity>;
+  update(
+    id: string,
+    data: Partial<{
+      discountPercent: number;
+      maxUses: number | null;
+      isActive: boolean;
+      expiresAt: Date | null;
+    }>,
+  ): Promise<DealerLinkEntity>;
+  delete(id: string): Promise<void>;
+  incrementUses(id: string): Promise<void>;
+  incrementClicks(id: string): Promise<void>;
+}
+
+export interface CreateDealerSaleInput {
+  dealerId: string;
+  orderId: string;
+  linkId: string | null;
+  grossAmount: number;
+  discountAmount: number;
+  commissionAmount: number;
+  netAmount: number;
+}
+
+export interface IDealerSaleRepository {
+  listByDealer(
+    dealerId: string,
+    options: { status?: DealerSaleStatus; page: number; limit: number },
+  ): Promise<{ items: DealerSaleEntity[]; total: number }>;
+  listByOrder(orderId: string): Promise<DealerSaleEntity | null>;
+  create(data: CreateDealerSaleInput): Promise<DealerSaleEntity>;
+  getTotalEarnings(
+    dealerId: string,
+  ): Promise<{ commission: number; pending: number; settled: number }>;
+  getPendingSettlement(dealerId: string): Promise<number>;
+  markSettled(saleId: string): Promise<void>;
+  markRefunded(orderId: string): Promise<void>;
+}
+
+export interface CreateDealerPayoutInput {
+  dealerId: string;
+  userId: string;
+  amount: number;
+  currency: 'TRY' | 'USD' | 'EUR' | 'USDT';
+  method: 'IBAN' | 'PAPARA';
+  destination: string;
+  notes?: string | null;
+}
+
+export interface IDealerPayoutRepository {
+  create(data: CreateDealerPayoutInput): Promise<DealerPayoutEntity>;
+  findById(id: string): Promise<DealerPayoutEntity | null>;
+  listByDealer(
+    dealerId: string,
+    options: { status?: DealerPayoutStatus; page: number; limit: number },
+  ): Promise<{ items: DealerPayoutEntity[]; total: number }>;
+  listAll(options: {
+    status?: DealerPayoutStatus;
+    page: number;
+    limit: number;
+  }): Promise<{ items: DealerPayoutEntity[]; total: number }>;
+  updateStatus(
+    id: string,
+    status: DealerPayoutStatus,
+    extras?: { processedById?: string; rejectionReason?: string },
+  ): Promise<DealerPayoutEntity>;
 }

@@ -16,6 +16,7 @@ export type CartItem = {
 interface CartState {
   items: CartItem[];
   hydrated: boolean;
+  refCode: string | null;
 }
 
 interface CartContextValue extends CartState {
@@ -25,9 +26,11 @@ interface CartContextValue extends CartState {
   clearCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;
+  setRefCode: (code: string | null) => void;
 }
 
 const STORAGE_KEY = 'cl_cart_v1';
+const REF_KEY = 'cl_ref_v1';
 
 const CartContext = React.createContext<CartContextValue | null>(null);
 
@@ -63,16 +66,47 @@ function saveToStorage(items: CartItem[]): void {
   } catch {}
 }
 
+function loadRef(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const url = new URL(window.location.href);
+    const fromQuery = url.searchParams.get('ref');
+    if (fromQuery) {
+      window.localStorage.setItem(REF_KEY, fromQuery);
+      return fromQuery;
+    }
+    return window.localStorage.getItem(REF_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveRef(code: string | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (code) window.localStorage.setItem(REF_KEY, code);
+    else window.localStorage.removeItem(REF_KEY);
+  } catch {}
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = React.useState<CartState>({ items: [], hydrated: false });
+  const [state, setState] = React.useState<CartState>({
+    items: [],
+    hydrated: false,
+    refCode: null,
+  });
 
   React.useEffect(() => {
-    setState({ items: loadFromStorage(), hydrated: true });
+    setState({ items: loadFromStorage(), hydrated: true, refCode: loadRef() });
   }, []);
 
   React.useEffect(() => {
     if (state.hydrated) saveToStorage(state.items);
   }, [state.items, state.hydrated]);
+
+  React.useEffect(() => {
+    if (state.hydrated) saveRef(state.refCode);
+  }, [state.refCode, state.hydrated]);
 
   const addItem = React.useCallback((item: Omit<CartItem, 'qty'> & { qty?: number }) => {
     const qtyToAdd = item.qty ?? 1;
@@ -118,26 +152,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return state.items.reduce((sum, it) => sum + it.qty, 0);
   }, [state.items]);
 
+  const setRefCode = React.useCallback((code: string | null) => {
+    setState((prev) => ({ ...prev, refCode: code }));
+  }, []);
+
   const value = React.useMemo<CartContextValue>(
     () => ({
       items: state.items,
       hydrated: state.hydrated,
+      refCode: state.refCode,
       addItem,
       removeItem,
       updateQty,
       clearCart,
       getTotal,
       getItemCount,
+      setRefCode,
     }),
     [
       state.items,
       state.hydrated,
+      state.refCode,
       addItem,
       removeItem,
       updateQty,
       clearCart,
       getTotal,
       getItemCount,
+      setRefCode,
     ],
   );
 

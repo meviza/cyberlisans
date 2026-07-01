@@ -9,7 +9,7 @@ export interface AuthUser {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
-  role: 'CUSTOMER' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'CUSTOMER' | 'DEALER' | 'ADMIN' | 'SUPER_ADMIN';
   twoFactorEnabled: boolean;
   wallet: { balanceTry: number; balanceUsd: number; balanceEur: number; balanceUsdt: number };
   locale: string;
@@ -20,7 +20,11 @@ interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string, twoFactorToken?: string) => Promise<{ requires2FA?: boolean }>;
+  login: (
+    email: string,
+    password: string,
+    twoFactorToken?: string,
+  ) => Promise<{ requires2FA?: boolean }>;
   register: (input: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -66,16 +70,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const login = React.useCallback(async (email: string, password: string, twoFactorToken?: string) => {
-    const res = await apiFetch<{ accessToken: string; refreshToken: string; requires2FA?: boolean }>(
-      '/auth/login',
-      { method: 'POST', body: JSON.stringify({ email, password, twoFactorToken }) }
-    );
-    if (res.requires2FA) return { requires2FA: true };
-    setTokens(res.accessToken, res.refreshToken);
-    await refresh();
-    return {};
-  }, [refresh]);
+  const login = React.useCallback(
+    async (email: string, password: string, twoFactorToken?: string) => {
+      const res = await apiFetch<{
+        accessToken: string;
+        refreshToken: string;
+        requires2FA?: boolean;
+      }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, twoFactorToken }),
+      });
+      if (res.requires2FA) return { requires2FA: true };
+      setTokens(res.accessToken, res.refreshToken);
+      await refresh();
+      return {};
+    },
+    [refresh],
+  );
 
   const register = React.useCallback(async (input: RegisterPayload) => {
     await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(input) });

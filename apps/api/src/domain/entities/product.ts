@@ -91,6 +91,7 @@ export interface OrderEntity {
   currency: Currency;
   status: OrderStatus;
   paymentMethod: PaymentMethod | null;
+  refCode: string | null;
   notes: string | null;
   paidAt: Date | null;
   fulfilledAt: Date | null;

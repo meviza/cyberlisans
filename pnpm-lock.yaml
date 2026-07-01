@@ -133,6 +133,9 @@ importers:
       next:
         specifier: 15.1.4
         version: 15.1.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      qrcode:
+        specifier: 1.5.4
+        version: 1.5.4
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -143,6 +146,9 @@ importers:
         specifier: 0.171.0
         version: 0.171.0
     devDependencies:
+      '@types/qrcode':
+        specifier: 1.5.5
+        version: 1.5.5
       '@types/react':
         specifier: 19.0.7
         version: 19.0.7

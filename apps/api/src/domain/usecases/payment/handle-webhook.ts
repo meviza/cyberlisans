@@ -3,6 +3,7 @@ import { walletRepository } from '../../../infrastructure/repositories/wallet.re
 import { orderRepository } from '../../../infrastructure/repositories/order.repository';
 import { auditRepository } from '../../../infrastructure/repositories/audit.repository';
 import { fulfillOrder } from '../order/fulfill-order';
+import { recordDealerSale } from '../dealer/record-dealer-sale';
 import { PaymentNotFoundError } from '../../errors/wallet';
 import type { WebhookPayload } from '@cyberlisans/payments/types';
 
@@ -57,6 +58,13 @@ export async function handlePaymentWebhook(payload: WebhookPayload) {
       });
     } catch (err) {
       console.error('[FULFILL_ORDER_AFTER_WEBHOOK_FAILED]', err);
+    }
+    try {
+      const meta = payment.metadata as Record<string, unknown> | null;
+      const refCode = (meta?.['refCode'] as string | undefined) ?? undefined;
+      await recordDealerSale({ orderId: payment.orderId, refCode });
+    } catch (err) {
+      console.error('[RECORD_DEALER_SALE_FAILED]', err);
     }
   }
   await auditRepository.log({

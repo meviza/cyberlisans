@@ -81,17 +81,23 @@ export function StorefrontHeader() {
           {isLoading ? (
             <div className="hidden h-9 w-20 sm:block" />
           ) : user ? (
-            <Link
-              href="/dashboard"
-              className="hidden items-center gap-2 sm:flex"
-              aria-label="Hesabım"
-            >
-              <Avatar className="h-9 w-9 border border-cyber-cyan/40">
-                <AvatarFallback className="bg-cyber-cyan/20 text-sm text-cyber-cyan">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
+            <div className="hidden items-center gap-2 sm:flex">
+              {(user.role === 'DEALER' || user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
+                <Link
+                  href="/dealer"
+                  className="rounded-md border border-cyber-cyan/30 bg-cyber-darker/60 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-cyber-cyan transition-colors hover:border-cyber-cyan hover:text-white"
+                >
+                  Bayi Paneli
+                </Link>
+              )}
+              <Link href="/dashboard" aria-label="Hesabım">
+                <Avatar className="h-9 w-9 border border-cyber-cyan/40">
+                  <AvatarFallback className="bg-cyber-cyan/20 text-sm text-cyber-cyan">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
           ) : (
             <Link href="/login" className="hidden sm:block">
               <Button variant="outline" size="sm">

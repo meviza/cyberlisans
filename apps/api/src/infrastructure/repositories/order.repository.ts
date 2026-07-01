@@ -29,6 +29,7 @@ function toEntity(o: any): OrderEntity {
     currency: o.currency as Currency,
     status: o.status as OrderStatus,
     paymentMethod: (o.paymentMethod ?? null) as OrderEntity['paymentMethod'],
+    refCode: o.refCode ?? null,
     notes: o.notes ?? null,
     paidAt: o.paidAt ?? null,
     fulfilledAt: o.fulfilledAt ?? null,

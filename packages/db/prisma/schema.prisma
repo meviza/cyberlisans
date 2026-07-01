@@ -97,6 +97,26 @@ enum AuditAction {
   SETTINGS_CHANGE
 }
 
+enum DealerStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  REJECTED
+}
+
+enum DealerSaleStatus {
+  PENDING
+  SETTLED
+  REFUNDED
+}
+
+enum DealerPayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
 model User {
   id               String     @id @default(uuid()) @db.Uuid
   email            String     @unique
@@ -130,6 +150,10 @@ model User {
   sessions           Session[]
   consentRecords     ConsentRecord[]
   credential         UserCredential?
+  dealerProfile      DealerProfile?
+  dealerApprovals    DealerProfile[]     @relation("DealerApprover")
+  dealerPayouts      DealerPayout[]      @relation("DealerPayoutDealer")
+  processedPayouts   DealerPayout[]      @relation("DealerPayoutProcessor")
 
   @@index([email])
   @@index([username])
@@ -265,6 +289,7 @@ model Product {
 
   keys       ProductKey[]
   orderItems OrderItem[]
+  dealerLinks DealerLink[]
 
   @@index([categoryId, isActive, sortOrder])
   @@index([brandId, isActive])
@@ -301,6 +326,8 @@ model Order {
   currency      Currency
   status        OrderStatus      @default(PENDING)
   paymentMethod PaymentProvider?
+  refCode       String?
+  refDealerId   String?          @db.Uuid
   notes         String?
   paidAt        DateTime?
   fulfilledAt   DateTime?
@@ -311,6 +338,7 @@ model Order {
 
   items    OrderItem[]
   payments Payment[]
+  dealerSale DealerSale?
 
   @@index([userId, createdAt])
   @@index([status])
@@ -397,4 +425,103 @@ model ConsentRecord {
   @@index([userId])
   @@index([type])
   @@map("consent_records")
+}
+
+model DealerProfile {
+  id              String       @id @default(uuid()) @db.Uuid
+  userId          String       @unique @db.Uuid
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName     String
+  taxId           String
+  taxOffice       String?
+  address         String?
+  phone           String?
+  websiteUrl      String?
+  logoUrl         String?
+  commissionRate  Decimal      @default(10.00) @db.Decimal(5, 2)
+  balance         Decimal      @default(0) @db.Decimal(18, 2)
+  status          DealerStatus @default(PENDING)
+  approvedById    String?      @db.Uuid
+  approvedBy      User?        @relation("DealerApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  rejectionReason String?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  links   DealerLink[]
+  sales   DealerSale[]
+  payouts DealerPayout[]
+
+  @@index([status])
+  @@index([userId])
+  @@map("dealer_profiles")
+}
+
+model DealerLink {
+  id             String    @id @default(uuid()) @db.Uuid
+  dealerId       String    @db.Uuid
+  dealer         DealerProfile @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  code           String    @unique
+  productId      String?   @db.Uuid
+  product        Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  discountPercent Int      @default(0)
+  maxUses        Int?
+  currentUses    Int       @default(0)
+  clicks         Int       @default(0)
+  isActive       Boolean   @default(true)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  sales DealerSale[]
+
+  @@index([dealerId])
+  @@index([code])
+  @@index([productId])
+  @@map("dealer_links")
+}
+
+model DealerSale {
+  id               String          @id @default(uuid()) @db.Uuid
+  dealerId         String          @db.Uuid
+  dealer           DealerProfile   @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  orderId          String          @unique @db.Uuid
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  linkId           String?         @db.Uuid
+  link             DealerLink?     @relation(fields: [linkId], references: [id], onDelete: SetNull)
+  grossAmount      Decimal         @db.Decimal(18, 2)
+  discountAmount   Decimal         @default(0) @db.Decimal(18, 2)
+  commissionAmount Decimal         @db.Decimal(18, 2)
+  netAmount        Decimal         @db.Decimal(18, 2)
+  status           DealerSaleStatus @default(PENDING)
+  settledAt        DateTime?
+  createdAt        DateTime        @default(now())
+
+  @@index([dealerId, createdAt])
+  @@index([status])
+  @@map("dealer_sales")
+}
+
+model DealerPayout {
+  id          String            @id @default(uuid()) @db.Uuid
+  dealerId    String            @db.Uuid
+  dealer      DealerProfile     @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  userId      String            @db.Uuid
+  user        User              @relation("DealerPayoutDealer", fields: [userId], references: [id], onDelete: Restrict)
+  amount      Decimal           @db.Decimal(18, 2)
+  currency    Currency
+  method      String
+  destination String
+  status      DealerPayoutStatus @default(PENDING)
+  processedById String?         @db.Uuid
+  processedBy User?             @relation("DealerPayoutProcessor", fields: [processedById], references: [id], onDelete: SetNull)
+  processedAt DateTime?
+  rejectionReason String?
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([dealerId, createdAt])
+  @@index([status])
+  @@map("dealer_payouts")
 }

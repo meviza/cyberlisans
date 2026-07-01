@@ -13,6 +13,7 @@ export const createOrderSchema = z.object({
   currency: z.enum(['TRY', 'USD', 'EUR', 'USDT']),
   paymentMethod: z.enum(['PAYTR', 'PAPARA', 'NOWPAYMENTS', 'STRIPE', 'BANK_TRANSFER', 'WALLET']),
   notes: z.string().max(500).optional(),
+  refCode: z.string().min(3).max(60).optional(),
 });
 
 export const listOrdersQuerySchema = z.object({

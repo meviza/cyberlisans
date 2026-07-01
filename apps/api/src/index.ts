@@ -19,6 +19,9 @@ import { adminAuditRoutes } from './interface/routes/admin/audit';
 import { adminPrivacyRoutes } from './interface/routes/admin/privacy';
 import { adminSettingsRoutes } from './interface/routes/admin/settings';
 import { ordersRoutes } from './interface/routes/orders';
+import { dealerRoutes } from './interface/routes/dealer';
+import { dealerPublicRoutes } from './interface/routes/dealer-public';
+import { adminDealersRoutes } from './interface/routes/admin/dealers';
 
 const app = new Hono();
 
@@ -53,6 +56,9 @@ app.route('/admin/audit', adminAuditRoutes);
 app.route('/admin/privacy', adminPrivacyRoutes);
 app.route('/admin/settings', adminSettingsRoutes);
 app.route('/orders', ordersRoutes);
+app.route('/dealer', dealerRoutes);
+app.route('/dealer-public', dealerPublicRoutes);
+app.route('/admin/dealers', adminDealersRoutes);
 
 app.notFound((c) => c.json({ error: 'Not found' }, 404));
 

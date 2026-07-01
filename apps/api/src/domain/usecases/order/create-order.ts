@@ -22,6 +22,7 @@ export interface CreateOrderUseCaseInput {
   currency: Currency;
   paymentMethod: PaymentMethod;
   notes?: string | null;
+  refCode?: string | null;
   ipAddress?: string;
   userAgent?: string;
 }
@@ -98,6 +99,7 @@ export async function createOrder(input: CreateOrderUseCaseInput) {
               currency: input.currency,
               status: 'PENDING',
               paymentMethod: input.paymentMethod,
+              refCode: input.refCode ?? null,
               notes: input.notes ?? null,
               items: { create: itemsCreate },
             },
