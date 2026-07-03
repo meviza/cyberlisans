@@ -1,27 +1,40 @@
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+'use client';
+
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { Spinner } from '@cyberlisans/ui/atoms';
 import { DealerProfileForm } from '@/components/dealer/DealerProfileForm';
+import { apiFetch } from '@/lib/api-client';
 import type { DealerProfile } from '@/lib/dealer-types';
 
-const API_URL =
-  process.env['NEXT_PUBLIC_API_URL'] ?? process.env['API_INTERNAL_URL'] ?? 'http://localhost:3001';
+export default function DealerProfilePage() {
+  const router = useRouter();
+  const [profile, setProfile] = React.useState<DealerProfile | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
-export const dynamic = 'force-dynamic';
+  React.useEffect(() => {
+    let cancelled = false;
+    apiFetch<DealerProfile>('/dealer/me')
+      .then((res) => {
+        if (!cancelled) setProfile(res);
+      })
+      .catch(() => {
+        if (!cancelled) router.replace('/dealer/register');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
-export default async function DealerProfilePage() {
-  const hdrs = await headers();
-  const auth = hdrs.get('authorization');
-  if (!auth) redirect('/login?next=/dealer/profile');
-
-  let profile: DealerProfile | null = null;
-  try {
-    const res = await fetch(`${API_URL}/dealer/me`, {
-      headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-    if (res.ok) profile = (await res.json()) as DealerProfile;
-  } catch {}
-  if (!profile) redirect('/dealer/register');
-
+  if (loading || !profile) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
   return <DealerProfileForm initialProfile={profile} />;
 }

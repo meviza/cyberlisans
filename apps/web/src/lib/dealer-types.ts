@@ -27,6 +27,7 @@ export interface DealerLink {
   code: string;
   productId: string | null;
   productName: string | null;
+  productSlug: string | null;
   discountPercent: number;
   maxUses: number | null;
   currentUses: number;
@@ -43,6 +44,8 @@ export interface DealerSale {
   linkId: string | null;
   linkCode: string | null;
   productName: string | null;
+  orderNumber?: string | null;
+  currency?: 'TRY' | 'USD' | 'EUR' | 'USDT';
   grossAmount: number;
   discountAmount: number;
   commissionAmount: number;
@@ -77,7 +80,8 @@ export interface DealerPayout {
 
 export interface ProductListItem {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;
 }
 
 export interface DealerStats {

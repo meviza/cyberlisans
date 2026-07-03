@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Key, Copy, Eye, EyeOff, Check, Package } from 'lucide-react';
-import { Card, CardContent, Badge, Button } from '@cyberlisans/ui/atoms';
+import { Card, CardContent, Badge, Button, Spinner } from '@cyberlisans/ui/atoms';
 import { EmptyState } from '@/components/dashboard/empty-state';
 import { apiFetch } from '@/lib/api-client';
 
@@ -15,56 +15,37 @@ interface ProductKey {
   status: 'active' | 'expired' | 'revoked';
 }
 
-const MOCK_KEYS: ProductKey[] = [
-  {
-    id: '1',
-    productTitle: 'Steam Cüzdan 50 TL',
-    brand: 'Steam',
-    key: 'STM-7K3F-92HD-JX4P-9K2L',
-    deliveredAt: '28 Haz 2026',
-    status: 'active',
-  },
-  {
-    id: '2',
-    productTitle: 'OpenAI API $10 Kredi',
-    brand: 'OpenAI',
-    key: 'sk-proj-3kF2jH4lM5nP6qR7sT8uV9wX0yZ',
-    deliveredAt: '27 Haz 2026',
-    status: 'active',
-  },
-  {
-    id: '3',
-    productTitle: 'Windows 11 Pro Key',
-    brand: 'Microsoft',
-    key: 'VK7JG-NPHTM-C97JM-9MPGT-3V66T',
-    deliveredAt: '24 Haz 2026',
-    status: 'active',
-  },
-  {
-    id: '4',
-    productTitle: 'Netflix Premium 1 Ay',
-    brand: 'Netflix',
-    key: 'NFX-22A1B-33C4D-55E6F-77G8H',
-    deliveredAt: '19 Haz 2026',
-    status: 'expired',
-  },
-];
-
-const STATUS_MAP: Record<ProductKey['status'], { label: string; variant: 'success' | 'warning' | 'danger' }> = {
+const STATUS_MAP: Record<
+  ProductKey['status'],
+  { label: string; variant: 'success' | 'warning' | 'danger' }
+> = {
   active: { label: 'Aktif', variant: 'success' },
   expired: { label: 'Süresi Doldu', variant: 'warning' },
   revoked: { label: 'İptal', variant: 'danger' },
 };
 
 export default function DashboardProductsPage() {
-  const [keys, setKeys] = React.useState<ProductKey[]>(MOCK_KEYS);
+  const [keys, setKeys] = React.useState<ProductKey[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [revealed, setRevealed] = React.useState<Record<string, boolean>>({});
   const [copied, setCopied] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    let cancelled = false;
     apiFetch<ProductKey[]>('/profile/me/products')
-      .then(setKeys)
-      .catch(() => {});
+      .then((data) => {
+        if (!cancelled) setKeys(data);
+      })
+      .catch(() => {
+        if (!cancelled) setError('Ürünlerin yüklenemedi');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const copy = async (k: string, id: string) => {
@@ -79,10 +60,23 @@ export default function DashboardProductsPage() {
 
   const mask = (k: string) => k.slice(0, 4) + '••••••••' + k.slice(-4);
 
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
   if (keys.length === 0) {
     return (
       <div className="space-y-6">
         <h1 className="font-orbitron text-2xl font-black text-white">Ürünlerim</h1>
+        {error && (
+          <div className="rounded-md border border-cyber-magenta/40 bg-cyber-magenta/10 px-4 py-3 text-sm text-cyber-magenta">
+            {error}
+          </div>
+        )}
         <EmptyState
           icon={Package}
           title="Henüz ürünün yok"
@@ -98,7 +92,9 @@ export default function DashboardProductsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-orbitron text-2xl font-black text-white">Ürünlerim</h1>
-        <p className="text-sm text-white/60">Satın aldığın lisansları görüntüle ve keylerini kopyala</p>
+        <p className="text-sm text-white/60">
+          Satın aldığın lisansları görüntüle ve keylerini kopyala
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -116,7 +112,9 @@ export default function DashboardProductsPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-white">{k.productTitle}</h3>
-                        <Badge variant={s.variant} size="sm">{s.label}</Badge>
+                        <Badge variant={s.variant} size="sm">
+                          {s.label}
+                        </Badge>
                       </div>
                       <p className="mt-0.5 text-xs text-white/60">
                         {k.brand} · {k.deliveredAt} tarihinde teslim edildi

@@ -9,13 +9,17 @@ import {
 
 export interface CreateDealerLinkInput {
   dealerId: string;
-  code: string;
+  code?: string;
   productId?: string | null;
   discountPercent?: number;
   maxUses?: number | null;
   expiresAt?: Date | null;
   ipAddress?: string;
   userAgent?: string;
+}
+
+function randomCode(): string {
+  return Math.random().toString(36).slice(2, 10);
 }
 
 function normalizeCode(code: string): string {
@@ -31,7 +35,8 @@ export async function createDealerLink(input: CreateDealerLinkInput) {
   if (profile.status !== 'APPROVED') {
     throw new DealerInvalidStatusError('Sadece onaylı bayiler link oluşturabilir');
   }
-  const code = normalizeCode(input.code);
+  const baseCode = input.code?.trim() ? input.code : `${profile.companyName}-${randomCode()}`;
+  const code = normalizeCode(baseCode);
   if (code.length < 3 || code.length > 60) {
     throw new DealerLinkCodeTakenError();
   }

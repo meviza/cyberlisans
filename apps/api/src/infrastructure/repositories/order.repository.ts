@@ -15,8 +15,13 @@ function toItemEntity(i: any): OrderItemEntity {
     productId: i.productId,
     productKeyId: i.productKeyId ?? null,
     quantity: i.quantity,
+    qty: i.quantity,
     unitPrice: Number(i.unitPrice),
     totalPrice: Number(i.totalPrice),
+    productTitle: i.product?.title,
+    productSlug: i.product?.slug,
+    productBrand: i.product?.brand?.name ?? null,
+    productKeyCode: i.productKey?.code ?? null,
   };
 }
 
@@ -91,7 +96,9 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
-        include: { items: { include: { product: true, productKey: true } } },
+        include: {
+          items: { include: { product: { include: { brand: true } }, productKey: true } },
+        },
       }),
       prisma.order.count({ where: { userId } }),
     ]);
@@ -111,7 +118,7 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
         orderBy: { createdAt: 'desc' },
         skip: (options.page - 1) * options.limit,
         take: options.limit,
-        include: { items: { include: { product: true } } },
+        include: { items: { include: { product: { include: { brand: true } } } } },
       }),
       prisma.order.count({ where }),
     ]);
@@ -137,7 +144,7 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
           })),
         },
       },
-      include: { items: { include: { product: true, productKey: true } } },
+      include: { items: { include: { product: { include: { brand: true } }, productKey: true } } },
     });
     return toEntity(o);
   }
@@ -160,7 +167,7 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
     const o = await prisma.order.update({
       where: { id: orderId },
       data,
-      include: { items: { include: { product: true, productKey: true } } },
+      include: { items: { include: { product: { include: { brand: true } }, productKey: true } } },
     });
     return toEntity(o);
   }

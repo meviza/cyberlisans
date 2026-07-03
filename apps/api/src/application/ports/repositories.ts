@@ -385,6 +385,13 @@ export interface DealerStats {
   pendingSettlement: number;
   balance: number;
   linksCount: number;
+  pendingCommission?: number;
+  settledCommission?: number;
+  salesTrend?: Array<{ date: string; amount: number; count: number }>;
+  commissionTrend?: Array<{ date: string; amount: number }>;
+  topProducts?: Array<{ productId: string; productName: string; count: number; gross: number }>;
+  recentSales?: DealerSaleEntity[];
+  activeLinks?: DealerLinkEntity[];
 }
 
 export interface IDealerRepository {
@@ -428,7 +435,7 @@ export interface CreateDealerLinkInput {
 export interface IDealerLinkRepository {
   listByDealer(
     dealerId: string,
-    options: { page: number; limit: number },
+    options: { page: number; limit: number; isActive?: boolean },
   ): Promise<{ items: DealerLinkEntity[]; total: number }>;
   findById(id: string): Promise<DealerLinkEntity | null>;
   findByCode(code: string): Promise<DealerLinkEntity | null>;
@@ -440,6 +447,7 @@ export interface IDealerLinkRepository {
       maxUses: number | null;
       isActive: boolean;
       expiresAt: Date | null;
+      productId: string | null;
     }>,
   ): Promise<DealerLinkEntity>;
   delete(id: string): Promise<void>;

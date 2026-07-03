@@ -1,47 +1,54 @@
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+'use client';
+
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { Spinner } from '@cyberlisans/ui/atoms';
 import { DealerSalesList } from '@/components/dealer/DealerSalesList';
+import { apiFetch } from '@/lib/api-client';
 import type { DealerLink, DealerProfile, DealerSale } from '@/lib/dealer-types';
 
-const API_URL =
-  process.env['NEXT_PUBLIC_API_URL'] ?? process.env['API_INTERNAL_URL'] ?? 'http://localhost:3001';
+export default function DealerSalesPage() {
+  const router = useRouter();
+  const [profile, setProfile] = React.useState<DealerProfile | null>(null);
+  const [sales, setSales] = React.useState<DealerSale[]>([]);
+  const [links, setLinks] = React.useState<DealerLink[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-export const dynamic = 'force-dynamic';
+  React.useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      apiFetch<DealerProfile>('/dealer/me'),
+      apiFetch<{ items?: DealerSale[]; data?: DealerSale[] } | DealerSale[]>(
+        '/dealer/sales?limit=200',
+      ),
+      apiFetch<{ items?: DealerLink[]; data?: DealerLink[] } | DealerLink[]>(
+        '/dealer/links?limit=100',
+      ),
+    ])
+      .then(([profileRes, salesRes, linksRes]) => {
+        if (cancelled) return;
+        setProfile(profileRes);
+        setSales(Array.isArray(salesRes) ? salesRes : (salesRes.items ?? salesRes.data ?? []));
+        setLinks(Array.isArray(linksRes) ? linksRes : (linksRes.items ?? linksRes.data ?? []));
+      })
+      .catch(() => {
+        if (!cancelled) router.replace('/dealer/register');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
-async function fetchJson<T>(path: string, auth: string): Promise<T | null> {
-  try {
-    const res = await fetch(`${API_URL}${path}`, {
-      headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
+  if (loading || !profile) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
   }
-}
-
-export default async function DealerSalesPage() {
-  const hdrs = await headers();
-  const auth = hdrs.get('authorization');
-  if (!auth) redirect('/login?next=/dealer/sales');
-
-  const profile = await fetchJson<DealerProfile>('/dealer/me', auth);
-  if (!profile) redirect('/dealer/register');
-
-  const [salesRes, linksRes] = await Promise.all([
-    fetchJson<{ items?: DealerSale[]; data?: DealerSale[] } | DealerSale[]>(
-      '/dealer/sales?limit=200',
-      auth,
-    ),
-    fetchJson<{ items?: DealerLink[]; data?: DealerLink[] } | DealerLink[]>(
-      '/dealer/links?limit=100',
-      auth,
-    ),
-  ]);
-
-  const sales = Array.isArray(salesRes) ? salesRes : (salesRes?.items ?? salesRes?.data ?? []);
-  const links = Array.isArray(linksRes) ? linksRes : (linksRes?.items ?? linksRes?.data ?? []);
 
   return (
     <DealerSalesList

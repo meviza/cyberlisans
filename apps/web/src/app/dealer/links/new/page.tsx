@@ -1,41 +1,51 @@
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+'use client';
+
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { Spinner } from '@cyberlisans/ui/atoms';
 import { DealerCreateLinkForm } from '@/components/dealer/DealerCreateLinkForm';
+import { apiFetch } from '@/lib/api-client';
 import type { DealerProfile, ProductListItem } from '@/lib/dealer-types';
 
-const API_URL =
-  process.env['NEXT_PUBLIC_API_URL'] ?? process.env['API_INTERNAL_URL'] ?? 'http://localhost:3001';
+export default function DealerNewLinkPage() {
+  const router = useRouter();
+  const [profile, setProfile] = React.useState<DealerProfile | null>(null);
+  const [products, setProducts] = React.useState<ProductListItem[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-export const dynamic = 'force-dynamic';
+  React.useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      apiFetch<DealerProfile>('/dealer/me'),
+      apiFetch<{ items?: ProductListItem[]; data?: ProductListItem[] } | ProductListItem[]>(
+        '/products?limit=200',
+      ),
+    ])
+      .then(([profileRes, productsRes]) => {
+        if (cancelled) return;
+        setProfile(profileRes);
+        setProducts(
+          Array.isArray(productsRes) ? productsRes : (productsRes.items ?? productsRes.data ?? []),
+        );
+      })
+      .catch(() => {
+        if (!cancelled) router.replace('/dealer/register');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
-async function fetchJson<T>(path: string, auth?: string): Promise<T | null> {
-  if (!auth) return null;
-  try {
-    const res = await fetch(`${API_URL}${path}`, {
-      headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
+  if (loading || !profile) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
   }
-}
-
-export default async function DealerNewLinkPage() {
-  const hdrs = await headers();
-  const auth = hdrs.get('authorization');
-  if (!auth) redirect('/login?next=/dealer/links/new');
-
-  const profile = await fetchJson<DealerProfile>('/dealer/me', auth);
-  if (!profile) redirect('/dealer/register');
-
-  const productsRes = await fetchJson<
-    { items?: ProductListItem[]; data?: ProductListItem[] } | ProductListItem[]
-  >('/products?limit=200', auth);
-  const products = Array.isArray(productsRes)
-    ? productsRes
-    : (productsRes?.items ?? productsRes?.data ?? []);
 
   return <DealerCreateLinkForm profile={profile} products={products} />;
 }

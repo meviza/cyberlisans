@@ -11,6 +11,8 @@ function toEntity(l: any): DealerLinkEntity {
     dealerId: l.dealerId,
     code: l.code,
     productId: l.productId ?? null,
+    productName: l.product?.title ?? null,
+    productSlug: l.product?.slug ?? null,
     discountPercent: l.discountPercent,
     maxUses: l.maxUses ?? null,
     currentUses: l.currentUses,
@@ -24,28 +26,36 @@ function toEntity(l: any): DealerLinkEntity {
 export class DealerLinkRepository implements IDealerLinkRepository {
   async listByDealer(
     dealerId: string,
-    options: { page: number; limit: number },
+    options: { page: number; limit: number; isActive?: boolean },
   ): Promise<{ items: DealerLinkEntity[]; total: number }> {
+    const where: Record<string, unknown> = { dealerId };
+    if (options.isActive !== undefined) where['isActive'] = options.isActive;
     const [items, total] = await prisma.$transaction([
       prisma.dealerLink.findMany({
-        where: { dealerId },
+        where,
         orderBy: { createdAt: 'desc' },
         skip: (options.page - 1) * options.limit,
         take: options.limit,
         include: { product: { select: { id: true, slug: true, title: true } } },
       }),
-      prisma.dealerLink.count({ where: { dealerId } }),
+      prisma.dealerLink.count({ where }),
     ]);
     return { items: items.map((i: any) => toEntity(i)), total };
   }
 
   async findById(id: string): Promise<DealerLinkEntity | null> {
-    const l = await prisma.dealerLink.findUnique({ where: { id } });
+    const l = await prisma.dealerLink.findUnique({
+      where: { id },
+      include: { product: { select: { id: true, slug: true, title: true } } },
+    });
     return l ? toEntity(l) : null;
   }
 
   async findByCode(code: string): Promise<DealerLinkEntity | null> {
-    const l = await prisma.dealerLink.findUnique({ where: { code } });
+    const l = await prisma.dealerLink.findUnique({
+      where: { code },
+      include: { product: { select: { id: true, slug: true, title: true } } },
+    });
     return l ? toEntity(l) : null;
   }
 
@@ -70,9 +80,14 @@ export class DealerLinkRepository implements IDealerLinkRepository {
       maxUses: number | null;
       isActive: boolean;
       expiresAt: Date | null;
+      productId: string | null;
     }>,
   ): Promise<DealerLinkEntity> {
-    const l = await prisma.dealerLink.update({ where: { id }, data });
+    const l = await prisma.dealerLink.update({
+      where: { id },
+      data,
+      include: { product: { select: { id: true, slug: true, title: true } } },
+    });
     return toEntity(l);
   }
 

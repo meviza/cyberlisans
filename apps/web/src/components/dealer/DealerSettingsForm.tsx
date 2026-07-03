@@ -86,13 +86,13 @@ export function DealerSettingsForm() {
 
   const enable2FA = async () => {
     try {
-      await apiFetch('/profile/2fa/enable', { method: 'POST' });
+      await apiFetch('/auth/2fa/setup', { method: 'POST' });
     } catch {}
   };
 
   const verify2FA = async () => {
     try {
-      await apiFetch('/profile/2fa/verify', {
+      await apiFetch('/auth/2fa/verify', {
         method: 'POST',
         body: JSON.stringify({ token: twoFactorCode }),
       });
@@ -104,7 +104,7 @@ export function DealerSettingsForm() {
 
   const disable2FA = async () => {
     try {
-      await apiFetch('/profile/2fa/disable', {
+      await apiFetch('/auth/2fa/disable', {
         method: 'POST',
         body: JSON.stringify({ password: disablePwd }),
       });

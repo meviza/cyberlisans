@@ -137,23 +137,113 @@ export class DealerRepository implements IDealerRepository {
         linksCount: 0,
       };
     }
-    const [salesAgg, linksCount] = await Promise.all([
-      prisma.dealerSale.aggregate({
-        where: { dealerId },
-        _count: { _all: true },
-        _sum: {
-          grossAmount: true,
-          discountAmount: true,
-          commissionAmount: true,
-          netAmount: true,
-        },
-      }),
-      prisma.dealerLink.count({ where: { dealerId } }),
-    ]);
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - 29);
+    const [salesAgg, linksCount, earnings, recentSales, activeLinks, trendSales, topRows] =
+      await Promise.all([
+        prisma.dealerSale.aggregate({
+          where: { dealerId },
+          _count: { _all: true },
+          _sum: {
+            grossAmount: true,
+            discountAmount: true,
+            commissionAmount: true,
+            netAmount: true,
+          },
+        }),
+        prisma.dealerLink.count({ where: { dealerId } }),
+        prisma.dealerSale.groupBy({
+          by: ['status'],
+          where: { dealerId },
+          _sum: { commissionAmount: true },
+        }),
+        prisma.dealerSale.findMany({
+          where: { dealerId },
+          orderBy: { createdAt: 'desc' },
+          take: 8,
+          include: {
+            link: { select: { code: true } },
+            order: {
+              select: {
+                orderNumber: true,
+                currency: true,
+                items: { select: { product: { select: { title: true } } } },
+              },
+            },
+          },
+        }),
+        prisma.dealerLink.findMany({
+          where: { dealerId, isActive: true },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          include: { product: { select: { id: true, slug: true, title: true } } },
+        }),
+        prisma.dealerSale.findMany({
+          where: { dealerId, createdAt: { gte: start } },
+          select: { createdAt: true, grossAmount: true, commissionAmount: true },
+        }),
+        prisma.dealerSale.findMany({
+          where: { dealerId },
+          select: {
+            grossAmount: true,
+            order: {
+              select: {
+                items: { select: { productId: true, product: { select: { title: true } } } },
+              },
+            },
+          },
+        }),
+      ]);
     const pending = await prisma.dealerSale.aggregate({
       where: { dealerId, status: 'PENDING' },
       _sum: { commissionAmount: true },
     });
+    const pendingCommission = roundCurrency(
+      Number(earnings.find((e: any) => e.status === 'PENDING')?._sum.commissionAmount ?? 0),
+      'TRY',
+    );
+    const settledCommission = roundCurrency(
+      Number(earnings.find((e: any) => e.status === 'SETTLED')?._sum.commissionAmount ?? 0),
+      'TRY',
+    );
+    const dayMap = new Map<
+      string,
+      { date: string; amount: number; count: number; commission: number }
+    >();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      dayMap.set(key, { date: key, amount: 0, count: 0, commission: 0 });
+    }
+    for (const sale of trendSales as any[]) {
+      const key = sale.createdAt.toISOString().slice(0, 10);
+      const row = dayMap.get(key);
+      if (row) {
+        row.amount += Number(sale.grossAmount ?? 0);
+        row.commission += Number(sale.commissionAmount ?? 0);
+        row.count += 1;
+      }
+    }
+    const productMap = new Map<
+      string,
+      { productId: string; productName: string; count: number; gross: number }
+    >();
+    for (const sale of topRows as any[]) {
+      for (const item of sale.order?.items ?? []) {
+        const key = item.productId;
+        const current = productMap.get(key) ?? {
+          productId: key,
+          productName: item.product?.title ?? 'Bilinmeyen ürün',
+          count: 0,
+          gross: 0,
+        };
+        current.count += 1;
+        current.gross += Number(sale.grossAmount ?? 0);
+        productMap.set(key, current);
+      }
+    }
     return {
       totalSales: salesAgg._count._all,
       totalGross: roundCurrency(Number(salesAgg._sum.grossAmount ?? 0), 'TRY'),
@@ -163,6 +253,57 @@ export class DealerRepository implements IDealerRepository {
       pendingSettlement: roundCurrency(Number(pending._sum.commissionAmount ?? 0), 'TRY'),
       balance: roundCurrency(Number(profile.balance), 'TRY'),
       linksCount,
+      pendingCommission,
+      settledCommission,
+      salesTrend: [...dayMap.values()].map((d) => ({
+        date: d.date,
+        amount: roundCurrency(d.amount, 'TRY'),
+        count: d.count,
+      })),
+      commissionTrend: [...dayMap.values()].map((d) => ({
+        date: d.date,
+        amount: roundCurrency(d.commission, 'TRY'),
+      })),
+      topProducts: [...productMap.values()]
+        .sort((a, b) => b.gross - a.gross)
+        .slice(0, 5)
+        .map((p) => ({ ...p, gross: roundCurrency(p.gross, 'TRY') })),
+      recentSales: recentSales.map((s: any) => ({
+        id: s.id,
+        dealerId: s.dealerId,
+        orderId: s.orderId,
+        linkId: s.linkId ?? null,
+        linkCode: s.link?.code ?? null,
+        productName:
+          s.order?.items
+            ?.map((i: any) => i.product?.title)
+            .filter(Boolean)
+            .join(', ') ?? null,
+        orderNumber: s.order?.orderNumber ?? null,
+        currency: s.order?.currency ?? undefined,
+        grossAmount: Number(s.grossAmount),
+        discountAmount: Number(s.discountAmount ?? 0),
+        commissionAmount: Number(s.commissionAmount),
+        netAmount: Number(s.netAmount),
+        status: s.status,
+        settledAt: s.settledAt ?? null,
+        createdAt: s.createdAt,
+      })),
+      activeLinks: activeLinks.map((l: any) => ({
+        id: l.id,
+        dealerId: l.dealerId,
+        code: l.code,
+        productId: l.productId ?? null,
+        productName: l.product?.title ?? null,
+        productSlug: l.product?.slug ?? null,
+        discountPercent: l.discountPercent,
+        maxUses: l.maxUses ?? null,
+        currentUses: l.currentUses,
+        clicks: l.clicks,
+        isActive: l.isActive,
+        expiresAt: l.expiresAt ?? null,
+        createdAt: l.createdAt,
+      })),
     };
   }
 

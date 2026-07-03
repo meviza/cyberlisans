@@ -1,59 +1,72 @@
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
+'use client';
+
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { Spinner } from '@cyberlisans/ui/atoms';
 import { DealerCommissionsList } from '@/components/dealer/DealerCommissionsList';
+import { apiFetch } from '@/lib/api-client';
 import type { DealerProfile, DealerSale } from '@/lib/dealer-types';
 
-const API_URL =
-  process.env['NEXT_PUBLIC_API_URL'] ?? process.env['API_INTERNAL_URL'] ?? 'http://localhost:3001';
-
-export const dynamic = 'force-dynamic';
-
-async function fetchJson<T>(path: string, auth: string): Promise<T | null> {
-  try {
-    const res = await fetch(`${API_URL}${path}`, {
-      headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
-  }
+interface CommissionsResponse {
+  items?: DealerSale[];
+  data?: DealerSale[];
+  totalEarned?: number;
+  pendingSettlement?: number;
+  settled?: number;
 }
 
-export default async function DealerCommissionsPage() {
-  const hdrs = await headers();
-  const auth = hdrs.get('authorization');
-  if (!auth) redirect('/login?next=/dealer/commissions');
+export default function DealerCommissionsPage() {
+  const router = useRouter();
+  const [profile, setProfile] = React.useState<DealerProfile | null>(null);
+  const [items, setItems] = React.useState<DealerSale[]>([]);
+  const [totals, setTotals] = React.useState({ totalEarned: 0, pendingSettlement: 0, settled: 0 });
+  const [loading, setLoading] = React.useState(true);
 
-  const profile = await fetchJson<DealerProfile>('/dealer/me', auth);
-  if (!profile) redirect('/dealer/register');
+  React.useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      apiFetch<DealerProfile>('/dealer/me'),
+      apiFetch<CommissionsResponse>('/dealer/commissions?limit=200'),
+    ])
+      .then(([profileRes, res]) => {
+        if (cancelled) return;
+        const list = res.items ?? res.data ?? [];
+        setProfile(profileRes);
+        setItems(list);
+        setTotals({
+          totalEarned: res.totalEarned ?? list.reduce((s, it) => s + it.commissionAmount, 0),
+          pendingSettlement:
+            res.pendingSettlement ??
+            list
+              .filter((it) => it.status === 'PENDING')
+              .reduce((s, it) => s + it.commissionAmount, 0),
+          settled:
+            res.settled ??
+            list
+              .filter((it) => it.status === 'SETTLED')
+              .reduce((s, it) => s + it.commissionAmount, 0),
+        });
+      })
+      .catch(() => {
+        if (!cancelled) router.replace('/dealer/register');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
-  const res = await fetchJson<{
-    items?: DealerSale[];
-    data?: DealerSale[];
-    totalEarned?: number;
-    pendingSettlement?: number;
-    settled?: number;
-  }>('/dealer/commissions?limit=200', auth);
-
-  const items = Array.isArray(res) ? res : (res?.items ?? res?.data ?? []);
-
-  const initialTotals = {
-    totalEarned: res?.totalEarned ?? items.reduce((s, it) => s + it.commissionAmount, 0),
-    pendingSettlement:
-      res?.pendingSettlement ??
-      items.filter((it) => it.status === 'PENDING').reduce((s, it) => s + it.commissionAmount, 0),
-    settled:
-      res?.settled ??
-      items.filter((it) => it.status === 'SETTLED').reduce((s, it) => s + it.commissionAmount, 0),
-  };
+  if (loading || !profile) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
-    <DealerCommissionsList
-      profile={profile}
-      initialCommissions={items}
-      initialTotals={initialTotals}
-    />
+    <DealerCommissionsList profile={profile} initialCommissions={items} initialTotals={totals} />
   );
 }

@@ -45,7 +45,9 @@ export default function DashboardSettingsPage() {
 
   const [savingProfile, setSavingProfile] = React.useState(false);
   const [savingPwd, setSavingPwd] = React.useState(false);
-  const [profileMsg, setProfileMsg] = React.useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [profileMsg, setProfileMsg] = React.useState<{ type: 'ok' | 'err'; text: string } | null>(
+    null,
+  );
   const [pwdMsg, setPwdMsg] = React.useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
   const saveProfile = async (e: React.FormEvent) => {
@@ -97,13 +99,13 @@ export default function DashboardSettingsPage() {
 
   const enable2FA = async () => {
     try {
-      await apiFetch('/profile/2fa/enable', { method: 'POST' });
+      await apiFetch('/auth/2fa/setup', { method: 'POST' });
     } catch {}
   };
 
   const verify2FA = async () => {
     try {
-      await apiFetch('/profile/2fa/verify', {
+      await apiFetch('/auth/2fa/verify', {
         method: 'POST',
         body: JSON.stringify({ token: twoFactorCode }),
       });
@@ -115,7 +117,7 @@ export default function DashboardSettingsPage() {
 
   const disable2FA = async () => {
     try {
-      await apiFetch('/profile/2fa/disable', {
+      await apiFetch('/auth/2fa/disable', {
         method: 'POST',
         body: JSON.stringify({ password: disablePwd }),
       });
@@ -148,7 +150,9 @@ export default function DashboardSettingsPage() {
           <form onSubmit={saveProfile} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="displayName" className="mb-2 block">Görünür ad</Label>
+                <Label htmlFor="displayName" className="mb-2 block">
+                  Görünür ad
+                </Label>
                 <Input
                   id="displayName"
                   value={displayName}
@@ -157,7 +161,9 @@ export default function DashboardSettingsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="avatarUrl" className="mb-2 block">Avatar URL</Label>
+                <Label htmlFor="avatarUrl" className="mb-2 block">
+                  Avatar URL
+                </Label>
                 <Input
                   id="avatarUrl"
                   type="url"
@@ -169,16 +175,36 @@ export default function DashboardSettingsPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="locale" className="mb-2 block">Dil</Label>
-                <Select id="locale" value={locale} onChange={(e) => setLocale(e.target.value)} options={LOCALE_OPTS} />
+                <Label htmlFor="locale" className="mb-2 block">
+                  Dil
+                </Label>
+                <Select
+                  id="locale"
+                  value={locale}
+                  onChange={(e) => setLocale(e.target.value)}
+                  options={LOCALE_OPTS}
+                />
               </div>
               <div>
-                <Label htmlFor="currency" className="mb-2 block">Para birimi</Label>
-                <Select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} options={CURRENCY_OPTS} />
+                <Label htmlFor="currency" className="mb-2 block">
+                  Para birimi
+                </Label>
+                <Select
+                  id="currency"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  options={CURRENCY_OPTS}
+                />
               </div>
             </div>
             {profileMsg && (
-              <p className={profileMsg.type === 'ok' ? 'text-sm text-cyber-lime' : 'text-sm text-cyber-magenta'}>
+              <p
+                className={
+                  profileMsg.type === 'ok'
+                    ? 'text-sm text-cyber-lime'
+                    : 'text-sm text-cyber-magenta'
+                }
+              >
                 {profileMsg.text}
               </p>
             )}
@@ -195,7 +221,9 @@ export default function DashboardSettingsPage() {
           <h2 className="mb-4 font-orbitron text-lg font-bold text-white">Şifre Değiştir</h2>
           <form onSubmit={changePassword} className="space-y-4">
             <div>
-              <Label htmlFor="currentPwd" className="mb-2 block">Mevcut şifre</Label>
+              <Label htmlFor="currentPwd" className="mb-2 block">
+                Mevcut şifre
+              </Label>
               <Input
                 id="currentPwd"
                 type="password"
@@ -206,7 +234,9 @@ export default function DashboardSettingsPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="newPwd" className="mb-2 block">Yeni şifre</Label>
+                <Label htmlFor="newPwd" className="mb-2 block">
+                  Yeni şifre
+                </Label>
                 <Input
                   id="newPwd"
                   type="password"
@@ -216,7 +246,9 @@ export default function DashboardSettingsPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="confirmPwd" className="mb-2 block">Yeni şifre tekrar</Label>
+                <Label htmlFor="confirmPwd" className="mb-2 block">
+                  Yeni şifre tekrar
+                </Label>
                 <Input
                   id="confirmPwd"
                   type="password"
@@ -227,7 +259,11 @@ export default function DashboardSettingsPage() {
               </div>
             </div>
             {pwdMsg && (
-              <p className={pwdMsg.type === 'ok' ? 'text-sm text-cyber-lime' : 'text-sm text-cyber-magenta'}>
+              <p
+                className={
+                  pwdMsg.type === 'ok' ? 'text-sm text-cyber-lime' : 'text-sm text-cyber-magenta'
+                }
+              >
                 {pwdMsg.text}
               </p>
             )}
@@ -243,7 +279,9 @@ export default function DashboardSettingsPage() {
         <CardContent className="p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="font-orbitron text-lg font-bold text-white">İki Faktörlü Doğrulama (2FA)</h2>
+              <h2 className="font-orbitron text-lg font-bold text-white">
+                İki Faktörlü Doğrulama (2FA)
+              </h2>
               <p className="mt-1 text-sm text-white/60">
                 Authenticator uygulaması ile hesabını koru
               </p>
@@ -319,7 +357,9 @@ export default function DashboardSettingsPage() {
               <QrCode className="h-32 w-32 text-cyber-cyan" />
             </div>
             <div>
-              <Label htmlFor="code" className="mb-2 block">6 haneli kodu gir</Label>
+              <Label htmlFor="code" className="mb-2 block">
+                6 haneli kodu gir
+              </Label>
               <Input
                 id="code"
                 value={twoFactorCode}
@@ -352,10 +392,19 @@ export default function DashboardSettingsPage() {
               placeholder="Mevcut şifre"
             />
             <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setShowDisable2FAModal(false)}>
+              <Button
+                variant="ghost"
+                className="flex-1"
+                onClick={() => setShowDisable2FAModal(false)}
+              >
                 İptal
               </Button>
-              <Button variant="secondary" className="flex-1" onClick={disable2FA} disabled={!disablePwd}>
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={disable2FA}
+                disabled={!disablePwd}
+              >
                 2FA'yı Kapat
               </Button>
             </div>
@@ -370,7 +419,9 @@ export default function DashboardSettingsPage() {
               Bu işlem geri alınamaz. Tüm verilerin kalıcı olarak silinir.
             </p>
             <div>
-              <Label htmlFor="deletePwd" className="mb-2 block">Şifreni onayla</Label>
+              <Label htmlFor="deletePwd" className="mb-2 block">
+                Şifreni onayla
+              </Label>
               <Input
                 id="deletePwd"
                 type="password"

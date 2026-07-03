@@ -23,12 +23,7 @@ import { PaymentNotFoundError } from '../../domain/errors/wallet';
 import { createRateLimiter, RATE_LIMIT_CONFIGS } from '../middleware/security/rate-limit';
 import { getRequestMeta } from '../middleware/request-meta';
 import { isIpWhitelisted, verifyTimestampInWindow } from '@cyberlisans/payments/webhook-security';
-import _payments from '@cyberlisans/payments';
-
-const paymentsPkg = _payments as any;
-const createPaymentProvider = paymentsPkg.createPaymentProvider as (
-  provider: WebhookPayload['provider'],
-) => any;
+import { createPaymentProvider } from '@cyberlisans/payments/index';
 
 export const paymentsRoutes = new Hono();
 

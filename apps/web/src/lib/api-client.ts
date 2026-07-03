@@ -1,6 +1,6 @@
 'use client';
 
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
+const INTERNAL_API_URL = '/api';
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
@@ -48,7 +48,7 @@ async function refreshAccessToken(): Promise<boolean> {
   const refresh = getRefreshToken();
   if (!refresh) return false;
   try {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
+    const res = await fetch(`${INTERNAL_API_URL}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: refresh }),
@@ -70,7 +70,7 @@ export async function apiFetch<T = unknown>(
   options: RequestInit = {},
   retry = true,
 ): Promise<T> {
-  const url = path.startsWith('/api/') ? path : `${API_URL}${path}`;
+  const url = path.startsWith('/api/') ? path : `${INTERNAL_API_URL}${path}`;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> | undefined),

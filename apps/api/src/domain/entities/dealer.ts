@@ -28,6 +28,8 @@ export interface DealerLinkEntity {
   dealerId: string;
   code: string;
   productId: string | null;
+  productName?: string | null;
+  productSlug?: string | null;
   discountPercent: number;
   maxUses: number | null;
   currentUses: number;
@@ -42,6 +44,10 @@ export interface DealerSaleEntity {
   dealerId: string;
   orderId: string;
   linkId: string | null;
+  linkCode?: string | null;
+  productName?: string | null;
+  orderNumber?: string | null;
+  currency?: 'TRY' | 'USD' | 'EUR' | 'USDT';
   grossAmount: number;
   discountAmount: number;
   commissionAmount: number;

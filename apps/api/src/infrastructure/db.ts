@@ -1,4 +1,4 @@
-import _db from '@cyberlisans/db/client';
+import * as _db from '@cyberlisans/db/client';
 
 const db = _db as any;
 

@@ -12,6 +12,14 @@ function toEntity(s: any): DealerSaleEntity {
     dealerId: s.dealerId,
     orderId: s.orderId,
     linkId: s.linkId ?? null,
+    linkCode: s.link?.code ?? null,
+    orderNumber: s.order?.orderNumber ?? null,
+    currency: s.order?.currency ?? undefined,
+    productName:
+      s.order?.items
+        ?.map((i: any) => i.product?.title)
+        .filter(Boolean)
+        .join(', ') ?? null,
     grossAmount: Number(s.grossAmount),
     discountAmount: Number(s.discountAmount ?? 0),
     commissionAmount: Number(s.commissionAmount),
@@ -36,7 +44,16 @@ export class DealerSaleRepository implements IDealerSaleRepository {
         skip: (options.page - 1) * options.limit,
         take: options.limit,
         include: {
-          order: { select: { id: true, orderNumber: true, totalAmount: true, currency: true } },
+          link: { select: { code: true } },
+          order: {
+            select: {
+              id: true,
+              orderNumber: true,
+              totalAmount: true,
+              currency: true,
+              items: { select: { product: { select: { title: true } } } },
+            },
+          },
         },
       }),
       prisma.dealerSale.count({ where }),

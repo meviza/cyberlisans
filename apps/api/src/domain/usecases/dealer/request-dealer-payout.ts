@@ -86,6 +86,7 @@ export async function listDealerPayouts(input: ListDealerPayoutsInput) {
 }
 
 export interface ProcessDealerPayoutInput {
+  dealerId?: string;
   payoutId: string;
   adminId: string;
   action: 'approve' | 'reject' | 'complete';
@@ -97,6 +98,10 @@ export interface ProcessDealerPayoutInput {
 export async function processDealerPayout(input: ProcessDealerPayoutInput) {
   const payout = await dealerPayoutRepository.findById(input.payoutId);
   if (!payout) {
+    const { DealerPayoutNotFoundError } = await import('../../errors/dealer');
+    throw new DealerPayoutNotFoundError();
+  }
+  if (input.dealerId && payout.dealerId !== input.dealerId) {
     const { DealerPayoutNotFoundError } = await import('../../errors/dealer');
     throw new DealerPayoutNotFoundError();
   }
@@ -119,8 +124,8 @@ export async function processDealerPayout(input: ProcessDealerPayoutInput) {
     return updated;
   }
   if (input.action === 'reject') {
-    if (payout.status === 'COMPLETED') {
-      throw new DealerInvalidStatusError('Tamamlanmış ödeme reddedilemez');
+    if (payout.status !== 'PENDING' && payout.status !== 'PROCESSING') {
+      throw new DealerInvalidStatusError('Sadece bekleyen/işlemde olan talepler reddedilebilir');
     }
     const result = await prisma.$transaction(async (tx: typeof prisma) => {
       const updated = await tx.dealerPayout.update({
@@ -150,8 +155,8 @@ export async function processDealerPayout(input: ProcessDealerPayoutInput) {
     return dealerPayoutRepository.findById(result.id);
   }
   if (input.action === 'complete') {
-    if (payout.status !== 'PROCESSING' && payout.status !== 'PENDING') {
-      throw new DealerInvalidStatusError('Sadece beklemede/işlemde olan talepler tamamlanabilir');
+    if (payout.status !== 'PROCESSING') {
+      throw new DealerInvalidStatusError('Sadece işlemde olan talepler tamamlanabilir');
     }
     const updated = await dealerPayoutRepository.updateStatus(input.payoutId, 'COMPLETED', {
       processedById: input.adminId,

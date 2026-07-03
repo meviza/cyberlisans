@@ -3,17 +3,9 @@
 import * as React from 'react';
 import { Loader2, Send, AlertCircle } from 'lucide-react';
 import { Card, CardContent, Button, Input, Label, Spinner } from '@cyberlisans/ui/atoms';
-import { Select } from '@/components/ui/select';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { DealerAccessGuard } from '@/components/dealer/DealerStatusBanner';
 import type { DealerProfile } from '@/lib/dealer-types';
-
-const CURRENCY_OPTS = [
-  { value: 'TRY', label: '₺ TRY' },
-  { value: 'USD', label: '$ USD' },
-  { value: 'EUR', label: '€ EUR' },
-  { value: 'USDT', label: '₮ USDT' },
-];
 
 const fmtTRY = (n: number) =>
   new Intl.NumberFormat('tr-TR', {
@@ -25,7 +17,6 @@ const fmtTRY = (n: number) =>
 export function DealerPayoutForm({ profile }: { profile: DealerProfile }) {
   const [amount, setAmount] = React.useState<string>('');
   const [iban, setIban] = React.useState('');
-  const [currency, setCurrency] = React.useState('TRY');
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState(false);
@@ -43,9 +34,9 @@ export function DealerPayoutForm({ profile }: { profile: DealerProfile }) {
         method: 'POST',
         body: JSON.stringify({
           amount: Number(amount),
-          currency,
-          method: 'BANK_TRANSFER',
-          destination: iban,
+          currency: 'TRY',
+          method: 'IBAN',
+          iban,
         }),
       });
       setSuccess(true);
@@ -93,12 +84,7 @@ export function DealerPayoutForm({ profile }: { profile: DealerProfile }) {
                 <Label htmlFor="currency" className="mb-2 block">
                   Para Birimi
                 </Label>
-                <Select
-                  id="currency"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  options={CURRENCY_OPTS}
-                />
+                <Input id="currency" value="TRY" disabled />
               </div>
             </div>
             <div>

@@ -1,7 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { Users, ShoppingCart, Wallet as WalletIcon, Package, ArrowUpRight } from 'lucide-react';
+import {
+  Users,
+  ShoppingCart,
+  Wallet as WalletIcon,
+  Package,
+  ArrowUpRight,
+  AlertTriangle,
+  ShieldCheck,
+  Store,
+} from 'lucide-react';
 import { Spinner } from '@cyberlisans/ui/atoms';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { StatCard } from '@/components/admin/stat-card';
@@ -18,9 +27,10 @@ import type { PaymentMethod } from '@/components/admin/recent-payments-table';
 
 export interface AdminStats {
   users: { total: number; last30DaysIncrease: number };
-  orders: { total: number; today: number; last30Days: number[] };
+  orders: { total: number; today: number; last30Days: number[]; pending?: number };
   revenue: { totalTry: number; last30DaysTry: number; last30Days: number[] };
-  products: { active: number };
+  products: { active: number; lowStock?: number };
+  dealers?: { pending: number };
   paymentsByMethod: Record<PaymentMethod, number>;
   topProducts: { id: string; title: string; sold: number }[];
 }
@@ -97,8 +107,15 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-orbitron text-2xl font-black text-white sm:text-3xl">Dashboard</h1>
-          <p className="mt-1 text-sm text-white/60">Genel bakış ve son 30 günlük performans</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyber-cyan/80">
+            Admin command center
+          </p>
+          <h1 className="mt-2 font-orbitron text-2xl font-black text-white sm:text-3xl">
+            Operasyon Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-white/60">
+            Gelir, sipariş, stok ve bayi risklerini tek ekranda izle.
+          </p>
         </div>
         <a
           href="/admin/audit"
@@ -137,6 +154,51 @@ export default function AdminDashboardPage() {
           icon={Package}
           accent="lime"
         />
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <a
+          href="/admin/orders?status=PENDING"
+          className="group rounded-xl border border-cyber-cyan/20 bg-cyber-cyan/5 p-4 transition-colors hover:border-cyber-cyan/50 hover:bg-cyber-cyan/10"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-white/50">Operasyon kuyruğu</p>
+              <p className="mt-1 font-orbitron text-xl text-white">
+                {formatNumber(s.orders.pending ?? 0)} bekleyen sipariş
+              </p>
+            </div>
+            <ShieldCheck className="h-6 w-6 text-cyber-cyan" />
+          </div>
+        </a>
+        <a
+          href="/admin/products"
+          className="group rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 transition-colors hover:border-amber-300/50 hover:bg-amber-300/10"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-white/50">Stok uyarısı</p>
+              <p className="mt-1 font-orbitron text-xl text-white">
+                {formatNumber(s.products.lowStock ?? 0)} düşük stok
+              </p>
+            </div>
+            <AlertTriangle className="h-6 w-6 text-amber-300" />
+          </div>
+        </a>
+        <a
+          href="/admin/dealers?status=PENDING"
+          className="group rounded-xl border border-cyber-magenta/20 bg-cyber-magenta/5 p-4 transition-colors hover:border-cyber-magenta/50 hover:bg-cyber-magenta/10"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-white/50">Bayi onayı</p>
+              <p className="mt-1 font-orbitron text-xl text-white">
+                {formatNumber(s.dealers?.pending ?? 0)} bekleyen başvuru
+              </p>
+            </div>
+            <Store className="h-6 w-6 text-cyber-magenta" />
+          </div>
+        </a>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

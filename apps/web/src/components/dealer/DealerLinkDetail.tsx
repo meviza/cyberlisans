@@ -31,7 +31,8 @@ import type { DealerLink } from '@/lib/dealer-types';
 
 interface ProductOption {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;
 }
 
 interface DealerLinkDetailProps {
@@ -59,13 +60,15 @@ export function DealerLinkDetail({ initialLink, products }: DealerLinkDetailProp
   const productOptions = React.useMemo(
     () => [
       { value: '', label: 'Tüm ürünler' },
-      ...products.map((p) => ({ value: p.id, label: p.name })),
+      ...products.map((p) => ({ value: p.id, label: p.name ?? p.title ?? p.id })),
     ],
     [products],
   );
 
   const url =
-    typeof window !== 'undefined' ? `${window.location.origin}/r/${link.code}` : `/r/${link.code}`;
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/?ref=${link.code}`
+      : `/?ref=${link.code}`;
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();

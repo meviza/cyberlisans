@@ -45,7 +45,7 @@ export function DealerLinksTable({ initialLinks, profile }: DealerLinksTableProp
   }, [refresh]);
 
   const copyLink = (code: string) => {
-    const url = `${window.location.origin}/r/${code}`;
+    const url = `${window.location.origin}/?ref=${encodeURIComponent(code)}`;
     navigator.clipboard.writeText(url).catch(() => undefined);
   };
 

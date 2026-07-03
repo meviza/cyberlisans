@@ -41,6 +41,7 @@ dealerPublicRoutes.get('/resolve/:code', async (c) => {
     dealerId: resolved.dealerId,
     companyName: dealer?.companyName ?? null,
     productId: resolved.productId,
+    productSlug: resolved.productSlug ?? null,
     discountPercent: resolved.discountPercent,
     isActive: resolved.isActive,
   });
@@ -61,6 +62,7 @@ dealerPublicRoutes.get('/resolve', zValidator('query', resolveDealerLinkQuerySch
     dealerId: resolved.dealerId,
     companyName: dealer?.companyName ?? null,
     productId: resolved.productId,
+    productSlug: resolved.productSlug ?? null,
     discountPercent: resolved.discountPercent,
     isActive: resolved.isActive,
   });

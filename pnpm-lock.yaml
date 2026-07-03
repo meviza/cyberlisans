@@ -109,6 +109,9 @@ importers:
       '@cyberlisans/3d':
         specifier: workspace:*
         version: link:../../packages/3d
+      '@cyberlisans/api':
+        specifier: workspace:*
+        version: link:../api
       '@cyberlisans/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -118,12 +121,21 @@ importers:
       '@cyberlisans/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@cyberlisans/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
+      '@cyberlisans/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@cyberlisans/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@cyberlisans/validators':
         specifier: workspace:*
         version: link:../../packages/validators
+      '@hono/node-server':
+        specifier: 1.13.7
+        version: 1.13.7(hono@4.7.1)
       '@prisma/client':
         specifier: 6.2.1
         version: 6.2.1(prisma@6.2.1)
@@ -139,6 +151,9 @@ importers:
       gsap:
         specifier: 3.12.5
         version: 3.12.5
+      hono:
+        specifier: 4.7.1
+        version: 4.7.1
       jose:
         specifier: 5.9.6
         version: 5.9.6

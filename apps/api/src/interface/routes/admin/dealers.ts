@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { z, ZodError } from 'zod';
+import { z } from 'zod';
 import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
 import { listDealers } from '../../../domain/usecases/dealer/list-dealers';
 import {
@@ -174,6 +174,7 @@ adminDealersRoutes.post(
     const meta = getRequestMeta(c);
     return c.json(
       await processDealerPayout({
+        dealerId: id,
         payoutId,
         adminId: admin.sub,
         action: body.action,

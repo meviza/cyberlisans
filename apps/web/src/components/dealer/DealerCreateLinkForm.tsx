@@ -10,7 +10,8 @@ import type { DealerProfile } from '@/lib/dealer-types';
 
 interface ProductOption {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;
 }
 
 interface DealerCreateLinkFormProps {
@@ -21,6 +22,7 @@ interface DealerCreateLinkFormProps {
 export function DealerCreateLinkForm({ profile, products }: DealerCreateLinkFormProps) {
   const router = useRouter();
   const [productId, setProductId] = React.useState<string>('');
+  const [code, setCode] = React.useState('');
   const [discountPercent, setDiscountPercent] = React.useState<number>(10);
   const [maxUses, setMaxUses] = React.useState<string>('');
   const [expiresAt, setExpiresAt] = React.useState<string>('');
@@ -30,7 +32,7 @@ export function DealerCreateLinkForm({ profile, products }: DealerCreateLinkForm
   const productOptions = React.useMemo(
     () => [
       { value: '', label: 'Tüm ürünler' },
-      ...products.map((p) => ({ value: p.id, label: p.name })),
+      ...products.map((p) => ({ value: p.id, label: p.name ?? p.title ?? p.id })),
     ],
     [products],
   );
@@ -55,6 +57,7 @@ export function DealerCreateLinkForm({ profile, products }: DealerCreateLinkForm
     try {
       const payload: Record<string, unknown> = {
         productId: productId || null,
+        code: code.trim() || undefined,
         discountPercent,
         maxUses: maxUses ? Number(maxUses) : null,
         expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
@@ -92,6 +95,23 @@ export function DealerCreateLinkForm({ profile, products }: DealerCreateLinkForm
             <p className="text-sm text-white/60">Ürünler yüklenemedi.</p>
           ) : (
             <form onSubmit={submit} className="space-y-4">
+              <div>
+                <Label htmlFor="code" className="mb-2 block">
+                  Link Kodu
+                </Label>
+                <Input
+                  id="code"
+                  value={code}
+                  onChange={(e) =>
+                    setCode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))
+                  }
+                  placeholder="Otomatik oluştur"
+                  maxLength={60}
+                />
+                <p className="mt-1 text-xs text-white/50">
+                  Boş bırakırsanız benzersiz bir kod otomatik üretilir.
+                </p>
+              </div>
               <div>
                 <Label htmlFor="productId" className="mb-2 block">
                   Ürün

@@ -16,7 +16,9 @@ export function DealerLinkQRCode({ link }: { link: DealerLink }) {
   const [error, setError] = React.useState<string | null>(null);
 
   const url =
-    typeof window !== 'undefined' ? `${window.location.origin}/r/${link.code}` : `/r/${link.code}`;
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/?ref=${encodeURIComponent(link.code)}`
+      : `/?ref=${encodeURIComponent(link.code)}`;
 
   React.useEffect(() => {
     let cancelled = false;

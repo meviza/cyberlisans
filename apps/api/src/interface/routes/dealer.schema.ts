@@ -17,8 +17,6 @@ export const dealerUpdateSchema = z.object({
   phone: z.string().max(30).nullable().optional(),
   websiteUrl: z.string().url().max(500).nullable().optional(),
   logoUrl: z.string().url().max(500).nullable().optional(),
-  notes: z.string().max(1000).nullable().optional(),
-  commissionRate: z.number().min(0).max(100).optional(),
 });
 
 export const adminDealerUpdateSchema = z.object({
@@ -45,7 +43,8 @@ export const dealerLinkCreateSchema = z.object({
     .string()
     .min(3)
     .max(60)
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Sadece harf, rakam, tire ve alt çizgi kullanılabilir'),
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Sadece harf, rakam, tire ve alt çizgi kullanılabilir')
+    .optional(),
   productId: z.string().uuid().nullable().optional(),
   discountPercent: z.number().int().min(0).max(100).default(0),
   maxUses: z.number().int().positive().nullable().optional(),
@@ -54,6 +53,7 @@ export const dealerLinkCreateSchema = z.object({
 
 export const dealerLinkUpdateSchema = z.object({
   discountPercent: z.number().int().min(0).max(100).optional(),
+  productId: z.string().uuid().nullable().optional(),
   maxUses: z.number().int().positive().nullable().optional(),
   isActive: z.boolean().optional(),
   expiresAt: z.string().datetime().nullable().optional(),
@@ -62,7 +62,7 @@ export const dealerLinkUpdateSchema = z.object({
 export const dealerPayoutRequestSchema = z
   .object({
     amount: z.number().positive().max(1_000_000),
-    currency: z.enum(['TRY', 'USD', 'EUR', 'USDT']),
+    currency: z.enum(['TRY']).default('TRY'),
     method: z.enum(['IBAN', 'PAPARA']),
     iban: z
       .string()
@@ -96,6 +96,10 @@ export const listDealersQuerySchema = z.object({
 export const listDealerLinksQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
+  isActive: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((value) => (value === undefined ? undefined : value === 'true')),
 });
 
 export const listDealerSalesQuerySchema = z.object({

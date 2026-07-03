@@ -25,6 +25,12 @@ export function DealerRegisterForm({ prefill }: RegisterFormProps) {
   const [done, setDone] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/login?next=/dealer/register');
+    }
+  }, [authLoading, router, user]);
+
   if (authLoading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
@@ -34,9 +40,6 @@ export function DealerRegisterForm({ prefill }: RegisterFormProps) {
   }
 
   if (!user) {
-    React.useEffect(() => {
-      router.replace('/login?next=/dealer/register');
-    }, [router]);
     return null;
   }
 

@@ -1,4 +1,2 @@
-apps/api
 apps/admin
 packages/db/migrations
-packages/payments/src

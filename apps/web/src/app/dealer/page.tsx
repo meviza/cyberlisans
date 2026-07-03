@@ -1,28 +1,11 @@
-import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
+
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { DealerDashboardClient } from '@/components/dealer/DealerDashboardClient';
+import { DealerDashboardLoading } from '@/components/dealer/DealerDashboardClient';
+import { apiFetch } from '@/lib/api-client';
 import type { DealerProfile, DealerStats } from '@/lib/dealer-types';
-
-const API_URL =
-  process.env['NEXT_PUBLIC_API_URL'] ?? process.env['API_INTERNAL_URL'] ?? 'http://localhost:3001';
-
-export const dynamic = 'force-dynamic';
-
-async function fetchJson<T>(path: string): Promise<T | null> {
-  const hdrs = await headers();
-  const auth = hdrs.get('authorization');
-  if (!auth) return null;
-  try {
-    const res = await fetch(`${API_URL}${path}`, {
-      headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
-  }
-}
 
 const FALLBACK_STATS: DealerStats = {
   totalSales: 0,
@@ -38,11 +21,31 @@ const FALLBACK_STATS: DealerStats = {
   activeLinks: [],
 };
 
-export default async function DealerDashboardPage() {
-  const profile = await fetchJson<DealerProfile>('/dealer/me');
-  if (!profile) redirect('/dealer/register');
+export default function DealerDashboardPage() {
+  const router = useRouter();
+  const [profile, setProfile] = React.useState<DealerProfile | null>(null);
+  const [stats, setStats] = React.useState<DealerStats>(FALLBACK_STATS);
+  const [loading, setLoading] = React.useState(true);
 
-  const stats = await fetchJson<DealerStats>('/dealer/stats');
+  React.useEffect(() => {
+    let cancelled = false;
+    Promise.all([apiFetch<DealerProfile>('/dealer/me'), apiFetch<DealerStats>('/dealer/stats')])
+      .then(([profileRes, statsRes]) => {
+        if (cancelled) return;
+        setProfile(profileRes);
+        setStats(statsRes ?? FALLBACK_STATS);
+      })
+      .catch(() => {
+        if (!cancelled) router.replace('/dealer/register');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
-  return <DealerDashboardClient initialProfile={profile} initialStats={stats ?? FALLBACK_STATS} />;
+  if (loading || !profile) return <DealerDashboardLoading />;
+  return <DealerDashboardClient initialProfile={profile} initialStats={stats} />;
 }

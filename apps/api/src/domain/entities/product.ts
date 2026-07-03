@@ -79,8 +79,13 @@ export interface OrderItemEntity {
   productId: string;
   productKeyId: string | null;
   quantity: number;
+  qty?: number;
   unitPrice: number;
   totalPrice: number;
+  productTitle?: string;
+  productSlug?: string;
+  productBrand?: string | null;
+  productKeyCode?: string | null;
 }
 
 export interface OrderEntity {

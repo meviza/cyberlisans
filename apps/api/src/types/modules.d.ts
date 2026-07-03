@@ -46,7 +46,15 @@ declare module '@cyberlisans/auth' {
   export const requireRole: any;
   export const requireAdmin: any;
   export const requireSuperAdmin: any;
+  export const requireTwoFactor: any;
   export const optionalAuth: any;
+  export const encryptToString: any;
+  export const decryptFromString: any;
+  export const encrypt: any;
+  export const decrypt: any;
+  export const generateBackupCodes: any;
+  export const hashBackupCodes: any;
+  export const verifyBackupCode: any;
   export type AccessTokenPayload = any;
   export type RefreshTokenPayload = any;
   export type EmailVerifyTokenPayload = any;
@@ -58,6 +66,11 @@ declare module '@cyberlisans/payments' {
   export default payments;
   export const getMailService: any;
   export const mailTemplates: any;
+  export const createPaymentProvider: any;
+}
+
+declare module '@cyberlisans/payments/index' {
+  export const createPaymentProvider: any;
 }
 
 declare module '@cyberlisans/db/client' {

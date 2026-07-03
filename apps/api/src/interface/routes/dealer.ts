@@ -41,7 +41,8 @@ const twoFaGuard = requireTwoFactor(async (userId: string) => {
 
 dealerRoutes.use('*', authMiddleware);
 dealerRoutes.use('*', dealerRateLimit);
-dealerRoutes.use('*', twoFaGuard);
+dealerRoutes.use('/links/*', twoFaGuard);
+dealerRoutes.use('/payouts*', twoFaGuard);
 
 dealerRoutes.use('*', async (c, next) => {
   try {
@@ -111,8 +112,32 @@ dealerRoutes.get('/links', zValidator('query', listDealerLinksQuerySchema), asyn
       dealerId: current.id,
       page: q.page,
       limit: q.limit,
+      isActive: q.isActive,
     }),
   );
+});
+
+dealerRoutes.get('/commissions', zValidator('query', listDealerSalesQuerySchema), async (c) => {
+  const user = c.get('user');
+  const q = c.req.valid('query');
+  const current = await getDealerProfile(user.sub);
+  const sales = await listDealerSales({
+    dealerId: current.id,
+    status: q.status,
+    page: q.page,
+    limit: q.limit,
+  });
+  const items = sales.items ?? [];
+  return c.json({
+    ...sales,
+    totalEarned: items.reduce((sum, sale) => sum + sale.commissionAmount, 0),
+    pendingSettlement: items
+      .filter((sale) => sale.status === 'PENDING')
+      .reduce((sum, sale) => sum + sale.commissionAmount, 0),
+    settled: items
+      .filter((sale) => sale.status === 'SETTLED')
+      .reduce((sum, sale) => sum + sale.commissionAmount, 0),
+  });
 });
 
 dealerRoutes.post('/links', zValidator('json', dealerLinkCreateSchema), async (c) => {
@@ -147,6 +172,7 @@ dealerRoutes.patch('/links/:id', zValidator('json', dealerLinkUpdateSchema), asy
       isActive: body.isActive,
       expiresAt:
         body.expiresAt === undefined ? undefined : body.expiresAt ? new Date(body.expiresAt) : null,
+      productId: body.productId === undefined ? undefined : body.productId,
     },
   });
   return c.json(link);
@@ -191,7 +217,7 @@ dealerRoutes.post('/payouts', zValidator('json', dealerPayoutRequestSchema), asy
     dealerId: current.id,
     userId: user.sub,
     amount: body.amount,
-    currency: body.currency,
+    currency: 'TRY',
     method: body.method,
     destination,
     notes: body.notes ?? null,

@@ -2,36 +2,108 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { CreditCard, ShoppingBag, Sparkles, Receipt, Wallet, ArrowUpRight, Shield, Mail, Clock } from 'lucide-react';
-import { Card, CardContent, Badge, Button } from '@cyberlisans/ui/atoms';
+import {
+  CreditCard,
+  ShoppingBag,
+  Sparkles,
+  Receipt,
+  Wallet,
+  ArrowUpRight,
+  Shield,
+  Mail,
+  Clock,
+} from 'lucide-react';
+import { Card, CardContent, Badge, Button, Spinner } from '@cyberlisans/ui/atoms';
 import { useAuth } from '@/lib/auth-context';
 import { StatCard } from '@/components/dashboard/stat-card';
+import { apiFetch } from '@/lib/api-client';
+
+interface DashboardOrder {
+  id: string;
+  orderNumber?: string;
+  totalAmount: number;
+  currency: string;
+  status: 'PENDING' | 'PAID' | 'FULFILLED' | 'CANCELLED' | 'REFUNDED' | string;
+  createdAt: string;
+  paidAt?: string | null;
+  fulfilledAt?: string | null;
+  items?: Array<{
+    title?: string;
+    productTitle?: string;
+    quantity?: number;
+    qty?: number;
+  }>;
+}
 
 interface RecentOrder {
   id: string;
   date: string;
   product: string;
   amount: number;
-  status: 'paid' | 'pending' | 'fulfilled' | 'cancelled';
+  status: DashboardOrder['status'];
 }
 
-const MOCK_ORDERS: RecentOrder[] = [
-  { id: 'ORD-2024-1842', date: '28 Haz 2026', product: 'Steam Cüzdan 50 TL', amount: 50, status: 'fulfilled' },
-  { id: 'ORD-2024-1839', date: '27 Haz 2026', product: 'OpenAI API $10', amount: 320, status: 'fulfilled' },
-  { id: 'ORD-2024-1835', date: '24 Haz 2026', product: 'Windows 11 Pro Key', amount: 1200, status: 'paid' },
-  { id: 'ORD-2024-1821', date: '19 Haz 2026', product: 'Netflix Premium 1 Ay', amount: 250, status: 'fulfilled' },
-  { id: 'ORD-2024-1810', date: '12 Haz 2026', product: 'Discord Nitro 1 Ay', amount: 200, status: 'cancelled' },
-];
-
-const STATUS_MAP: Record<RecentOrder['status'], { label: string; variant: 'success' | 'warning' | 'danger' | 'default' }> = {
-  paid: { label: 'Ödendi', variant: 'warning' },
-  pending: { label: 'Bekliyor', variant: 'warning' },
-  fulfilled: { label: 'Teslim Edildi', variant: 'success' },
-  cancelled: { label: 'İptal', variant: 'danger' },
+const STATUS_MAP: Record<
+  string,
+  { label: string; variant: 'success' | 'warning' | 'danger' | 'default' }
+> = {
+  PAID: { label: 'Ödendi', variant: 'warning' },
+  PENDING: { label: 'Bekliyor', variant: 'warning' },
+  FULFILLED: { label: 'Teslim Edildi', variant: 'success' },
+  CANCELLED: { label: 'İptal', variant: 'danger' },
+  REFUNDED: { label: 'İade Edildi', variant: 'default' },
 };
 
 export default function DashboardOverviewPage() {
   const { user } = useAuth();
+  const [orders, setOrders] = React.useState<DashboardOrder[]>([]);
+  const [loadingOrders, setLoadingOrders] = React.useState(true);
+  const [ordersError, setOrdersError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiFetch<{ items: DashboardOrder[] }>('/orders?limit=5');
+        if (!cancelled) setOrders(res.items ?? []);
+      } catch {
+        if (!cancelled) setOrdersError('Son siparişler yüklenemedi');
+      } finally {
+        if (!cancelled) setLoadingOrders(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const recentOrders: RecentOrder[] = orders.map((order) => {
+    const firstItem = order.items?.[0];
+    const firstTitle = firstItem?.productTitle ?? firstItem?.title ?? 'Dijital ürün';
+    const extraCount = Math.max(0, (order.items?.length ?? 0) - 1);
+    return {
+      id: order.orderNumber ?? order.id,
+      date: new Date(order.createdAt).toLocaleDateString('tr-TR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      product: extraCount > 0 ? `${firstTitle} +${extraCount}` : firstTitle,
+      amount: order.totalAmount,
+      status: order.status,
+    };
+  });
+
+  const completedOrders = orders.filter((o) => o.status === 'PAID' || o.status === 'FULFILLED');
+  const totalSpend = completedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const activeLicenses = completedOrders.reduce(
+    (sum, order) =>
+      sum +
+      (order.items ?? []).reduce((itemSum, item) => itemSum + (item.quantity ?? item.qty ?? 1), 0),
+    0,
+  );
+  const loyaltyPoints = Math.floor(totalSpend / 10);
+  const lastOrder = orders[0];
 
   return (
     <div className="space-y-6">
@@ -55,8 +127,12 @@ export default function DashboardOverviewPage() {
               <p className="mt-1 text-sm text-white/60">{user?.email}</p>
             </div>
             <div className="flex gap-2">
-              <Badge variant="magenta" size="lg">{user?.role}</Badge>
-              <Badge variant="default" size="lg">{user?.currency}</Badge>
+              <Badge variant="magenta" size="lg">
+                {user?.role}
+              </Badge>
+              <Badge variant="default" size="lg">
+                {user?.currency}
+              </Badge>
             </div>
           </div>
         </CardContent>
@@ -65,27 +141,31 @@ export default function DashboardOverviewPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Toplam Harcama"
-          value={`₺${(user?.wallet.balanceTry ?? 0).toLocaleString()}`}
+          value={`₺${totalSpend.toLocaleString('tr-TR')}`}
           icon={CreditCard}
-          trend={{ value: 12.4, positive: true }}
+          hint="Ödenen ve teslim edilen siparişler"
         />
         <StatCard
           label="Aktif Lisanslar"
-          value="14"
+          value={String(activeLicenses)}
           icon={ShoppingBag}
-          hint="Son 30 günde +3"
+          hint="Satın alınan dijital ürün adedi"
         />
         <StatCard
           label="Sadakat Puanı"
-          value="2.450"
+          value={loyaltyPoints.toLocaleString('tr-TR')}
           icon={Sparkles}
-          hint="450 puana 550 puan kaldı"
+          hint="Harcamaya göre hesaplanır"
         />
         <StatCard
           label="Son Sipariş"
-          value="₺320"
+          value={lastOrder ? `₺${lastOrder.totalAmount.toLocaleString('tr-TR')}` : '—'}
           icon={Receipt}
-          hint="28 Haz 2026"
+          hint={
+            lastOrder
+              ? new Date(lastOrder.createdAt).toLocaleDateString('tr-TR')
+              : 'Henüz sipariş yok'
+          }
         />
       </div>
 
@@ -134,12 +214,7 @@ export default function DashboardOverviewPage() {
                 status={user?.twoFactorEnabled ? 'success' : 'warning'}
                 detail={user?.twoFactorEnabled ? 'Aktif' : 'Pasif'}
               />
-              <StatusRow
-                icon={Clock}
-                label="Son giriş"
-                status="default"
-                detail="Şimdi"
-              />
+              <StatusRow icon={Clock} label="Son giriş" status="default" detail="Şimdi" />
             </div>
             <Link
               href="/dashboard/settings"
@@ -163,35 +238,59 @@ export default function DashboardOverviewPage() {
               Tümünü Gör →
             </Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-cyber-cyan/20 text-left text-xs uppercase tracking-wider text-white/60">
-                  <th className="py-3 pr-4">Sipariş No</th>
-                  <th className="py-3 pr-4">Tarih</th>
-                  <th className="py-3 pr-4">Ürün</th>
-                  <th className="py-3 pr-4 text-right">Tutar</th>
-                  <th className="py-3 pr-4">Durum</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MOCK_ORDERS.slice(0, 5).map((o) => {
-                  const s = STATUS_MAP[o.status];
-                  return (
-                    <tr key={o.id} className="border-b border-cyber-cyan/10 transition-colors hover:bg-cyber-cyan/5">
-                      <td className="py-3 pr-4 font-mono text-cyber-cyan">{o.id}</td>
-                      <td className="py-3 pr-4 text-white/70">{o.date}</td>
-                      <td className="py-3 pr-4 text-white">{o.product}</td>
-                      <td className="py-3 pr-4 text-right font-medium text-white">₺{o.amount.toLocaleString()}</td>
-                      <td className="py-3 pr-4">
-                        <Badge variant={s.variant} size="sm">{s.label}</Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          {loadingOrders ? (
+            <div className="flex min-h-32 items-center justify-center">
+              <Spinner size="md" />
+            </div>
+          ) : ordersError ? (
+            <div className="rounded-md border border-cyber-magenta/40 bg-cyber-magenta/10 px-4 py-3 text-sm text-cyber-magenta">
+              {ordersError}
+            </div>
+          ) : recentOrders.length === 0 ? (
+            <div className="rounded-md border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-white/60">
+              Henüz sipariş yok. İlk alışverişin burada görünecek.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-cyber-cyan/20 text-left text-xs uppercase tracking-wider text-white/60">
+                    <th className="py-3 pr-4">Sipariş No</th>
+                    <th className="py-3 pr-4">Tarih</th>
+                    <th className="py-3 pr-4">Ürün</th>
+                    <th className="py-3 pr-4 text-right">Tutar</th>
+                    <th className="py-3 pr-4">Durum</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentOrders.map((o) => {
+                    const s = STATUS_MAP[o.status] ?? {
+                      label: o.status,
+                      variant: 'default' as const,
+                    };
+                    return (
+                      <tr
+                        key={o.id}
+                        className="border-b border-cyber-cyan/10 transition-colors hover:bg-cyber-cyan/5"
+                      >
+                        <td className="py-3 pr-4 font-mono text-cyber-cyan">{o.id}</td>
+                        <td className="py-3 pr-4 text-white/70">{o.date}</td>
+                        <td className="py-3 pr-4 text-white">{o.product}</td>
+                        <td className="py-3 pr-4 text-right font-medium text-white">
+                          ₺{o.amount.toLocaleString()}
+                        </td>
+                        <td className="py-3 pr-4">
+                          <Badge variant={s.variant} size="sm">
+                            {s.label}
+                          </Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -213,8 +312,8 @@ function StatusRow({
     status === 'success'
       ? 'text-cyber-lime border-cyber-lime/30 bg-cyber-lime/5'
       : status === 'warning'
-      ? 'text-cyber-magenta border-cyber-magenta/30 bg-cyber-magenta/5'
-      : 'text-white/70 border-white/20 bg-white/5';
+        ? 'text-cyber-magenta border-cyber-magenta/30 bg-cyber-magenta/5'
+        : 'text-white/70 border-white/20 bg-white/5';
   return (
     <div className={`flex items-center justify-between rounded-md border px-3 py-2 ${colors}`}>
       <div className="flex items-center gap-2">
