@@ -1,5 +1,5 @@
-import type { UserEntity } from '../../../domain/entities/user';
-import type { SessionEntity } from '../../../domain/entities/session';
+import type { UserEntity } from '../../domain/entities/user';
+import type { SessionEntity } from '../../domain/entities/session';
 
 export interface RequestMeta {
   ipAddress?: string;
@@ -18,6 +18,8 @@ export interface TokenSignerPort {
     username: string;
   }): Promise<string>;
   signRefresh(payload: { sub: string; jti: string }): Promise<string>;
+  signEmailVerify(payload: { sub: string; email: string }): Promise<string>;
+  verifyEmailVerify(token: string): Promise<{ sub: string; email: string } | null>;
 }
 
 export interface TwoFactorVerifierPort {

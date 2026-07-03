@@ -3,12 +3,13 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Wallet, Receipt, Settings } from 'lucide-react';
+import { LayoutDashboard, Package, Wallet, Receipt, Settings, Store } from 'lucide-react';
 import { cn } from '@cyberlisans/ui/cn';
 
 const ITEMS = [
   { href: '/dashboard', label: 'Genel Bakış', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/products', label: 'Ürünlerim', icon: Package },
+  { href: '/dashboard/seller', label: 'Satıcı Mağazam', icon: Store },
   { href: '/dashboard/wallet', label: 'Cüzdan', icon: Wallet },
   { href: '/dashboard/orders', label: 'Siparişler', icon: Receipt },
   { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
@@ -31,12 +32,14 @@ export function Sidebar() {
                 'group flex items-center gap-3 rounded-md border border-transparent px-3 py-2.5 text-sm transition-all',
                 active
                   ? 'border-cyber-cyan/40 bg-cyber-cyan/10 text-cyber-cyan shadow-[0_0_20px_rgba(0,240,255,0.15)]'
-                  : 'text-white/70 hover:border-cyber-cyan/20 hover:bg-cyber-cyan/5 hover:text-white'
+                  : 'text-white/70 hover:border-cyber-cyan/20 hover:bg-cyber-cyan/5 hover:text-white',
               )}
             >
               <Icon className={cn('h-4 w-4', active && 'text-cyber-cyan')} />
               <span className="font-medium">{item.label}</span>
-              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyber-cyan shadow-[0_0_8px_rgba(0,240,255,0.8)]" />}
+              {active && (
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-cyber-cyan shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
+              )}
             </Link>
           );
         })}

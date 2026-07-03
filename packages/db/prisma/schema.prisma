@@ -117,8 +117,49 @@ enum DealerPayoutStatus {
   REJECTED
 }
 
+enum SellerStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  REJECTED
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum ListingType {
+  PLATFORM
+  SELLER
+}
+
+enum EscrowStatus {
+  HELD
+  RELEASED
+  REFUNDED
+  DISPUTED
+}
+
+enum SellerPayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+enum DisputeStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+}
+
 model User {
   id               String     @id @default(uuid()) @db.Uuid
+  supabaseAuthId   String?    @unique @db.Uuid
   email            String     @unique
   emailVerified    Boolean    @default(false)
   username         String     @unique
@@ -140,25 +181,37 @@ model User {
   updatedAt        DateTime   @updatedAt
   lastLoginAt      DateTime?
 
-  wallet             Wallet?
-  walletTransactions WalletTransaction[]
-  orders             Order[]
-  payments           Payment[]
-  productKeys        ProductKey[]
-  auditLogs          AuditLog[]          @relation("ActorLogs")
-  targetAuditLogs    AuditLog[]          @relation("TargetLogs")
-  sessions           Session[]
-  consentRecords     ConsentRecord[]
-  credential         UserCredential?
-  dealerProfile      DealerProfile?
-  dealerApprovals    DealerProfile[]     @relation("DealerApprover")
-  dealerPayouts      DealerPayout[]      @relation("DealerPayoutDealer")
-  processedPayouts   DealerPayout[]      @relation("DealerPayoutProcessor")
+  wallet              Wallet?
+  walletTransactions  WalletTransaction[]
+  orders              Order[]
+  payments            Payment[]
+  productKeys         ProductKey[]
+  auditLogs           AuditLog[]          @relation("ActorLogs")
+  targetAuditLogs     AuditLog[]          @relation("TargetLogs")
+  sessions            Session[]
+  consentRecords      ConsentRecord[]
+  credential          UserCredential?
+  dealerProfile       DealerProfile?
+  dealerApprovals     DealerProfile[]     @relation("DealerApprover")
+  dealerPayouts       DealerPayout[]      @relation("DealerPayoutDealer")
+  processedPayouts    DealerPayout[]      @relation("DealerPayoutProcessor")
+  seller              Seller?
+  escrowAsCustomer    EscrowTransaction[] @relation("EscrowCustomer")
+  disputesOpened      Dispute[]           @relation("DisputeOpener")
+  disputesResolved    Dispute[]           @relation("DisputeResolver")
+  notifications       Notification[]
+  supportTickets      SupportTicket[]      @relation("SupportTicketUser")
+  assignedTickets     SupportTicket[]      @relation("SupportTicketAssignee")
+  supportMessages     SupportMessage[]
+  disputeMessages     DisputeMessage[]
+  reviewsWritten      Review[]            @relation("ReviewCustomer")
+  sellerPayouts       SellerPayout[]      @relation("SellerPayoutUser")
 
   @@index([email])
   @@index([username])
   @@index([referralCode])
   @@index([referredById])
+  @@index([supabaseAuthId])
   @@map("users")
 }
 
@@ -263,38 +316,48 @@ model Brand {
 }
 
 model Product {
-  id           String       @id @default(uuid()) @db.Uuid
-  categoryId   String       @db.Uuid
-  category     Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  brandId      String?      @db.Uuid
-  brand        Brand?       @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  slug         String       @unique
-  title        String
-  description  String?
-  imageUrl     String?
-  modelUrl     String?
-  priceTry     Decimal      @db.Decimal(18, 2)
-  priceUsd     Decimal      @db.Decimal(18, 2)
-  priceEur     Decimal      @db.Decimal(18, 2)
-  priceUsdt    Decimal      @db.Decimal(18, 2)
-  stock        Int          @default(0)
-  deliveryType DeliveryType @default(KEY)
-  isActive     Boolean      @default(true)
-  isFeatured   Boolean      @default(false)
-  tags         String[]
-  metadata     Json?
-  sortOrder    Int          @default(0)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id                  String       @id @default(uuid()) @db.Uuid
+  categoryId          String       @db.Uuid
+  category            Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brandId             String?      @db.Uuid
+  brand               Brand?       @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  sellerId            String?      @db.Uuid
+  seller              Seller?      @relation("ProductSeller", fields: [sellerId], references: [id], onDelete: SetNull)
+  slug                String       @unique
+  title               String
+  description         String?
+  imageUrl            String?
+  modelUrl            String?
+  priceTry            Decimal      @db.Decimal(18, 2)
+  priceUsd            Decimal      @db.Decimal(18, 2)
+  priceEur            Decimal      @db.Decimal(18, 2)
+  priceUsdt           Decimal      @db.Decimal(18, 2)
+  stock               Int          @default(0)
+  deliveryType        DeliveryType @default(KEY)
+  listingType         ListingType  @default(PLATFORM)
+  digitalContent      String?
+  autoDelivery        Boolean      @default(false)
+  minDeliverySeconds  Int          @default(0)
+  maxDeliverySeconds  Int          @default(0)
+  isActive            Boolean      @default(true)
+  isFeatured          Boolean      @default(false)
+  tags                String[]
+  metadata            Json?
+  sortOrder           Int          @default(0)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
-  keys       ProductKey[]
-  orderItems OrderItem[]
-  dealerLinks DealerLink[]
+  keys               ProductKey[]
+  orderItems         OrderItem[]
+  dealerLinks        DealerLink[]
+  listings           ProductListing[]
 
   @@index([categoryId, isActive, sortOrder])
   @@index([brandId, isActive])
   @@index([slug])
   @@index([isFeatured, isActive])
+  @@index([sellerId])
+  @@index([listingType])
   @@map("products")
 }
 
@@ -336,9 +399,12 @@ model Order {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  items    OrderItem[]
-  payments Payment[]
-  dealerSale DealerSale?
+  items       OrderItem[]
+  payments    Payment[]
+  dealerSale  DealerSale?
+  escrow      EscrowTransaction?
+  dispute     Dispute?
+  review      Review?
 
   @@index([userId, createdAt])
   @@index([status])
@@ -484,19 +550,19 @@ model DealerProfile {
 }
 
 model DealerLink {
-  id             String    @id @default(uuid()) @db.Uuid
-  dealerId       String    @db.Uuid
-  dealer         DealerProfile @relation(fields: [dealerId], references: [id], onDelete: Cascade)
-  code           String    @unique
-  productId      String?   @db.Uuid
-  product        Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
-  discountPercent Int      @default(0)
-  maxUses        Int?
-  currentUses    Int       @default(0)
-  clicks         Int       @default(0)
-  isActive       Boolean   @default(true)
-  expiresAt      DateTime?
-  createdAt      DateTime  @default(now())
+  id              String    @id @default(uuid()) @db.Uuid
+  dealerId        String    @db.Uuid
+  dealer          DealerProfile @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  code            String    @unique
+  productId       String?   @db.Uuid
+  product         Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  discountPercent Int       @default(0)
+  maxUses         Int?
+  currentUses     Int       @default(0)
+  clicks          Int       @default(0)
+  isActive        Boolean   @default(true)
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
 
   sales DealerSale[]
 
@@ -507,20 +573,20 @@ model DealerLink {
 }
 
 model DealerSale {
-  id               String          @id @default(uuid()) @db.Uuid
-  dealerId         String          @db.Uuid
-  dealer           DealerProfile   @relation(fields: [dealerId], references: [id], onDelete: Cascade)
-  orderId          String          @unique @db.Uuid
-  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  linkId           String?         @db.Uuid
-  link             DealerLink?     @relation(fields: [linkId], references: [id], onDelete: SetNull)
-  grossAmount      Decimal         @db.Decimal(18, 2)
-  discountAmount   Decimal         @default(0) @db.Decimal(18, 2)
-  commissionAmount Decimal         @db.Decimal(18, 2)
-  netAmount        Decimal         @db.Decimal(18, 2)
-  status           DealerSaleStatus @default(PENDING)
+  id               String            @id @default(uuid()) @db.Uuid
+  dealerId         String            @db.Uuid
+  dealer           DealerProfile     @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  orderId          String            @unique @db.Uuid
+  order            Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  linkId           String?           @db.Uuid
+  link             DealerLink?       @relation(fields: [linkId], references: [id], onDelete: SetNull)
+  grossAmount      Decimal           @db.Decimal(18, 2)
+  discountAmount   Decimal           @default(0) @db.Decimal(18, 2)
+  commissionAmount Decimal           @db.Decimal(18, 2)
+  netAmount        Decimal           @db.Decimal(18, 2)
+  status           DealerSaleStatus  @default(PENDING)
   settledAt        DateTime?
-  createdAt        DateTime        @default(now())
+  createdAt        DateTime          @default(now())
 
   @@index([dealerId, createdAt])
   @@index([status])
@@ -528,25 +594,354 @@ model DealerSale {
 }
 
 model DealerPayout {
-  id          String            @id @default(uuid()) @db.Uuid
-  dealerId    String            @db.Uuid
-  dealer      DealerProfile     @relation(fields: [dealerId], references: [id], onDelete: Cascade)
-  userId      String            @db.Uuid
-  user        User              @relation("DealerPayoutDealer", fields: [userId], references: [id], onDelete: Restrict)
-  amount      Decimal           @db.Decimal(18, 2)
-  currency    Currency
-  method      String
-  destination String
-  status      DealerPayoutStatus @default(PENDING)
-  processedById String?         @db.Uuid
-  processedBy User?             @relation("DealerPayoutProcessor", fields: [processedById], references: [id], onDelete: SetNull)
-  processedAt DateTime?
+  id              String             @id @default(uuid()) @db.Uuid
+  dealerId        String             @db.Uuid
+  dealer          DealerProfile      @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  userId          String             @db.Uuid
+  user            User               @relation("DealerPayoutDealer", fields: [userId], references: [id], onDelete: Restrict)
+  amount          Decimal            @db.Decimal(18, 2)
+  currency        Currency
+  method          String
+  destination     String
+  status          DealerPayoutStatus @default(PENDING)
+  processedById   String?            @db.Uuid
+  processedBy     User?              @relation("DealerPayoutProcessor", fields: [processedById], references: [id], onDelete: SetNull)
+  processedAt     DateTime?
   rejectionReason String?
-  notes       String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  notes           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   @@index([dealerId, createdAt])
   @@index([status])
   @@map("dealer_payouts")
+}
+
+model Seller {
+  id              String       @id @default(uuid()) @db.Uuid
+  userId          String       @unique @db.Uuid
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug            String       @unique
+  companyName     String
+  taxId           String
+  taxOffice       String?
+  address         String?
+  phone           String?
+  websiteUrl      String?
+  logoUrl         String?
+  bio             String?
+  commissionRate  Decimal      @db.Decimal(5, 2)
+  balance         Decimal      @db.Decimal(18, 2)
+  pendingBalance  Decimal      @db.Decimal(18, 2)
+  totalSales      Decimal      @db.Decimal(18, 2)
+  totalOrders     Int
+  rating          Decimal?     @db.Decimal(3, 2)
+  ratingCount     Int
+  status          SellerStatus
+  kycStatus       KycStatus
+  approvedById    String?
+  approvedAt      DateTime?
+  rejectionReason String?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  products          Product[]                @relation("ProductSeller")
+  listings          ProductListing[]         
+  escrowTransactions EscrowTransaction[] @relation("EscrowSeller")
+  commissions       Commission[]
+  referralCodes     SellerReferralCode[]
+  kycRecords        SellerKyc[]
+  payouts           SellerPayout[]   @relation("SellerPayoutSeller")
+  sellerPayouts     Payout[]         @relation("PayoutSeller")
+  reviews           Review[]
+  disputes          Dispute[]         @relation("DisputeSeller")
+
+  @@index([userId])
+  @@index([slug])
+  @@index([status])
+  @@index([kycStatus])
+  @@map("sellers")
+}
+
+model SellerReferralCode {
+  id              String    @id @default(uuid()) @db.Uuid
+  sellerId        String    @db.Uuid
+  seller          Seller    @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  code            String    @unique
+  productId       String?   @db.Uuid
+  discountPercent Int
+  maxUses         Int?
+  currentUses     Int
+  clicks          Int
+  isActive        Boolean
+  expiresAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([sellerId])
+  @@index([code])
+  @@map("seller_referral_codes")
+}
+
+model SellerKyc {
+  id                String    @id @default(uuid()) @db.Uuid
+  sellerId          String    @db.Uuid
+  seller            Seller    @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  documentType      String
+  documentNumber    String
+  documentFrontUrl  String?
+  documentBackUrl   String?
+  selfieUrl         String?
+  addressProofUrl   String?
+  taxCertificateUrl String?
+  status            KycStatus
+  reviewedById      String?
+  reviewedAt        DateTime?
+  rejectionReason   String?
+  expiresAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([sellerId])
+  @@index([status])
+  @@map("seller_kyc")
+}
+
+model ProductListing {
+  id                  String    @id @default(uuid()) @db.Uuid
+  sellerId            String    @db.Uuid
+  seller              Seller    @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  productId           String    @db.Uuid
+  product             Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  price               Decimal   @db.Decimal(18, 2)
+  currency            Currency
+  stock               Int
+  digitalContent      String?
+  autoDelivery        Boolean
+  minDeliverySeconds  Int
+  maxDeliverySeconds  Int
+  isActive            Boolean
+  totalSold           Int
+  viewCount           Int
+  metadata            Json?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([sellerId])
+  @@index([productId])
+  @@index([isActive])
+  @@map("product_listings")
+}
+
+model EscrowTransaction {
+  id                String       @id @default(uuid()) @db.Uuid
+  orderId           String       @unique @db.Uuid
+  order             Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sellerId          String       @db.Uuid
+  seller            Seller       @relation("EscrowSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  customerId        String       @db.Uuid
+  customer          User         @relation("EscrowCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  amount            Decimal      @db.Decimal(18, 2)
+  sellerAmount      Decimal      @db.Decimal(18, 2)
+  commissionAmount  Decimal      @db.Decimal(18, 2)
+  currency          Currency
+  status            EscrowStatus
+  heldAt            DateTime     @default(now())
+  releaseAt         DateTime?
+  releasedAt        DateTime?
+  refundedAt        DateTime?
+  releaseReason     String?
+  paymentId         String?      @db.Uuid
+  metadata          Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  commissions  Commission[]
+  disputes     Dispute[]
+
+  @@index([sellerId])
+  @@index([customerId])
+  @@index([status])
+  @@map("escrow_transactions")
+}
+
+model Commission {
+  id                String   @id @default(uuid()) @db.Uuid
+  escrowId          String   @db.Uuid
+  escrow            EscrowTransaction @relation(fields: [escrowId], references: [id], onDelete: Cascade)
+  sellerId          String   @db.Uuid
+  seller            Seller   @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  grossAmount       Decimal  @db.Decimal(18, 2)
+  commissionRate    Decimal  @db.Decimal(5, 2)
+  commissionAmount  Decimal  @db.Decimal(18, 2)
+  netAmount         Decimal  @db.Decimal(18, 2)
+  createdAt         DateTime @default(now())
+
+  @@index([escrowId])
+  @@index([sellerId])
+  @@map("commissions")
+}
+
+model Payout {
+  id              String             @id @default(uuid()) @db.Uuid
+  sellerId        String             @db.Uuid
+  seller          Seller             @relation("PayoutSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  userId          String             @db.Uuid
+  amount          Decimal            @db.Decimal(18, 2)
+  currency        Currency
+  method          String
+  destination     String
+  status          SellerPayoutStatus
+  processedById   String?
+  processedAt     DateTime?
+  rejectionReason String?
+  notes           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([sellerId])
+  @@index([userId])
+  @@index([status])
+  @@map("payouts")
+}
+
+model SellerPayout {
+  id              String             @id @default(uuid()) @db.Uuid
+  sellerId        String             @db.Uuid
+  seller          Seller             @relation("SellerPayoutSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  userId          String             @db.Uuid
+  user            User               @relation("SellerPayoutUser", fields: [userId], references: [id], onDelete: Restrict)
+  amount          Decimal            @db.Decimal(18, 2)
+  currency        Currency
+  method          String
+  destination     String
+  status          SellerPayoutStatus
+  processedById   String?
+  processedAt     DateTime?
+  rejectionReason String?
+  notes           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([sellerId])
+  @@index([userId])
+  @@index([status])
+  @@map("seller_payouts")
+}
+
+model Dispute {
+  id            String       @id @default(uuid()) @db.Uuid
+  escrowId      String       @db.Uuid
+  escrow        EscrowTransaction @relation(fields: [escrowId], references: [id], onDelete: Cascade)
+  orderId       String       @unique @db.Uuid
+  order         Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sellerId      String       @db.Uuid
+  seller        Seller       @relation("DisputeSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  openedById    String       @db.Uuid
+  openedBy      User         @relation("DisputeOpener", fields: [openedById], references: [id], onDelete: Restrict)
+  openedByRole  String
+  reason        String
+  status        DisputeStatus
+  resolution    String?
+  resolvedById  String?
+  resolvedBy    User?        @relation("DisputeResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  messages DisputeMessage[]
+
+  @@index([escrowId])
+  @@index([orderId])
+  @@index([sellerId])
+  @@index([status])
+  @@map("disputes")
+}
+
+model DisputeMessage {
+  id             String   @id @default(uuid()) @db.Uuid
+  disputeId      String   @db.Uuid
+  dispute        Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  senderId       String?
+  sender         User?    @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  senderRole     String
+  message        String
+  attachmentUrl  String?
+  createdAt      DateTime @default(now())
+
+  @@index([disputeId])
+  @@map("dispute_messages")
+}
+
+model Review {
+  id                  String   @id @default(uuid()) @db.Uuid
+  orderId             String   @unique @db.Uuid
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sellerId            String   @db.Uuid
+  seller              Seller   @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  customerId          String   @db.Uuid
+  customer            User     @relation("ReviewCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  rating              Int
+  comment             String?
+  sellerReply         String?
+  isVerifiedPurchase  Boolean
+  isPublic            Boolean
+  createdAt           DateTime @default(now())
+
+  @@index([sellerId])
+  @@index([customerId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel   String
+  type      String
+  title     String
+  body      String?
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([readAt])
+  @@map("notifications")
+}
+
+model SupportTicket {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  user         User     @relation("SupportTicketUser", fields: [userId], references: [id], onDelete: Cascade)
+  subject      String
+  status       String
+  priority     String
+  assignedToId String?
+  assignedTo   User?    @relation("SupportTicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  messages SupportMessage[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([assignedToId])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id         String        @id @default(uuid()) @db.Uuid
+  ticketId   String        @db.Uuid
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderId   String?
+  sender     User?         @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  senderRole String
+  message    String
+  createdAt  DateTime      @default(now())
+
+  @@index([ticketId])
+  @@map("support_messages")
 }

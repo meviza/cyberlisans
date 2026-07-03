@@ -20,6 +20,8 @@ import { ordersRoutes } from './interface/routes/orders';
 import { dealerRoutes } from './interface/routes/dealer';
 import { dealerPublicRoutes } from './interface/routes/dealer-public';
 import { adminDealersRoutes } from './interface/routes/admin/dealers';
+import { sellerRoutes } from './interface/routes/sellers';
+import { adminSellersRoutes } from './interface/routes/admin/sellers';
 import { createCorsMiddleware } from './interface/middleware/cors';
 import { honoSecureHeaders, securityHeaders } from './interface/middleware/security-headers';
 import { errorHandler } from './interface/middleware/error-handler';
@@ -64,6 +66,8 @@ app.route('/orders', ordersRoutes);
 app.route('/dealer', dealerRoutes);
 app.route('/dealer-public', dealerPublicRoutes);
 app.route('/admin/dealers', adminDealersRoutes);
+app.route('/sellers', sellerRoutes);
+app.route('/admin/sellers', adminSellersRoutes);
 
 app.notFound((c) => c.json({ error: 'Not found', code: 'NOT_FOUND' }, 404));
 

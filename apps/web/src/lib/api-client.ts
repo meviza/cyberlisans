@@ -44,6 +44,39 @@ export class ApiError extends Error {
   }
 }
 
+export type SellerStatus = 'PENDING' | 'APPROVED' | 'SUSPENDED' | 'REJECTED';
+
+export interface SellerInfo {
+  id: string;
+  slug: string;
+  companyName: string;
+  status: SellerStatus;
+  kycStatus: string;
+  commissionRate: number;
+  balance: number;
+  pendingBalance: number;
+  totalSales: number;
+  rating: number;
+  ratingCount: number;
+}
+
+export interface ApplySellerPayload {
+  companyName: string;
+  taxId: string;
+  taxOffice?: string;
+  address?: string;
+  phone?: string;
+  websiteUrl?: string;
+  bio?: string;
+  slug: string;
+  logoUrl?: string;
+}
+
+export interface ApplySellerResult {
+  seller: SellerInfo;
+  message: string;
+}
+
 async function refreshAccessToken(): Promise<boolean> {
   const refresh = getRefreshToken();
   if (!refresh) return false;
