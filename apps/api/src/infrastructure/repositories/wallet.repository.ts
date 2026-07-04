@@ -1,4 +1,4 @@
-import { prisma } from '../db';
+import { supabaseAdmin, dbError } from '../db';
 import { roundCurrency } from '@cyberlisans/payments/currency';
 import type { IWalletRepository } from '../../application/ports/repositories';
 import type {
@@ -10,7 +10,34 @@ import type {
 
 const MAX_RETRIES = 5;
 
-function toEntity(w: any): WalletEntity {
+type WalletRow = {
+  id: string;
+  userId: string;
+  balanceTry: string | number;
+  balanceUsd: string | number;
+  balanceEur: string | number;
+  balanceUsdt: string | number;
+  loyaltyCoins: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type TxRow = {
+  id: string;
+  userId: string;
+  type: string;
+  currency: string;
+  amount: string | number;
+  balanceAfter: string | number;
+  referenceType: string | null;
+  referenceId: string | null;
+  description: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+function toEntity(w: WalletRow): WalletEntity {
   return {
     id: w.id,
     userId: w.userId,
@@ -20,44 +47,53 @@ function toEntity(w: any): WalletEntity {
     balanceUsdt: Number(w.balanceUsdt),
     loyaltyCoins: w.loyaltyCoins,
     version: w.version,
-    createdAt: w.createdAt,
-    updatedAt: w.updatedAt,
+    createdAt: new Date(w.createdAt),
+    updatedAt: new Date(w.updatedAt),
   };
 }
 
-function toTxEntity(t: any): WalletTransactionEntity {
+function toTxEntity(t: TxRow): WalletTransactionEntity {
   return {
     id: t.id,
     userId: t.userId,
-    type: t.type,
-    currency: t.currency,
+    type: t.type as WalletTxType,
+    currency: t.currency as Currency,
     amount: Number(t.amount),
     balanceAfter: Number(t.balanceAfter),
     referenceType: t.referenceType,
     referenceId: t.referenceId,
     description: t.description,
     metadata: t.metadata,
-    createdAt: t.createdAt,
+    createdAt: new Date(t.createdAt),
   };
 }
 
-const currencyField: Record<Currency, 'balanceTry' | 'balanceUsd' | 'balanceEur' | 'balanceUsdt'> =
-  {
-    TRY: 'balanceTry',
-    USD: 'balanceUsd',
-    EUR: 'balanceEur',
-    USDT: 'balanceUsdt',
-  };
+const currencyField: Record<Currency, string> = {
+  TRY: 'balanceTry',
+  USD: 'balanceUsd',
+  EUR: 'balanceEur',
+  USDT: 'balanceUsdt',
+};
 
 export class WalletRepository implements IWalletRepository {
   async findByUserId(userId: string): Promise<WalletEntity | null> {
-    const w = await prisma.wallet.findUnique({ where: { userId } });
-    return w ? toEntity(w) : null;
+    const { data, error } = await supabaseAdmin()
+      .from('wallets')
+      .select('*')
+      .eq('userId', userId)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    return data ? toEntity(data as WalletRow) : null;
   }
 
   async findById(id: string): Promise<WalletEntity | null> {
-    const w = await prisma.wallet.findUnique({ where: { id } });
-    return w ? toEntity(w) : null;
+    const { data, error } = await supabaseAdmin()
+      .from('wallets')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    return data ? toEntity(data as WalletRow) : null;
   }
 
   async credit(input: Parameters<IWalletRepository['credit']>[0]) {
@@ -80,45 +116,56 @@ export class WalletRepository implements IWalletRepository {
       metadata?: Record<string, unknown>;
     },
     op: 'credit' | 'debit',
-  ) {
+  ): Promise<{ wallet: WalletEntity; transaction: WalletTransactionEntity }> {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        return await prisma.$transaction(
-          async (tx: typeof prisma) => {
-            const w = await tx.wallet.findUnique({ where: { userId: input.userId } });
-            if (!w) throw new Error('WALLET_NOT_FOUND');
-            const field = currencyField[input.currency];
-            const current = Number(w[field]);
-            const next = op === 'credit' ? current + input.amount : current - input.amount;
-            if (op === 'debit' && next < 0) throw new Error('INSUFFICIENT_BALANCE');
-            const nextRounded = roundCurrency(next, input.currency);
-            const updated = await tx.wallet.update({
-              where: { id: w.id, version: w.version },
-              data: { [field]: nextRounded, version: { increment: 1 } },
-            });
-            const transaction = await tx.walletTransaction.create({
-              data: {
-                userId: input.userId,
-                type: input.type,
-                currency: input.currency,
-                amount: input.amount,
-                balanceAfter: nextRounded,
-                referenceType: input.referenceType ?? null,
-                referenceId: input.referenceId ?? null,
-                description: input.description ?? null,
-                metadata: (input.metadata as any) ?? undefined,
-              },
-            });
-            return { wallet: toEntity(updated), transaction: toTxEntity(transaction) };
-          },
-          { isolationLevel: 'Serializable' },
-        );
-      } catch (err: any) {
-        if (err?.message === 'INSUFFICIENT_BALANCE') throw err;
-        if (err?.message === 'WALLET_NOT_FOUND') throw err;
-        if (err?.code === 'P2034' && attempt < MAX_RETRIES - 1) continue;
-        throw err;
+      const { data: w, error: wErr } = await supabaseAdmin()
+        .from('wallets')
+        .select('*')
+        .eq('userId', input.userId)
+        .maybeSingle();
+      if (wErr) throw dbError(wErr);
+      if (!w) throw new Error('WALLET_NOT_FOUND');
+      const wr = w as WalletRow;
+      const field = currencyField[input.currency];
+      const current = Number(wr[field as keyof WalletRow]);
+      const next = op === 'credit' ? current + input.amount : current - input.amount;
+      if (op === 'debit' && next < 0) throw new Error('INSUFFICIENT_BALANCE');
+      const nextRounded = roundCurrency(next, input.currency);
+      const { data: upd, error: uErr } = await supabaseAdmin()
+        .from('wallets')
+        .update({
+          [field]: nextRounded,
+          version: wr.version + 1,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', wr.id)
+        .eq('version', wr.version)
+        .select('*')
+        .maybeSingle();
+      if (uErr) throw dbError(uErr);
+      if (!upd) {
+        if (attempt < MAX_RETRIES - 1) continue;
+        throw new Error('CONCURRENT_UPDATE_FAILED');
       }
+      const txInsert: Record<string, unknown> = {
+        id: crypto.randomUUID(),
+        userId: input.userId,
+        type: input.type,
+        currency: input.currency,
+        amount: input.amount,
+        balanceAfter: nextRounded,
+      };
+      if (input.referenceType !== undefined) txInsert['referenceType'] = input.referenceType;
+      if (input.referenceId !== undefined) txInsert['referenceId'] = input.referenceId;
+      if (input.description !== undefined) txInsert['description'] = input.description;
+      if (input.metadata !== undefined) txInsert['metadata'] = input.metadata;
+      const { data: tx, error: tErr } = await supabaseAdmin()
+        .from('wallet_transactions')
+        .insert(txInsert)
+        .select('*')
+        .single();
+      if (tErr || !tx) throw dbError(tErr);
+      return { wallet: toEntity(upd as WalletRow), transaction: toTxEntity(tx as TxRow) };
     }
     throw new Error('CONCURRENT_UPDATE_FAILED');
   }
@@ -129,7 +176,7 @@ export class WalletRepository implements IWalletRepository {
     currency: Currency;
     amount: number;
     description?: string;
-  }) {
+  }): Promise<void> {
     await this.debit({
       userId: input.fromUserId,
       currency: input.currency,
@@ -156,21 +203,34 @@ export class WalletRepository implements IWalletRepository {
     cursor?: string;
     limit: number;
   }): Promise<WalletTransactionEntity[]> {
-    const txs = await prisma.walletTransaction.findMany({
-      where: { userId: input.userId, type: input.type },
-      orderBy: { createdAt: 'desc' },
-      take: input.limit + 1,
-      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-    });
-    return txs.map(toTxEntity);
+    let q = supabaseAdmin().from('wallet_transactions').select('*').eq('userId', input.userId);
+    if (input.type) q = q.eq('type', input.type);
+    q = q.order('createdAt', { ascending: false }).limit(input.limit + 1);
+    if (input.cursor) {
+      q = q.lt('id', input.cursor).limit(input.limit);
+    }
+    const { data, error } = await q;
+    if (error) throw dbError(error);
+    return (data ?? []).map((r) => toTxEntity(r as TxRow));
   }
 
   async addLoyaltyCoins(userId: string, coins: number): Promise<WalletEntity> {
-    const w = await prisma.wallet.update({
-      where: { userId },
-      data: { loyaltyCoins: { increment: coins } },
-    });
-    return toEntity(w);
+    const { data: w, error: wErr } = await supabaseAdmin()
+      .from('wallets')
+      .select('loyaltyCoins')
+      .eq('userId', userId)
+      .maybeSingle();
+    if (wErr) throw dbError(wErr);
+    if (!w) throw new Error('WALLET_NOT_FOUND');
+    const next = (w as { loyaltyCoins: number }).loyaltyCoins + coins;
+    const { data, error } = await supabaseAdmin()
+      .from('wallets')
+      .update({ loyaltyCoins: next, updatedAt: new Date().toISOString() })
+      .eq('userId', userId)
+      .select('*')
+      .single();
+    if (error || !data) throw dbError(error);
+    return toEntity(data as WalletRow);
   }
 }
 

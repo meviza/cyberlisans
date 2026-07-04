@@ -1,4 +1,4 @@
-import { prisma } from '../../infrastructure/db';
+import { supabaseAdmin, dbError } from '../../infrastructure/db';
 import type { EncryptedData } from '@cyberlisans/auth/crypto';
 
 export interface TwoFactorRecord {
@@ -8,15 +8,28 @@ export interface TwoFactorRecord {
   enabled: boolean;
 }
 
+type Row = {
+  userId: string;
+  secretCipher: string;
+  backupCodesHash: string[] | null;
+  enabled: boolean;
+};
+
 export class UserTwoFactorRepository {
   async findByUserId(userId: string): Promise<TwoFactorRecord | null> {
-    const rec = await prisma.userTwoFactor.findUnique({ where: { userId } });
-    if (!rec) return null;
+    const { data, error } = await supabaseAdmin()
+      .from('user_two_factors')
+      .select('userId,secretCipher,backupCodesHash,enabled')
+      .eq('userId', userId)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    if (!data) return null;
+    const r = data as Row;
     return {
-      userId: rec.userId,
-      secretCipher: rec.secretCipher,
-      backupCodesHash: rec.backupCodesHash,
-      enabled: rec.enabled,
+      userId: r.userId,
+      secretCipher: r.secretCipher,
+      backupCodesHash: r.backupCodesHash ?? [],
+      enabled: r.enabled,
     };
   }
 
@@ -26,24 +39,38 @@ export class UserTwoFactorRepository {
   ): Promise<void> {
     const cipherStr =
       typeof data.secretCipher === 'string' ? data.secretCipher : JSON.stringify(data.secretCipher);
-    await prisma.userTwoFactor.upsert({
-      where: { userId },
-      create: {
-        userId,
-        secretCipher: cipherStr,
-        backupCodesHash: data.backupCodesHash,
-        enabled: data.enabled,
-      },
-      update: {
-        secretCipher: cipherStr,
-        backupCodesHash: data.backupCodesHash,
-        enabled: data.enabled,
-      },
-    });
+    const payload = {
+      userId,
+      secretCipher: cipherStr,
+      backupCodesHash: data.backupCodesHash,
+      enabled: data.enabled,
+      updatedAt: new Date().toISOString(),
+    };
+    const { data: existing } = await supabaseAdmin()
+      .from('user_two_factors')
+      .select('userId')
+      .eq('userId', userId)
+      .maybeSingle();
+    if (existing) {
+      const { error } = await supabaseAdmin()
+        .from('user_two_factors')
+        .update({
+          secretCipher: cipherStr,
+          backupCodesHash: data.backupCodesHash,
+          enabled: data.enabled,
+          updatedAt: payload.updatedAt,
+        })
+        .eq('userId', userId);
+      if (error) throw dbError(error);
+    } else {
+      const { error } = await supabaseAdmin().from('user_two_factors').insert(payload);
+      if (error) throw dbError(error);
+    }
   }
 
   async disable(userId: string): Promise<void> {
-    await prisma.userTwoFactor.deleteMany({ where: { userId } });
+    const { error } = await supabaseAdmin().from('user_two_factors').delete().eq('userId', userId);
+    if (error) throw dbError(error);
   }
 }
 

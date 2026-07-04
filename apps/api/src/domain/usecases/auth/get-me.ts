@@ -1,5 +1,6 @@
-import { prisma } from '../../../infrastructure/db';
+import { supabaseAdmin } from '../../../infrastructure/db';
 import { userRepository } from '../../../infrastructure/repositories/user.repository';
+import { walletRepository } from '../../../infrastructure/repositories/wallet.repository';
 import { UserNotFoundError } from '../../errors';
 
 export interface MeResult {
@@ -40,22 +41,13 @@ export async function getMe(userId: string): Promise<MeResult> {
   const user = await userRepository.findById(userId);
   if (!user) throw new UserNotFoundError();
 
-  const [wallet, orders] = await Promise.all([
-    prisma.wallet.findUnique({ where: { userId } }),
-    prisma.order.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: {
-        id: true,
-        orderNumber: true,
-        status: true,
-        totalAmount: true,
-        currency: true,
-        createdAt: true,
-      },
-    }),
-  ]);
+  const wallet = await walletRepository.findByUserId(userId);
+  const { data: ordersRaw } = await supabaseAdmin()
+    .from('orders')
+    .select('id,orderNumber,status,totalAmount,currency,createdAt')
+    .eq('userId', userId)
+    .order('createdAt', { ascending: false })
+    .limit(5);
 
   return {
     id: user.id,
@@ -83,13 +75,13 @@ export async function getMe(userId: string): Promise<MeResult> {
           loyaltyCoins: wallet.loyaltyCoins,
         }
       : null,
-    recentOrders: orders.map((o: any) => ({
-      id: o.id,
-      orderNumber: o.orderNumber,
-      status: o.status,
-      totalAmount: o.totalAmount.toString(),
-      currency: o.currency,
-      createdAt: o.createdAt,
+    recentOrders: (ordersRaw ?? []).map((o) => ({
+      id: o.id as string,
+      orderNumber: o.orderNumber as string,
+      status: o.status as string,
+      totalAmount: String(o.totalAmount),
+      currency: o.currency as string,
+      createdAt: new Date(o.createdAt as string),
     })),
   };
 }

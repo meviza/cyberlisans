@@ -1,10 +1,19 @@
-import { prisma } from '../../infrastructure/db';
+import { supabaseAdmin, dbError } from '../../infrastructure/db';
 import type { ISessionRepository, CreateSessionInput } from '../../application/ports/repositories';
 import type { SessionEntity } from '../../domain/entities/session';
 
-type PrismaSession = Awaited<ReturnType<typeof prisma.session.findUnique>>;
+type Row = {
+  id: string;
+  userId: string;
+  refreshToken: string;
+  refreshTokenHash: string | null;
+  userAgent: string | null;
+  ipAddress: string | null;
+  expiresAt: string;
+  createdAt: string;
+};
 
-function toEntity(s: NonNullable<PrismaSession>): SessionEntity {
+function toEntity(s: Row): SessionEntity {
   return {
     id: s.id,
     userId: s.userId,
@@ -12,45 +21,59 @@ function toEntity(s: NonNullable<PrismaSession>): SessionEntity {
     refreshTokenHash: s.refreshTokenHash,
     userAgent: s.userAgent,
     ipAddress: s.ipAddress,
-    expiresAt: s.expiresAt,
-    createdAt: s.createdAt,
+    expiresAt: new Date(s.expiresAt),
+    createdAt: new Date(s.createdAt),
   };
 }
 
 export class SessionRepository implements ISessionRepository {
   async create(data: CreateSessionInput): Promise<SessionEntity> {
-    const s = await prisma.session.create({
-      data: {
-        userId: data.userId,
-        refreshToken: data.refreshToken,
-        refreshTokenHash: data.refreshTokenHash,
-        userAgent: data.userAgent,
-        ipAddress: data.ipAddress,
-        expiresAt: data.expiresAt,
-      },
-    });
-    return toEntity(s);
+    const insert: Record<string, unknown> = {
+      userId: data.userId,
+      refreshToken: data.refreshToken,
+      refreshTokenHash: data.refreshTokenHash,
+      expiresAt: data.expiresAt.toISOString(),
+    };
+    if (data.userAgent !== undefined) insert['userAgent'] = data.userAgent;
+    if (data.ipAddress !== undefined) insert['ipAddress'] = data.ipAddress;
+    const { data: row, error } = await supabaseAdmin()
+      .from('sessions')
+      .insert(insert)
+      .select('*')
+      .single();
+    if (error || !row) throw dbError(error);
+    return toEntity(row as Row);
   }
 
   async findByRefreshTokenHash(hash: string): Promise<SessionEntity | null> {
-    const s = await prisma.session.findUnique({ where: { refreshTokenHash: hash } });
-    return s ? toEntity(s) : null;
+    const { data, error } = await supabaseAdmin()
+      .from('sessions')
+      .select('*')
+      .eq('refreshTokenHash', hash)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    return data ? toEntity(data as Row) : null;
   }
 
   async deleteById(id: string): Promise<void> {
-    await prisma.session.delete({ where: { id } });
+    const { error } = await supabaseAdmin().from('sessions').delete().eq('id', id);
+    if (error) throw dbError(error);
   }
 
   async deleteAllForUser(userId: string): Promise<void> {
-    await prisma.session.deleteMany({ where: { userId } });
+    const { error } = await supabaseAdmin().from('sessions').delete().eq('userId', userId);
+    if (error) throw dbError(error);
   }
 
   async listForUser(userId: string): Promise<SessionEntity[]> {
-    const sessions = await prisma.session.findMany({
-      where: { userId, expiresAt: { gt: new Date() } },
-      orderBy: { createdAt: 'desc' },
-    });
-    return sessions.map(toEntity);
+    const { data, error } = await supabaseAdmin()
+      .from('sessions')
+      .select('*')
+      .eq('userId', userId)
+      .gt('expiresAt', new Date().toISOString())
+      .order('createdAt', { ascending: false });
+    if (error) throw dbError(error);
+    return (data ?? []).map((r) => toEntity(r as Row));
   }
 }
 

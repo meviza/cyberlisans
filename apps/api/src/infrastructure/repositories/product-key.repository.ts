@@ -1,19 +1,33 @@
-import { prisma } from '../db';
+import { supabaseAdmin, dbError } from '../db';
 import type { IProductKeyRepository } from '../../application/ports/repositories';
 import type { ProductKeyEntity } from '../../domain/entities/product';
 import { NoKeysAvailableError } from '../../domain/errors/product';
 
-function toEntity(k: any): ProductKeyEntity {
+const COLS = 'id,productId,code,isUsed,usedById,usedAt,reservedAt,reservedFor,createdAt';
+
+type Row = {
+  id: string;
+  productId: string;
+  code: string;
+  isUsed: boolean;
+  usedById: string | null;
+  usedAt: string | null;
+  reservedAt: string | null;
+  reservedFor: string | null;
+  createdAt: string;
+};
+
+function toEntity(k: Row): ProductKeyEntity {
   return {
     id: k.id,
     productId: k.productId,
     code: k.code,
     isUsed: k.isUsed,
     usedById: k.usedById ?? null,
-    usedAt: k.usedAt ?? null,
-    reservedAt: k.reservedAt ?? null,
+    usedAt: k.usedAt ? new Date(k.usedAt) : null,
+    reservedAt: k.reservedAt ? new Date(k.reservedAt) : null,
     reservedFor: k.reservedFor ?? null,
-    createdAt: k.createdAt,
+    createdAt: new Date(k.createdAt),
   };
 }
 
@@ -24,49 +38,54 @@ export class ProductKeyRepository implements IProductKeyRepository {
     productId: string,
     options: { availableOnly?: boolean; page: number; limit: number },
   ): Promise<{ items: ProductKeyEntity[]; total: number }> {
-    const where: any = { productId };
-    if (options.availableOnly) where.isUsed = false;
-    const [items, total] = await prisma.$transaction([
-      prisma.productKey.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (options.page - 1) * options.limit,
-        take: options.limit,
-      }),
-      prisma.productKey.count({ where }),
-    ]);
-    return { items: items.map(toEntity), total };
+    let q = supabaseAdmin()
+      .from('product_keys')
+      .select(COLS, { count: 'exact' })
+      .eq('productId', productId);
+    if (options.availableOnly) q = q.eq('isUsed', false);
+    q = q.order('createdAt', { ascending: false });
+    const from = (options.page - 1) * options.limit;
+    const to = from + options.limit - 1;
+    q = q.range(from, to);
+    const { data, error, count } = await q;
+    if (error) throw dbError(error);
+    return { items: (data ?? []).map((r) => toEntity(r as Row)), total: count ?? 0 };
   }
 
   async reserve(productId: string, qty: number, userId: string): Promise<ProductKeyEntity[]> {
     for (let attempt = 0; attempt < MAX_RESERVATION_RETRIES; attempt++) {
       try {
-        return await prisma.$transaction(
-          async (tx: typeof prisma) => {
-            const keys = await tx.productKey.findMany({
-              where: { productId, isUsed: false, reservedFor: null },
-              orderBy: { createdAt: 'asc' },
-              take: qty,
-            });
-            if (keys.length < qty) {
-              throw new NoKeysAvailableError();
-            }
-            const now = new Date();
-            const updated = await Promise.all(
-              keys.map((k: { id: string }) =>
-                tx.productKey.update({
-                  where: { id: k.id },
-                  data: { reservedAt: now, reservedFor: userId },
-                }),
-              ),
-            );
-            return updated.map(toEntity);
-          },
-          { isolationLevel: 'Serializable' },
-        );
-      } catch (err: any) {
+        const { data: keys, error: findErr } = await supabaseAdmin()
+          .from('product_keys')
+          .select(COLS)
+          .eq('productId', productId)
+          .eq('isUsed', false)
+          .is('reservedFor', null)
+          .order('createdAt', { ascending: true })
+          .limit(qty);
+        if (findErr) throw dbError(findErr);
+        if (!keys || (keys as Row[]).length < qty) throw new NoKeysAvailableError();
+        const now = new Date().toISOString();
+        const updated: ProductKeyEntity[] = [];
+        for (const k of keys as Row[]) {
+          const { data: r, error: uErr } = await supabaseAdmin()
+            .from('product_keys')
+            .update({ reservedAt: now, reservedFor: userId })
+            .eq('id', k.id)
+            .is('reservedFor', null)
+            .select(COLS)
+            .maybeSingle();
+          if (uErr) throw dbError(uErr);
+          if (!r) throw new Error('KEY_RESERVATION_CONFLICT');
+          updated.push(toEntity(r as Row));
+        }
+        return updated;
+      } catch (err: unknown) {
         if (err instanceof NoKeysAvailableError) throw err;
-        if (err?.code === 'P2034' && attempt < MAX_RESERVATION_RETRIES - 1) continue;
+        if (err instanceof Error && err.message === 'KEY_RESERVATION_CONFLICT') {
+          if (attempt < MAX_RESERVATION_RETRIES - 1) continue;
+          throw err;
+        }
         throw err;
       }
     }
@@ -74,55 +93,85 @@ export class ProductKeyRepository implements IProductKeyRepository {
   }
 
   async markUsedByOrderItem(orderItemId: string, userId: string): Promise<void> {
-    await prisma.$transaction(async (tx: typeof prisma) => {
-      const item = await tx.orderItem.findUnique({ where: { id: orderItemId } });
-      if (!item || !item.productKeyId) return;
-      await tx.productKey.update({
-        where: { id: item.productKeyId },
-        data: {
-          isUsed: true,
-          usedById: userId,
-          usedAt: new Date(),
-          reservedAt: null,
-          reservedFor: null,
-        },
-      });
-    });
+    const { data: item, error: iErr } = await supabaseAdmin()
+      .from('order_items')
+      .select('productKeyId')
+      .eq('id', orderItemId)
+      .maybeSingle();
+    if (iErr) throw dbError(iErr);
+    const keyId = (item as { productKeyId: string | null } | null)?.productKeyId;
+    if (!keyId) return;
+    const { error } = await supabaseAdmin()
+      .from('product_keys')
+      .update({
+        isUsed: true,
+        usedById: userId,
+        usedAt: new Date().toISOString(),
+        reservedAt: null,
+        reservedFor: null,
+      })
+      .eq('id', keyId);
+    if (error) throw dbError(error);
   }
 
   async returnKeysForOrderItem(orderItemId: string): Promise<void> {
-    await prisma.$transaction(async (tx: typeof prisma) => {
-      const item = await tx.orderItem.findUnique({ where: { id: orderItemId } });
-      if (!item || !item.productKeyId) return;
-      const key = await tx.productKey.findUnique({ where: { id: item.productKeyId } });
-      if (!key) return;
-      if (key.isUsed) return;
-      await tx.productKey.update({
-        where: { id: item.productKeyId },
-        data: { reservedAt: null, reservedFor: null },
-      });
-    });
+    const { data: item, error: iErr } = await supabaseAdmin()
+      .from('order_items')
+      .select('productKeyId')
+      .eq('id', orderItemId)
+      .maybeSingle();
+    if (iErr) throw dbError(iErr);
+    const keyId = (item as { productKeyId: string | null } | null)?.productKeyId;
+    if (!keyId) return;
+    const { data: key } = await supabaseAdmin()
+      .from('product_keys')
+      .select('isUsed')
+      .eq('id', keyId)
+      .maybeSingle();
+    if (!key || (key as { isUsed: boolean }).isUsed) return;
+    const { error } = await supabaseAdmin()
+      .from('product_keys')
+      .update({ reservedAt: null, reservedFor: null })
+      .eq('id', keyId);
+    if (error) throw dbError(error);
   }
 
   async countAvailable(productId: string): Promise<number> {
-    return prisma.productKey.count({
-      where: { productId, isUsed: false },
-    });
+    const { count, error } = await supabaseAdmin()
+      .from('product_keys')
+      .select('*', { count: 'exact', head: true })
+      .eq('productId', productId)
+      .eq('isUsed', false);
+    if (error) throw dbError(error);
+    return count ?? 0;
   }
 
   async bulkCreate(productId: string, codes: string[]): Promise<number> {
-    const data = codes.map((code) => ({ productId, code }));
-    const result = await prisma.productKey.createMany({ data, skipDuplicates: true });
-    return result.count;
+    const now = new Date().toISOString();
+    const rows = codes.map((code) => ({
+      id: crypto.randomUUID(),
+      productId,
+      code,
+      createdAt: now,
+    }));
+    const { data, error } = await supabaseAdmin().from('product_keys').insert(rows).select('id');
+    if (error) throw dbError(error);
+    return (data ?? []).length;
   }
 
   async deleteById(id: string): Promise<void> {
-    await prisma.productKey.delete({ where: { id } });
+    const { error } = await supabaseAdmin().from('product_keys').delete().eq('id', id);
+    if (error) throw dbError(error);
   }
 
   async findById(id: string): Promise<ProductKeyEntity | null> {
-    const k = await prisma.productKey.findUnique({ where: { id } });
-    return k ? toEntity(k) : null;
+    const { data, error } = await supabaseAdmin()
+      .from('product_keys')
+      .select(COLS)
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    return data ? toEntity(data as Row) : null;
   }
 }
 

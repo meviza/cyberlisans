@@ -1,5 +1,4 @@
-import * as _db from '@cyberlisans/db/client';
-
-const db = _db as any;
-
-export const prisma = db.prisma;
+export { supabase, supabaseAdmin, dbError } from './supabase-db';
+import { supabase as _supabase } from './supabase-db';
+export const prisma: any = _supabase;
+export type { SupabaseClient } from '@supabase/supabase-js';

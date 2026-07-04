@@ -46,6 +46,20 @@ app.onError((err, c) => errorHandler(err, c));
 app.get('/', (c) => c.json({ name: 'CyberLisans API', version: '0.1.0', status: 'ok' }));
 app.get('/health', (c) => c.json({ status: 'healthy', timestamp: new Date().toISOString() }));
 
+app.get('/debug/db', async (c) => {
+  try {
+    const { supabaseAdmin } = await import('./infrastructure/db');
+    const { data, error } = await supabaseAdmin().from('users').select('id').limit(1);
+    if (error) throw error;
+    return c.json({ ok: true, info: { reachable: true, sampleRows: (data ?? []).length } });
+  } catch (e) {
+    return c.json(
+      { ok: false, error: (e as Error).message, code: (e as { code?: string }).code },
+      500,
+    );
+  }
+});
+
 app.route('/auth', authRoutes);
 app.route('/profile', profileRoutes);
 app.route('/sessions', sessionRoutes);

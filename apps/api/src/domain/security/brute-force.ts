@@ -1,4 +1,4 @@
-import { prisma } from '../../infrastructure/db';
+import { supabaseAdmin, dbError } from '../../infrastructure/db';
 import { AccountLockedError } from '../errors';
 
 const TIER_1 = 5;
@@ -41,6 +41,12 @@ export interface LockoutInfo {
   retryAfterSeconds?: number;
 }
 
+type AttemptRow = {
+  email: string;
+  attemptedAt: string;
+  lockedUntil: string | null;
+};
+
 export async function getLockoutInfo(email: string): Promise<LockoutInfo> {
   const key = trackerKey(email);
   const tracker = trackers.get(key);
@@ -56,23 +62,25 @@ export async function getLockoutInfo(email: string): Promise<LockoutInfo> {
     trackers.delete(key);
   }
   try {
-    const since = new Date(Date.now() - TIER_3_LOCK_MS);
-    const recent = await prisma.failedLoginAttempt.findMany({
-      where: { email: key, attemptedAt: { gte: since } },
-      orderBy: { attemptedAt: 'asc' },
-    });
-    const active = recent.filter(
-      (r: { lockedUntil: Date | null }) => !r.lockedUntil || r.lockedUntil > new Date(),
-    );
-    const activeLock = active.find(
-      (r: { lockedUntil: Date | null }) => r.lockedUntil && r.lockedUntil > new Date(),
-    );
+    const since = new Date(Date.now() - TIER_3_LOCK_MS).toISOString();
+    const { data: recent, error } = await supabaseAdmin()
+      .from('failed_login_attempts')
+      .select('email,attemptedAt,lockedUntil')
+      .eq('email', key)
+      .gte('attemptedAt', since)
+      .order('attemptedAt', { ascending: true });
+    if (error) throw dbError(error);
+    const rows = (recent ?? []) as AttemptRow[];
+    const nowDate = new Date();
+    const active = rows.filter((r) => !r.lockedUntil || new Date(r.lockedUntil) > nowDate);
+    const activeLock = active.find((r) => r.lockedUntil && new Date(r.lockedUntil) > nowDate);
     if (activeLock && activeLock.lockedUntil) {
+      const until = new Date(activeLock.lockedUntil);
       return {
         locked: true,
         attempts: active.length,
-        lockedUntil: activeLock.lockedUntil,
-        retryAfterSeconds: Math.ceil((activeLock.lockedUntil.getTime() - Date.now()) / 1000),
+        lockedUntil: until,
+        retryAfterSeconds: Math.ceil((until.getTime() - Date.now()) / 1000),
       };
     }
     return { locked: false, attempts: active.length };
@@ -117,14 +125,16 @@ export async function recordFailedAttempt(
   trackers.set(key, tracker);
 
   try {
-    await prisma.failedLoginAttempt.create({
-      data: {
-        email: key,
-        ipAddress: ipAddress ?? null,
-        userAgent: userAgent ?? null,
-        lockedUntil: lockedUntil ? new Date(lockedUntil) : null,
-      },
-    });
+    const insert: Record<string, unknown> = {
+      id: crypto.randomUUID(),
+      email: key,
+      attemptedAt: new Date(now).toISOString(),
+    };
+    if (ipAddress !== undefined) insert['ipAddress'] = ipAddress;
+    if (userAgent !== undefined) insert['userAgent'] = userAgent;
+    if (lockedUntil !== undefined) insert['lockedUntil'] = new Date(lockedUntil).toISOString();
+    const { error } = await supabaseAdmin().from('failed_login_attempts').insert(insert);
+    if (error) throw dbError(error);
   } catch (err) {
     console.error('[brute-force] persist failed', err);
   }
@@ -141,9 +151,12 @@ export async function clearAttempts(email: string): Promise<void> {
   const key = trackerKey(email);
   trackers.delete(key);
   try {
-    await prisma.failedLoginAttempt.deleteMany({
-      where: { email: key, lockedUntil: null },
-    });
+    const { error } = await supabaseAdmin()
+      .from('failed_login_attempts')
+      .delete()
+      .eq('email', key)
+      .is('lockedUntil', null);
+    if (error) throw dbError(error);
   } catch (err) {
     console.error('[brute-force] clear failed', err);
   }

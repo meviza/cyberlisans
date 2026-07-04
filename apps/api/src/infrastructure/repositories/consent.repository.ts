@@ -1,19 +1,19 @@
-import { prisma } from '../../infrastructure/db';
+import { supabaseAdmin, dbError } from '../../infrastructure/db';
 import type { IConsentRepository, ConsentRecordInput } from '../../application/ports/repositories';
 
 export class ConsentRepository implements IConsentRepository {
   async record(data: ConsentRecordInput): Promise<void> {
-    await prisma.consentRecord.create({
-      data: {
-        userId: data.userId,
-        email: data.email,
-        type: data.type,
-        granted: data.granted,
-        documentVersion: data.documentVersion,
-        ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
-      },
-    });
+    const insert: Record<string, unknown> = {
+      userId: data.userId,
+      type: data.type,
+      granted: data.granted,
+      documentVersion: data.documentVersion,
+    };
+    if (data.email !== undefined) insert['email'] = data.email;
+    if (data.ipAddress !== undefined) insert['ipAddress'] = data.ipAddress;
+    if (data.userAgent !== undefined) insert['userAgent'] = data.userAgent;
+    const { error } = await supabaseAdmin().from('consent_records').insert(insert);
+    if (error) throw dbError(error);
   }
 }
 

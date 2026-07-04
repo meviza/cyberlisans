@@ -1,54 +1,93 @@
-import { prisma } from '../db';
+import { supabaseAdmin, dbError } from '../db';
 import type { IPaymentRepository } from '../../application/ports/repositories';
 import type { PaymentEntity, Currency } from '../../domain/entities/wallet';
 
-function toEntity(p: any): PaymentEntity {
+type Row = {
+  id: string;
+  userId: string;
+  orderId: string | null;
+  provider: string;
+  providerRef: string | null;
+  amount: string | number;
+  currency: string;
+  status: string;
+  webhookPayload: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  expiresAt: string | null;
+  paidAt: string | null;
+  refundedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+function toEntity(p: Row): PaymentEntity {
   return {
     id: p.id,
     userId: p.userId,
     orderId: p.orderId,
-    provider: p.provider,
+    provider: p.provider as PaymentEntity['provider'],
     providerRef: p.providerRef,
     amount: Number(p.amount),
-    currency: p.currency,
-    status: p.status,
+    currency: p.currency as Currency,
+    status: p.status as PaymentEntity['status'],
     webhookPayload: p.webhookPayload,
     metadata: p.metadata,
-    expiresAt: p.expiresAt,
-    paidAt: p.paidAt,
-    refundedAt: p.refundedAt,
-    createdAt: p.createdAt,
-    updatedAt: p.updatedAt,
+    expiresAt: p.expiresAt ? new Date(p.expiresAt) : null,
+    paidAt: p.paidAt ? new Date(p.paidAt) : null,
+    refundedAt: p.refundedAt ? new Date(p.refundedAt) : null,
+    createdAt: new Date(p.createdAt),
+    updatedAt: new Date(p.updatedAt),
   };
 }
 
 export class PaymentRepository implements IPaymentRepository {
   async create(input: Parameters<IPaymentRepository['create']>[0]): Promise<PaymentEntity> {
-    const p = await prisma.payment.create({
-      data: {
-        userId: input.userId,
-        orderId: input.orderId ?? null,
-        provider: input.provider,
-        amount: input.amount,
-        currency: input.currency,
-        expiresAt: input.expiresAt ?? null,
-        metadata: (input.metadata as any) ?? undefined,
-      },
-    });
-    return toEntity(p);
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const insert: Record<string, unknown> = {
+      id,
+      userId: input.userId,
+      orderId: input.orderId ?? null,
+      provider: input.provider,
+      amount: input.amount,
+      currency: input.currency,
+      status: 'PENDING',
+      createdAt: now,
+      updatedAt: now,
+    };
+    if (input.expiresAt !== undefined) insert['expiresAt'] = input.expiresAt.toISOString();
+    if (input.metadata !== undefined) insert['metadata'] = input.metadata;
+    const { data, error } = await supabaseAdmin()
+      .from('payments')
+      .insert(insert)
+      .select('*')
+      .single();
+    if (error || !data) throw dbError(error);
+    return toEntity(data as Row);
   }
 
   async findById(id: string): Promise<PaymentEntity | null> {
-    const p = await prisma.payment.findUnique({ where: { id } });
-    return p ? toEntity(p) : null;
+    const { data, error } = await supabaseAdmin()
+      .from('payments')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    return data ? toEntity(data as Row) : null;
   }
 
   async findByProviderRef(
     provider: PaymentEntity['provider'],
     providerRef: string,
   ): Promise<PaymentEntity | null> {
-    const p = await prisma.payment.findFirst({ where: { provider, providerRef } });
-    return p ? toEntity(p) : null;
+    const { data, error } = await supabaseAdmin()
+      .from('payments')
+      .select('*')
+      .eq('provider', provider)
+      .eq('providerRef', providerRef)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    return data ? toEntity(data as Row) : null;
   }
 
   async updateStatus(
@@ -56,31 +95,47 @@ export class PaymentRepository implements IPaymentRepository {
     status: PaymentEntity['status'],
     extras?: { providerRef?: string; webhookPayload?: Record<string, unknown>; paidAt?: Date },
   ): Promise<PaymentEntity> {
-    const data: any = { status };
-    if (extras?.providerRef) data.providerRef = extras.providerRef;
-    if (extras?.webhookPayload) data.webhookPayload = extras.webhookPayload;
-    if (extras?.paidAt) data.paidAt = extras.paidAt;
-    const p = await prisma.payment.update({ where: { id }, data });
-    return toEntity(p);
+    const patch: Record<string, unknown> = {
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+    if (extras?.providerRef !== undefined) patch['providerRef'] = extras.providerRef;
+    if (extras?.webhookPayload !== undefined) patch['webhookPayload'] = extras.webhookPayload;
+    if (extras?.paidAt) patch['paidAt'] = extras.paidAt.toISOString();
+    const { data, error } = await supabaseAdmin()
+      .from('payments')
+      .update(patch)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error || !data) throw dbError(error);
+    return toEntity(data as Row);
   }
 
   async listForUser(userId: string, limit: number, cursor?: string): Promise<PaymentEntity[]> {
-    const p = await prisma.payment.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: limit + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    });
-    return p.map(toEntity);
+    let q = supabaseAdmin()
+      .from('payments')
+      .select('*')
+      .eq('userId', userId)
+      .order('createdAt', { ascending: false })
+      .limit(limit + 1);
+    if (cursor) {
+      q = q.lt('id', cursor).limit(limit);
+    }
+    const { data, error } = await q;
+    if (error) throw dbError(error);
+    return (data ?? []).map((r) => toEntity(r as Row));
   }
 
   async listPending(limit: number): Promise<PaymentEntity[]> {
-    const p = await prisma.payment.findMany({
-      where: { status: { in: ['PENDING', 'PROCESSING'] } },
-      orderBy: { createdAt: 'asc' },
-      take: limit,
-    });
-    return p.map(toEntity);
+    const { data, error } = await supabaseAdmin()
+      .from('payments')
+      .select('*')
+      .in('status', ['PENDING', 'PROCESSING'])
+      .order('createdAt', { ascending: true })
+      .limit(limit);
+    if (error) throw dbError(error);
+    return (data ?? []).map((r) => toEntity(r as Row));
   }
 }
 

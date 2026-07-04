@@ -1,4 +1,4 @@
-import { prisma } from '../db';
+import { supabaseAdmin, dbError } from '../db';
 import type {
   IOrderRepository,
   IOrderRepositoryForWallet,
@@ -8,7 +8,39 @@ import type {
 import type { OrderEntity, OrderItemEntity, OrderStatus } from '../../domain/entities/product';
 import type { Currency } from '../../domain/entities/wallet';
 
-function toItemEntity(i: any): OrderItemEntity {
+type OrderRow = {
+  id: string;
+  orderNumber: string;
+  userId: string;
+  totalAmount: string | number;
+  currency: string;
+  status: string;
+  paymentMethod: string | null;
+  refCode: string | null;
+  notes: string | null;
+  paidAt: string | null;
+  fulfilledAt: string | null;
+  cancelledAt: string | null;
+  refundedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type ItemRow = {
+  id: string;
+  orderId: string;
+  productId: string;
+  productKeyId: string | null;
+  quantity: number;
+  unitPrice: string | number;
+  totalPrice: string | number;
+  productKey?: { code: string } | { code: string }[] | null;
+};
+
+function toItemEntity(i: ItemRow): OrderItemEntity {
+  const keyCode = Array.isArray(i.productKey)
+    ? (i.productKey[0]?.code ?? null)
+    : (i.productKey?.code ?? null);
   return {
     id: i.id,
     orderId: i.orderId,
@@ -18,14 +50,11 @@ function toItemEntity(i: any): OrderItemEntity {
     qty: i.quantity,
     unitPrice: Number(i.unitPrice),
     totalPrice: Number(i.totalPrice),
-    productTitle: i.product?.title,
-    productSlug: i.product?.slug,
-    productBrand: i.product?.brand?.name ?? null,
-    productKeyCode: i.productKey?.code ?? null,
+    productKeyCode: keyCode,
   };
 }
 
-function toEntity(o: any): OrderEntity {
+function toEntity(o: OrderRow, items?: ItemRow[]): OrderEntity {
   return {
     id: o.id,
     orderNumber: o.orderNumber,
@@ -36,23 +65,39 @@ function toEntity(o: any): OrderEntity {
     paymentMethod: (o.paymentMethod ?? null) as OrderEntity['paymentMethod'],
     refCode: o.refCode ?? null,
     notes: o.notes ?? null,
-    paidAt: o.paidAt ?? null,
-    fulfilledAt: o.fulfilledAt ?? null,
-    cancelledAt: o.cancelledAt ?? null,
-    refundedAt: o.refundedAt ?? null,
-    createdAt: o.createdAt,
-    updatedAt: o.updatedAt,
-    items: o.items ? o.items.map(toItemEntity) : undefined,
+    paidAt: o.paidAt ? new Date(o.paidAt) : null,
+    fulfilledAt: o.fulfilledAt ? new Date(o.fulfilledAt) : null,
+    cancelledAt: o.cancelledAt ? new Date(o.cancelledAt) : null,
+    refundedAt: o.refundedAt ? new Date(o.refundedAt) : null,
+    createdAt: new Date(o.createdAt),
+    updatedAt: new Date(o.updatedAt),
+    items: items ? items.map(toItemEntity) : undefined,
   };
 }
 
 export class OrderRepository implements IOrderRepository, IOrderRepositoryForWallet {
   async findById(orderId: string, withItems = false): Promise<OrderEntity | null> {
-    const o = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: withItems ? { items: { include: { product: true, productKey: true } } } : undefined,
-    });
-    return o ? toEntity(o) : null;
+    if (!withItems) {
+      const { data, error } = await supabaseAdmin()
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .maybeSingle();
+      if (error) throw dbError(error);
+      return data ? toEntity(data as OrderRow) : null;
+    }
+    const { data: order, error } = await supabaseAdmin()
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    if (!order) return null;
+    const { data: items } = await supabaseAdmin()
+      .from('order_items')
+      .select('*,productKey:product_keys(code)')
+      .eq('orderId', orderId);
+    return toEntity(order as OrderRow, (items ?? []) as ItemRow[]);
   }
 
   async findByIdForUser(
@@ -60,29 +105,43 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
     userId: string,
     withItems = false,
   ): Promise<OrderEntity | null> {
-    const o = await prisma.order.findFirst({
-      where: { id: orderId, userId },
-      include: withItems ? { items: { include: { product: true, productKey: true } } } : undefined,
-    });
-    return o ? toEntity(o) : null;
+    if (!withItems) {
+      const { data, error } = await supabaseAdmin()
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .eq('userId', userId)
+        .maybeSingle();
+      if (error) throw dbError(error);
+      return data ? toEntity(data as OrderRow) : null;
+    }
+    const { data: order, error } = await supabaseAdmin()
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .eq('userId', userId)
+      .maybeSingle();
+    if (error) throw dbError(error);
+    if (!order) return null;
+    const { data: items } = await supabaseAdmin()
+      .from('order_items')
+      .select('*,productKey:product_keys(code)')
+      .eq('orderId', orderId);
+    return toEntity(order as OrderRow, (items ?? []) as ItemRow[]);
   }
 
   async findByUserId(
     userId: string,
     options: { status?: OrderStatus; page: number; limit: number },
   ): Promise<{ items: OrderEntity[]; total: number }> {
-    const where: any = { userId };
-    if (options.status) where.status = options.status;
-    const [items, total] = await prisma.$transaction([
-      prisma.order.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (options.page - 1) * options.limit,
-        take: options.limit,
-      }),
-      prisma.order.count({ where }),
-    ]);
-    return { items: items.map(toEntity), total };
+    let q = supabaseAdmin().from('orders').select('*', { count: 'exact' }).eq('userId', userId);
+    if (options.status) q = q.eq('status', options.status);
+    q = q.order('createdAt', { ascending: false });
+    const from = (options.page - 1) * options.limit;
+    q = q.range(from, from + options.limit - 1);
+    const { data, error, count } = await q;
+    if (error) throw dbError(error);
+    return { items: (data ?? []).map((r) => toEntity(r as OrderRow)), total: count ?? 0 };
   }
 
   async findByUserIdWithItems(
@@ -90,19 +149,27 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
     page: number,
     limit: number,
   ): Promise<{ items: OrderEntity[]; total: number }> {
-    const [items, total] = await prisma.$transaction([
-      prisma.order.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-        include: {
-          items: { include: { product: { include: { brand: true } }, productKey: true } },
-        },
-      }),
-      prisma.order.count({ where: { userId } }),
-    ]);
-    return { items: items.map(toEntity), total };
+    const from = (page - 1) * limit;
+    const {
+      data: orders,
+      error,
+      count,
+    } = await supabaseAdmin()
+      .from('orders')
+      .select('*', { count: 'exact' })
+      .eq('userId', userId)
+      .order('createdAt', { ascending: false })
+      .range(from, from + limit - 1);
+    if (error) throw dbError(error);
+    const items: OrderEntity[] = [];
+    for (const o of orders ?? []) {
+      const { data: its } = await supabaseAdmin()
+        .from('order_items')
+        .select('*,productKey:product_keys(code)')
+        .eq('orderId', (o as OrderRow).id);
+      items.push(toEntity(o as OrderRow, (its ?? []) as ItemRow[]));
+    }
+    return { items, total: count ?? 0 };
   }
 
   async listAll(options: {
@@ -110,43 +177,59 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
     page: number;
     limit: number;
   }): Promise<{ items: OrderEntity[]; total: number }> {
-    const where: any = {};
-    if (options.status) where.status = options.status;
-    const [items, total] = await prisma.$transaction([
-      prisma.order.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (options.page - 1) * options.limit,
-        take: options.limit,
-        include: { items: { include: { product: { include: { brand: true } } } } },
-      }),
-      prisma.order.count({ where }),
-    ]);
-    return { items: items.map(toEntity), total };
+    let q = supabaseAdmin().from('orders').select('*', { count: 'exact' });
+    if (options.status) q = q.eq('status', options.status);
+    q = q.order('createdAt', { ascending: false });
+    const from = (options.page - 1) * options.limit;
+    q = q.range(from, from + options.limit - 1);
+    const { data, error, count } = await q;
+    if (error) throw dbError(error);
+    return { items: (data ?? []).map((r) => toEntity(r as OrderRow)), total: count ?? 0 };
   }
 
   async createWithItems(data: CreateOrderInput): Promise<OrderEntity> {
-    const o = await prisma.order.create({
-      data: {
+    const orderId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const orderNum = `CYB-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const { error: oErr } = await supabaseAdmin()
+      .from('orders')
+      .insert({
+        id: orderId,
+        orderNumber: orderNum,
         userId: data.userId,
         totalAmount: data.totalAmount,
         currency: data.currency,
         status: 'PENDING',
         paymentMethod: data.paymentMethod,
         notes: data.notes ?? null,
-        items: {
-          create: data.items.map((it: CreateOrderItemInput) => ({
-            productId: it.productId,
-            productKeyId: it.productKeyId ?? null,
-            quantity: it.quantity,
-            unitPrice: it.unitPrice,
-            totalPrice: it.totalPrice,
-          })),
-        },
-      },
-      include: { items: { include: { product: { include: { brand: true } }, productKey: true } } },
-    });
-    return toEntity(o);
+        createdAt: now,
+        updatedAt: now,
+      });
+    if (oErr) throw dbError(oErr);
+    if (data.items.length > 0) {
+      const itemRows = data.items.map((it: CreateOrderItemInput) => ({
+        id: crypto.randomUUID(),
+        orderId,
+        productId: it.productId,
+        productKeyId: it.productKeyId ?? null,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        totalPrice: it.totalPrice,
+      }));
+      const { error: iErr } = await supabaseAdmin().from('order_items').insert(itemRows);
+      if (iErr) throw dbError(iErr);
+    }
+    const { data: o, error } = await supabaseAdmin()
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .maybeSingle();
+    if (error || !o) throw dbError(error);
+    const { data: items } = await supabaseAdmin()
+      .from('order_items')
+      .select('*,productKey:product_keys(code)')
+      .eq('orderId', orderId);
+    return toEntity(o as OrderRow, (items ?? []) as ItemRow[]);
   }
 
   async updateStatus(
@@ -159,31 +242,46 @@ export class OrderRepository implements IOrderRepository, IOrderRepositoryForWal
       refundedAt?: Date;
     },
   ): Promise<OrderEntity> {
-    const data: any = { status };
-    if (extras?.paidAt) data.paidAt = extras.paidAt;
-    if (extras?.fulfilledAt) data.fulfilledAt = extras.fulfilledAt;
-    if (extras?.cancelledAt) data.cancelledAt = extras.cancelledAt;
-    if (extras?.refundedAt) data.refundedAt = extras.refundedAt;
-    const o = await prisma.order.update({
-      where: { id: orderId },
-      data,
-      include: { items: { include: { product: { include: { brand: true } }, productKey: true } } },
-    });
-    return toEntity(o);
+    const patch: Record<string, unknown> = {
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+    if (extras?.paidAt) patch['paidAt'] = extras.paidAt.toISOString();
+    if (extras?.fulfilledAt) patch['fulfilledAt'] = extras.fulfilledAt.toISOString();
+    if (extras?.cancelledAt) patch['cancelledAt'] = extras.cancelledAt.toISOString();
+    if (extras?.refundedAt) patch['refundedAt'] = extras.refundedAt.toISOString();
+    const { data: o, error } = await supabaseAdmin()
+      .from('orders')
+      .update(patch)
+      .eq('id', orderId)
+      .select('*')
+      .single();
+    if (error || !o) throw dbError(error);
+    return toEntity(o as OrderRow);
   }
 
   async markPaid(orderId: string, _paymentId: string): Promise<void> {
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { status: 'PAID', paidAt: new Date() },
-    });
+    const { error } = await supabaseAdmin()
+      .from('orders')
+      .update({
+        status: 'PAID',
+        paidAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .eq('id', orderId);
+    if (error) throw dbError(error);
   }
 
   async markFulfilled(orderId: string): Promise<void> {
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { status: 'FULFILLED', fulfilledAt: new Date() },
-    });
+    const { error } = await supabaseAdmin()
+      .from('orders')
+      .update({
+        status: 'FULFILLED',
+        fulfilledAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      .eq('id', orderId);
+    if (error) throw dbError(error);
   }
 }
 
