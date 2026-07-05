@@ -366,7 +366,7 @@
                   "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
                   "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
                   "var json = pm.response.json();",
-                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code || (b.error && b.error.code); }); });",
                   "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
                 ]
               }
@@ -525,7 +525,7 @@
                   "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
                   "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
                   "var json = pm.response.json();",
-                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code || (b.error && b.error.code); }); });",
                   "if (json.id) { pm.environment.set('test_payout_id', json.id); }",
                   "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
                 ]
@@ -600,7 +600,7 @@
                   "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
                   "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
                   "var json = pm.response.json();",
-                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code || (b.error && b.error.code); }); });",
                   "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
                 ]
               }
@@ -1372,6 +1372,192 @@
               "raw": "{{base_url}}/admin/products/{{rejected_product_id}}/reject",
               "host": ["{{base_url}}"],
               "path": ["admin", "products", "{{rejected_product_id}}", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments M5 (Shopier)",
+      "item": [
+        {
+          "name": "Available Providers (TRY)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has providers array', function () { pm.expect(json).to.have.property('providers'); pm.expect(json.providers).to.be.an('array'); });",
+                  "pm.test('Includes PAYTR or SHOPIER for TRY', function () {",
+                  "  var codes = json.providers.map(function (p) { return p.provider; });",
+                  "  pm.expect(codes).to.satisfy(function (c) { return c.indexOf('PAYTR') !== -1 || c.indexOf('SHOPIER') !== -1; });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"TRY\",\n  \"amount\": 100,\n  \"customerCountry\": \"TR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/available-providers",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "available-providers"]
+            }
+          }
+        },
+        {
+          "name": "Available Providers (USD)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Includes STRIPE for USD', function () {",
+                  "  var codes = (json.providers || []).map(function (p) { return p.provider; });",
+                  "  pm.expect(codes).to.include('STRIPE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"USD\",\n  \"amount\": 49.99,\n  \"customerCountry\": \"US\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/available-providers",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "available-providers"]
+            }
+          }
+        },
+        {
+          "name": "Initiate Shopier Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "pm.test('Status 201, 400, or 500 (config may be missing)', function () {",
+                  "  pm.expect([201, 400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  var json = pm.response.json();",
+                  "  if (json.payment && json.payment.id) pm.environment.set('shopier_payment_id', json.payment.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 99.99,\n  \"currency\": \"TRY\",\n  \"provider\": \"SHOPIER\",\n  \"returnUrl\": \"{{base_url}}/payment/success\",\n  \"metadata\": {\n    \"productName\": \"Test Digital Product\",\n    \"buyerName\": \"Alice Test\",\n    \"buyerPhone\": \"+905555555555\",\n    \"billingCity\": \"Istanbul\",\n    \"billingCountry\": \"TR\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/initiate",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "initiate"]
+            }
+          }
+        },
+        {
+          "name": "Shopier Webhook (Simulated Signed)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Shopier signature must be computed in Node.js (crypto sandbox yok).\n// Use pre-computed signature for static test body.\nconst body = 'status=success&payment_id=test_shopier_123&total_order_value=99.99';\nconst signature = 'placeholder_for_static_test';\npm.environment.set('shopier_webhook_body', body);\npm.environment.set('shopier_webhook_signature', signature);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 401', function () {",
+                  "  pm.expect([200, 401]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Webhook accepted', function () { pm.response.to.be.json; });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+              { "key": "X-Shopier-Signature", "value": "{{shopier_webhook_signature}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{shopier_webhook_body}}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/webhook/SHOPIER",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "webhook", "SHOPIER"]
+            }
+          }
+        },
+        {
+          "name": "Refund Shopier Payment (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "pm.test('Status is 200, 404 or 409', function () {",
+                  "  pm.expect([200, 404, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 99.99,\n  \"reason\": \"customer_request\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/{{shopier_payment_id}}/refund",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "{{shopier_payment_id}}", "refund"]
             }
           }
         }

@@ -19,6 +19,8 @@
     "./nowpayments": "./src/nowpayments.ts",
     "./stripe": "./src/stripe.ts",
     "./bank-transfer": "./src/bank-transfer.ts",
+    "./shopier": "./src/shopier.ts",
+    "./provider-selector": "./src/provider-selector.ts",
     "./webhook-security": "./src/webhook-security.ts"
   },
   "scripts": {

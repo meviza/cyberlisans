@@ -12,6 +12,7 @@ import {
 import {
   initiatePaymentSchema,
   refundPaymentSchema,
+  availableProvidersSchema,
   type InitiatePaymentInputBody,
 } from './payments.schema';
 import {
@@ -24,6 +25,7 @@ import { createRateLimiter, RATE_LIMIT_CONFIGS } from '../middleware/security/ra
 import { getRequestMeta } from '../middleware/request-meta';
 import { isIpWhitelisted, verifyTimestampInWindow } from '@cyberlisans/payments/webhook-security';
 import { createPaymentProvider } from '@cyberlisans/payments/index';
+import { selectAvailableProviders } from '@cyberlisans/payments/provider-selector';
 
 export const paymentsRoutes = new Hono();
 
@@ -67,6 +69,21 @@ paymentsRoutes.use('*', async (c, next) => {
     return c.json({ error: 'Bir hata oluştu, lütfen tekrar deneyin', code: 'INTERNAL_ERROR' }, 500);
   }
 });
+
+paymentsRoutes.post(
+  '/available-providers',
+  zValidator('json', availableProvidersSchema),
+  async (c) => {
+    const body = c.req.valid('json');
+    const providers = selectAvailableProviders({
+      currency: body.currency,
+      amount: body.amount,
+      customerCountry: body.customerCountry,
+      preferredProvider: body.preferredProvider,
+    });
+    return c.json({ providers });
+  },
+);
 
 paymentsRoutes.post(
   '/initiate',

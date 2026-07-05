@@ -42,7 +42,7 @@ export interface PaymentEntity {
   id: string;
   userId: string;
   orderId: string | null;
-  provider: 'PAYTR' | 'PAPARA' | 'NOWPAYMENTS' | 'STRIPE' | 'BANK_TRANSFER' | 'WALLET';
+  provider: 'PAYTR' | 'PAPARA' | 'NOWPAYMENTS' | 'STRIPE' | 'BANK_TRANSFER' | 'SHOPIER' | 'WALLET';
   providerRef: string | null;
   amount: number;
   currency: Currency;

@@ -5,6 +5,7 @@ export type PaymentProvider =
   | 'NOWPAYMENTS'
   | 'STRIPE'
   | 'BANK_TRANSFER'
+  | 'SHOPIER'
   | 'WALLET';
 export type PaymentStatus =
   | 'PENDING'
@@ -76,5 +77,6 @@ export const providerSupportsCurrency: Record<PaymentProvider, Currency[]> = {
   NOWPAYMENTS: ['USD', 'EUR', 'USDT', 'TRY'],
   STRIPE: ['TRY', 'USD', 'EUR'],
   BANK_TRANSFER: ['TRY', 'USD', 'EUR', 'USDT'],
+  SHOPIER: ['TRY'],
   WALLET: ['TRY', 'USD', 'EUR', 'USDT'],
 };

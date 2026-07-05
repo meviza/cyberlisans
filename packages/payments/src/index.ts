@@ -9,12 +9,20 @@ export { NowPaymentsProvider } from './nowpayments';
 export { PaparaProvider } from './papara';
 export { StripeProvider } from './stripe';
 export { BankTransferProvider, type BankTransferDetails } from './bank-transfer';
+export { ShopierProvider, type ShopierConfig } from './shopier';
+export {
+  selectAvailableProviders,
+  selectDefaultProvider,
+  type SelectorContext,
+  type ProviderOption,
+} from './provider-selector';
 
 import { PayTRProvider } from './paytr';
 import { NowPaymentsProvider } from './nowpayments';
 import { PaparaProvider } from './papara';
 import { StripeProvider } from './stripe';
 import { BankTransferProvider } from './bank-transfer';
+import { ShopierProvider } from './shopier';
 import type { IPaymentProvider, PaymentProvider } from './types';
 
 export function createPaymentProvider(name: PaymentProvider): IPaymentProvider {
@@ -29,6 +37,8 @@ export function createPaymentProvider(name: PaymentProvider): IPaymentProvider {
       return new StripeProvider();
     case 'BANK_TRANSFER':
       return new BankTransferProvider();
+    case 'SHOPIER':
+      return new ShopierProvider();
     case 'WALLET':
       throw new Error('WALLET is not a payment provider; use wallet credit directly');
     default:
