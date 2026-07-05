@@ -12,3 +12,14 @@ build
 .vercel
 coverage
 .pnpm-store
+
+# Postman environments that may contain real credentials
+*.postman_environment.local.json
+postman/environments/*-secrets.postman_environment.json
+
+# TypeScript build info
+*.tsbuildinfo
+.tsbuildinfo
+
+# Newman temporary reports
+newman/

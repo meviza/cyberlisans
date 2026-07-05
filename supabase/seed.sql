@@ -66,5 +66,30 @@ INSERT INTO product_keys (product_id, code, created_at) VALUES
 ('55555555-5555-5555-5555-55555555555b', 'OPEN-AI10-B001', now()),('55555555-5555-5555-5555-55555555555b', 'OPEN-AI10-B002', now()),('55555555-5555-5555-5555-55555555555b', 'OPEN-AI10-B003', now()),('55555555-5555-5555-5555-55555555555b', 'OPEN-AI10-B004', now()),('55555555-5555-5555-5555-55555555555b', 'OPEN-AI10-B005', now()),('55555555-5555-5555-5555-55555555555b', 'OPEN-AI10-B006', now()),('55555555-5555-5555-5555-55555555555b', 'OPEN-AI10-B007', now()),
 ('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C001', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C002', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C003', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C004', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C005', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C006', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C007', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C008', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C009', now()),('55555555-5555-5555-5555-55555555555c', 'CLAU-DE10-C010', now());
 
+-- Charlie PENDING seller için admin-onay workflow test ürünü
+INSERT INTO products (
+  slug, title, description, "categoryId", "brandId",
+  "imageUrl", images,
+  "priceTry", "priceUsd", "priceEur", "priceUsdt",
+  stock, "deliveryType", "isActive", "isFeatured",
+  status, "sellerId", "listingType", "autoDelivery",
+  "minDeliverySeconds", "maxDeliverySeconds",
+  "sortOrder", "createdAt", "updatedAt"
+)
+SELECT
+  'midjourney-100-usd-test', 'Midjourney 100 USD Kredi (Test)',
+  'Midjourney abonelik kredisi - admin onay workflow testi için',
+  c.id, b.id,
+  'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800',
+  ARRAY['https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800']::text[],
+  3500, 100, 92, 100, 10, 'API_CREDITS', false, false,
+  'PENDING_REVIEW', s.id, 'SELLER', true, 60, 86400, 999, now(), now()
+FROM sellers s
+JOIN users u ON u.id = s."userId"
+JOIN categories c ON c.slug = 'ai-api'
+JOIN brands b ON b.slug = 'openai'
+WHERE u.email = 'charlie@cyberlisans.com'
+ON CONFLICT (slug) DO NOTHING;
+
 -- Sync stock counts
 UPDATE products p SET stock = (SELECT COUNT(*)::int FROM product_keys k WHERE k.product_id = p.id AND k.is_used = false);

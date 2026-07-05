@@ -12,7 +12,11 @@ import { zValidator } from '@hono/zod-validator';
 import { ZodError } from 'zod';
 
 import { getRequestMeta } from '../middleware/request-meta';
-import { createRateLimiter, RATE_LIMIT_CONFIGS } from '../middleware/security/rate-limit';
+import {
+  createRateLimiter,
+  RATE_LIMIT_CONFIGS,
+  emailBodyIdentifier,
+} from '../middleware/security/rate-limit';
 import { registerUserGeneric } from '../../domain/usecases/auth/register-user';
 import { loginUser } from '../../domain/usecases/auth/login-user';
 import { refreshToken } from '../../domain/usecases/auth/refresh-token';
@@ -43,8 +47,14 @@ import {
 
 export const authRoutes = new Hono();
 
-const registerRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.register });
-const loginRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.login });
+const registerRateLimit = createRateLimiter({
+  config: RATE_LIMIT_CONFIGS.register,
+  identifier: emailBodyIdentifier,
+});
+const loginRateLimit = createRateLimiter({
+  config: RATE_LIMIT_CONFIGS.login,
+  identifier: emailBodyIdentifier,
+});
 const forgotRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.forgotPassword });
 const resetRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.resetPassword });
 const verifyEmailRateLimit = createRateLimiter({ config: RATE_LIMIT_CONFIGS.verifyEmail });

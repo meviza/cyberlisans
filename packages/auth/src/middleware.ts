@@ -50,14 +50,20 @@ export function requireTwoFactor(isTwoFactorEnabled: (userId: string) => Promise
     }
     const enabled = await isTwoFactorEnabled(user.sub);
     if (!enabled) {
-      return c.json(
-        {
-          error: 'Bu hesap için iki faktörlü doğrulama zorunludur.',
-          code: '2FA_REQUIRED',
-          twoFactorSetupUrl: '/auth/2fa/setup',
-        },
-        403,
-      );
+      const forced =
+        user.role === 'ADMIN' || user.role === 'SUPER_ADMIN'
+          ? process.env['REQUIRE_2FA_FOR_ADMINS'] === 'true'
+          : false;
+      if (forced) {
+        return c.json(
+          {
+            error: 'Bu hesap için iki faktörlü doğrulama zorunludur.',
+            code: '2FA_REQUIRED',
+            twoFactorSetupUrl: '/auth/2fa/setup',
+          },
+          403,
+        );
+      }
     }
     await next();
   };

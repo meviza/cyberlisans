@@ -18,7 +18,7 @@ export function setDefaultRateLimiterStore(store: RateLimiterStore): void {
 export interface CreateRateLimiterOptions {
   config: RateLimitConfig;
   store?: RateLimiterStore;
-  identifier?: (c: Context) => string | null;
+  identifier?: (c: Context) => string | null | Promise<string | null>;
   skipFailed?: boolean;
   skipSuccess?: boolean;
 }
@@ -28,7 +28,7 @@ export function createRateLimiter(opts: CreateRateLimiterOptions): MiddlewareHan
   const identifier = opts.identifier ?? defaultIdentifier;
 
   return async (c: Context, next: Next) => {
-    const id = identifier(c);
+    const id = await identifier(c);
     if (!id) {
       await next();
       return;
@@ -64,6 +64,22 @@ function defaultIdentifier(c: Context): string | null {
 export function ipAndBodyIdentifier(c: Context): string | null {
   const meta = getRequestMeta(c);
   return meta.ipAddress ?? 'unknown';
+}
+
+export async function emailBodyIdentifier(c: Context): Promise<string | null> {
+  try {
+    const req = c.req.raw;
+    const cloned = req.clone();
+    const body = (await cloned.json().catch(() => null)) as { email?: unknown } | null;
+    const email = body?.email;
+    if (typeof email === 'string' && email.length > 0) {
+      return `email:${email.toLowerCase()}`;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  const meta = getRequestMeta(c);
+  return `ip:${meta.ipAddress ?? 'unknown'}`;
 }
 
 export function ipAndPathIdentifier(c: Context): string | null {

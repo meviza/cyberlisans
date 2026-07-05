@@ -23,7 +23,7 @@ export interface CreateEscrowDeps {
 }
 
 export interface CreateEscrowOutput {
-  escrowId: string;
+  id: string;
   status: EscrowEntity['status'];
   releaseAt: string;
   payoutEligibleAt: string;
@@ -86,7 +86,7 @@ export class CreateEscrowUseCase {
     });
 
     return {
-      escrowId: escrow.id,
+      id: escrow.id,
       status: escrow.status,
       releaseAt: escrow.releaseAt!.toISOString(),
       payoutEligibleAt: escrow.payoutEligibleAt.toISOString(),

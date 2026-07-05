@@ -4,7 +4,7 @@
 > Yeni AI agent veya ekip üyesi bu dosyayı okuyarak projeye 30 saniyede bağlam kurabilir.
 
 **Son güncelleme:** 2026-07-05
-**Mevcut milestone:** M3 tamamlandı, M4 başlıyor
+**Mevcut milestone:** M4 tamamlandı, M5 planlanıyor
 **Production:** https://cyberlisans-mp.vercel.app (Vercel alias sorunu M3.1'de çözülecek)
 
 ---
@@ -17,19 +17,19 @@ Cyberlisans, **Clean Architecture monorepo** olarak geliştirilen, **Supabase RE
 
 ## 📊 Milestone İlerlemesi
 
-| Milestone | Açıklama                                                | Durum         | Tag                |
-| --------- | ------------------------------------------------------- | ------------- | ------------------ |
-| **M0**    | Marketplace pivot kararı, mevcut state analizi          | ✅ Tamamlandı | —                  |
-| **M1**    | Clean Architecture başlangıç, auth/login refactor       | ✅ Tamamlandı | v1.0-clean-arch    |
-| **M2**    | Marketplace schema + seller profile + public storefront | ✅ Tamamlandı | v2.0-marketplace   |
-| **M2.1**  | Prisma → Supabase REST migration, production login      | ✅ Tamamlandı | v2.1-supabase-rest |
-| **M3**    | Escrow + payout + dispute tam akış                      | ✅ Tamamlandı | **v3.0-escrow**    |
-| **M3.1**  | Vercel alias düzeltme + Sentry clean install + rotate   | 🔴 Blocker    | —                  |
-| **M4**    | Satıcı ürün yönetimi (CRUD + admin onay)                | 🟡 Sırada     | v4.0-products      |
-| **M5**    | Payments entegrasyonu (PayTR + Papara + Crypto)         | ⚪ Plan       | v5.0-payments      |
-| **M6**    | Review/rating + email verification + 2FA aktif          | ⚪ Plan       | v6.0-trust         |
-| **M7**    | SEO + multi-language + landing page                     | ⚪ Plan       | v7.0-growth        |
-| **M8**    | Beta launch + analytics + A/B test                      | ⚪ Plan       | v8.0-launch        |
+| Milestone | Açıklama                                                           | Durum         | Tag                      |
+| --------- | ------------------------------------------------------------------ | ------------- | ------------------------ |
+| **M0**    | Marketplace pivot kararı, mevcut state analizi                     | ✅ Tamamlandı | —                        |
+| **M1**    | Clean Architecture başlangıç, auth/login refactor                  | ✅ Tamamlandı | v1.0-clean-arch          |
+| **M2**    | Marketplace schema + seller profile + public storefront            | ✅ Tamamlandı | v2.0-marketplace         |
+| **M2.1**  | Prisma → Supabase REST migration, production login                 | ✅ Tamamlandı | v2.1-supabase-rest       |
+| **M3**    | Escrow + payout + dispute tam akış                                 | ✅ Tamamlandı | **v3.0-escrow**          |
+| **M3.1**  | Vercel alias düzeltme + Sentry clean install + rotate              | 🔴 Blocker    | —                        |
+| **M4**    | Satıcı ürün yönetimi (CRUD + admin onay) + M4.1 security hardening | ✅ Tamamlandı | **v4.0-seller-products** |
+| **M5**    | Payments entegrasyonu (PayTR + Papara + Crypto)                    | ⚪ Plan       | v5.0-payments            |
+| **M6**    | Review/rating + email verification + 2FA aktif                     | ⚪ Plan       | v6.0-trust               |
+| **M7**    | SEO + multi-language + landing page                                | ⚪ Plan       | v7.0-growth              |
+| **M8**    | Beta launch + analytics + A/B test                                 | ⚪ Plan       | v8.0-launch              |
 
 ---
 

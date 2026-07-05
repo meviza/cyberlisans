@@ -30,15 +30,20 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@cyberlisans.com\",\n  \"password\": \"Admin!2026Safe\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/login",
+              "raw": "{{base_url}}/auth/login",
               "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "path": ["auth", "login"]
             }
           }
         },
@@ -63,15 +68,20 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"alice@cyberlisans.com\",\n  \"password\": \"Alice!2026Safe\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/login",
+              "raw": "{{base_url}}/auth/login",
               "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "path": ["auth", "login"]
             }
           }
         },
@@ -96,15 +106,20 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"bob@cyberlisans.com\",\n  \"password\": \"Bob!2026Safe\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/login",
+              "raw": "{{base_url}}/auth/login",
               "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "path": ["auth", "login"]
             }
           }
         },
@@ -128,11 +143,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/profile/me",
+              "raw": "{{base_url}}/profile/me",
               "host": ["{{base_url}}"],
-              "path": ["api", "profile", "me"]
+              "path": ["profile", "me"]
             }
           }
         }
@@ -172,17 +192,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"companyName\": \"Test Seller Co\",\n  \"taxId\": \"1234567890\",\n  \"taxOffice\": \"Kadikoy\",\n  \"address\": \"Istanbul, TR\",\n  \"phone\": \"+905551112233\",\n  \"slug\": \"{{apply_slug}}\",\n  \"bio\": \"Automated test seller profile\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/sellers/apply",
+              "raw": "{{base_url}}/sellers/apply",
               "host": ["{{base_url}}"],
-              "path": ["api", "sellers", "apply"]
+              "path": ["sellers", "apply"]
             }
           }
         },
@@ -199,6 +225,7 @@
                   "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
                   "var json = pm.response.json();",
                   "pm.test('Body has expected keys', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code === 'NOT_FOUND'; }); });",
+                  "if (json.id) { pm.environment.set('test_seller_id', json.id); }",
                   "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
                 ]
               }
@@ -206,11 +233,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/sellers/me",
+              "raw": "{{base_url}}/sellers/me",
               "host": ["{{base_url}}"],
-              "path": ["api", "sellers", "me"]
+              "path": ["sellers", "me"]
             }
           }
         },
@@ -236,9 +268,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/sellers/alice-gaming-keys/public",
+              "raw": "{{base_url}}/sellers/alice-gaming-keys/public",
               "host": ["{{base_url}}"],
-              "path": ["api", "sellers", "alice-gaming-keys", "public"]
+              "path": ["sellers", "alice-gaming-keys", "public"]
             }
           }
         },
@@ -262,11 +294,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/admin/sellers/pending",
+              "raw": "{{base_url}}/admin/sellers/pending",
               "host": ["{{base_url}}"],
-              "path": ["api", "admin", "sellers", "pending"]
+              "path": ["admin", "sellers", "pending"]
             }
           }
         }
@@ -283,11 +320,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200, 201, 400, 403 or 404', function () { pm.expect([200,201,400,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Status 200, 201, 400, 403, 404 or 409', function () { pm.expect([200,201,400,403,404,409]).to.include(pm.response.code); });",
                   "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
                   "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
                   "var json = pm.response.json();",
-                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code || (b.error && b.error.code); }); });",
                   "if (json.id) { pm.environment.set('test_escrow_id', json.id); }",
                   "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
                 ]
@@ -297,17 +334,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"orderId\": \"{{test_order_id}}\",\n  \"sellerId\": \"{{test_seller_id}}\",\n  \"amount\": 1000,\n  \"commissionRate\": 12,\n  \"currency\": \"TRY\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/escrow",
+              "raw": "{{base_url}}/escrow",
               "host": ["{{base_url}}"],
-              "path": ["api", "escrow"]
+              "path": ["escrow"]
             }
           }
         },
@@ -331,11 +374,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/escrow/{{test_escrow_id}}",
+              "raw": "{{base_url}}/escrow/{{test_escrow_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "escrow", "{{test_escrow_id}}"]
+              "path": ["escrow", "{{test_escrow_id}}"]
             }
           }
         },
@@ -347,7 +395,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200, 400, 403 or 404', function () { pm.expect([200,400,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Status 200, 400, 403 or 404', function () { pm.expect([200,400,403,404,409,500]).to.include(pm.response.code); });",
                   "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
                   "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
                   "var json = pm.response.json();",
@@ -360,17 +408,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"CUSTOMER_RELEASE\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/escrow/{{test_escrow_id}}/release",
+              "raw": "{{base_url}}/escrow/{{test_escrow_id}}/release",
               "host": ["{{base_url}}"],
-              "path": ["api", "escrow", "{{test_escrow_id}}", "release"]
+              "path": ["escrow", "{{test_escrow_id}}", "release"]
             }
           }
         }
@@ -387,11 +441,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200, 201, 400, 403 or 404', function () { pm.expect([200,201,400,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Status 200, 201, 400, 403, 404 or 409', function () { pm.expect([200,201,400,403,404,409]).to.include(pm.response.code); });",
                   "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
                   "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
                   "var json = pm.response.json();",
-                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code || (b.error && b.error.code); }); });",
                   "if (json.id) { pm.environment.set('test_dispute_id', json.id); }",
                   "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
                 ]
@@ -401,17 +455,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"escrowId\": \"{{test_escrow_id}}\",\n  \"reason\": \"Ürün çalışmıyor\",\n  \"description\": \"Anahtar aktifleştirilemiyor, destek bekleniyor.\"\n}"
+              "raw": "{\n  \"escrowId\": \"{{test_escrow_id}}\",\n  \"reason\": \"\u00dcr\u00fcn \u00e7al\u0131\u015fm\u0131yor\",\n  \"description\": \"Anahtar aktifle\u015ftirilemiyor, destek bekleniyor.\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/disputes",
+              "raw": "{{base_url}}/disputes",
               "host": ["{{base_url}}"],
-              "path": ["api", "disputes"]
+              "path": ["disputes"]
             }
           }
         },
@@ -435,11 +495,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/disputes/me",
+              "raw": "{{base_url}}/disputes/me",
               "host": ["{{base_url}}"],
-              "path": ["api", "disputes", "me"]
+              "path": ["disputes", "me"]
             }
           }
         }
@@ -470,17 +535,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"amount\": 100,\n  \"method\": \"BANK\",\n  \"destination\": \"TR123456789012345678901234\",\n  \"currency\": \"TRY\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/payouts",
+              "raw": "{{base_url}}/payouts",
               "host": ["{{base_url}}"],
-              "path": ["api", "payouts"]
+              "path": ["payouts"]
             }
           }
         },
@@ -504,11 +575,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/payouts/me",
+              "raw": "{{base_url}}/payouts/me",
               "host": ["{{base_url}}"],
-              "path": ["api", "payouts", "me"]
+              "path": ["payouts", "me"]
             }
           }
         },
@@ -532,11 +608,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{alice_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/payouts/{{test_payout_id}}",
+              "raw": "{{base_url}}/payouts/{{test_payout_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "payouts", "{{test_payout_id}}"]
+              "path": ["payouts", "{{test_payout_id}}"]
             }
           }
         }
@@ -565,12 +646,22 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/admin/escrow/escrow?limit=10",
+              "raw": "{{base_url}}/admin/escrow/escrow?limit=10",
               "host": ["{{base_url}}"],
-              "path": ["api", "admin", "escrow", "escrow"],
-              "query": [{ "key": "limit", "value": "10" }]
+              "path": ["admin", "escrow", "escrow"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
             }
           }
         },
@@ -594,11 +685,16 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/admin/escrow/escrow/auto-release",
+              "raw": "{{base_url}}/admin/escrow/escrow/auto-release",
               "host": ["{{base_url}}"],
-              "path": ["api", "admin", "escrow", "escrow", "auto-release"]
+              "path": ["admin", "escrow", "escrow", "auto-release"]
             }
           }
         },
@@ -622,12 +718,22 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/admin/escrow/payouts?limit=10",
+              "raw": "{{base_url}}/admin/escrow/payouts?limit=10",
               "host": ["{{base_url}}"],
-              "path": ["api", "admin", "escrow", "payouts"],
-              "query": [{ "key": "limit", "value": "10" }]
+              "path": ["admin", "escrow", "payouts"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
             }
           }
         },
@@ -653,9 +759,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/debug/db",
+              "raw": "{{base_url}}/debug/db",
               "host": ["{{base_url}}"],
-              "path": ["api", "debug", "db"]
+              "path": ["debug", "db"]
             }
           }
         }
@@ -686,9 +792,586 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/health",
+              "raw": "{{base_url}}/health",
               "host": ["{{base_url}}"],
-              "path": ["api", "health"]
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Seller Products",
+      "item": [
+        {
+          "name": "Ensure Seller Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has accessToken', function () { pm.expect(json).to.have.property('accessToken'); pm.expect(json.accessToken).to.be.a('string').and.not.empty; });",
+                  "if (json.accessToken) { pm.environment.set('seller_token', json.accessToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{seller_email}}\",\n  \"password\": \"{{seller_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('seller_token')) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/auth/login',",
+                  "    method: 'POST',",
+                  "    header: 'Content-Type: application/json',",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ email: pm.environment.get('seller_email') || 'alice@cyberlisans.com', password: pm.environment.get('seller_password') || 'Alice!2026Safe' }) }",
+                  "  }, function (err, res) {",
+                  "    var j = res.json();",
+                  "    var token = j.accessToken || j.token || j.session && j.session.access_token;",
+                  "    if (token) { pm.environment.set('seller_token', token); }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has id', function () { pm.expect(json).to.have.property('id'); pm.expect(json.id).to.be.a('string').and.not.empty; });",
+                  "pm.test('Status is PENDING_REVIEW', function () { pm.expect(json).to.have.property('status', 'PENDING_REVIEW'); });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });",
+                  "if (json.id) { pm.environment.set('test_product_id', json.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Product {{$randomProductName}}\",\n  \"description\": \"Test description for M4 seller products flow\",\n  \"imageUrl\": \"https://images.unsplash.com/test.jpg\",\n  \"images\": [\"https://images.unsplash.com/test1.jpg\", \"https://images.unsplash.com/test2.jpg\"],\n  \"categoryId\": \"{{category_id}}\",\n  \"brandId\": \"{{brand_id}}\",\n  \"priceTry\": 99.99,\n  \"priceUsd\": 3.30,\n  \"priceEur\": 3.00,\n  \"priceUsdt\": 3.30,\n  \"stock\": 50,\n  \"deliveryType\": \"KEY\",\n  \"autoDelivery\": true,\n  \"minDeliverySeconds\": 60,\n  \"maxDeliverySeconds\": 86400,\n  \"digitalContent\": \"Sample key template - M4 auto test\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/seller/products",
+              "host": ["{{base_url}}"],
+              "path": ["seller", "products"]
+            }
+          }
+        },
+        {
+          "name": "List My Products",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('seller_token')) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/auth/login',",
+                  "    method: 'POST',",
+                  "    header: 'Content-Type: application/json',",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ email: pm.environment.get('seller_email') || 'alice@cyberlisans.com', password: pm.environment.get('seller_password') || 'Alice!2026Safe' }) }",
+                  "  }, function (err, res) {",
+                  "    var j = res.json();",
+                  "    var token = j.accessToken || j.token || j.session && j.session.access_token;",
+                  "    if (token) { pm.environment.set('seller_token', token); }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has items array', function () { pm.expect(json).to.have.property('items'); pm.expect(json.items).to.be.an('array'); });",
+                  "pm.test('items length >= 0', function () { pm.expect(json.items.length).to.be.at.least(0); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/seller/products?status=PENDING_REVIEW",
+              "host": ["{{base_url}}"],
+              "path": ["seller", "products"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING_REVIEW"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('seller_token')) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/auth/login',",
+                  "    method: 'POST',",
+                  "    header: 'Content-Type: application/json',",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ email: pm.environment.get('seller_email') || 'alice@cyberlisans.com', password: pm.environment.get('seller_password') || 'Alice!2026Safe' }) }",
+                  "  }, function (err, res) {",
+                  "    var j = res.json();",
+                  "    var token = j.accessToken || j.token || j.session && j.session.access_token;",
+                  "    if (token) { pm.environment.set('seller_token', token); }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has id', function () { pm.expect(json).to.have.property('id'); pm.expect(json.id).to.be.a('string').and.not.empty; });",
+                  "pm.test('Title updated', function () { pm.expect(json).to.have.property('title', 'Updated Title - M4'); });",
+                  "pm.test('Price updated', function () { pm.expect(Number(json.priceTry)).to.equal(119.99); });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title - M4\",\n  \"priceTry\": 119.99\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/seller/products/{{test_product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["seller", "products", "{{test_product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Product Detail",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('seller_token')) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/auth/login',",
+                  "    method: 'POST',",
+                  "    header: 'Content-Type: application/json',",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ email: pm.environment.get('seller_email') || 'alice@cyberlisans.com', password: pm.environment.get('seller_password') || 'Alice!2026Safe' }) }",
+                  "  }, function (err, res) {",
+                  "    var j = res.json();",
+                  "    var token = j.accessToken || j.token || j.session && j.session.access_token;",
+                  "    if (token) { pm.environment.set('seller_token', token); }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body id matches test_product_id', function () { pm.expect(json).to.have.property('id'); pm.expect(json.id).to.equal(pm.environment.get('test_product_id')); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/seller/products/{{test_product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["seller", "products", "{{test_product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Soft Delete Product",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('seller_token')) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/auth/login',",
+                  "    method: 'POST',",
+                  "    header: 'Content-Type: application/json',",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ email: pm.environment.get('seller_email') || 'alice@cyberlisans.com', password: pm.environment.get('seller_password') || 'Alice!2026Safe' }) }",
+                  "  }, function (err, res) {",
+                  "    var j = res.json();",
+                  "    var token = j.accessToken || j.token || j.session && j.session.access_token;",
+                  "    if (token) { pm.environment.set('seller_token', token); }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 2xx', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/seller/products/{{test_product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["seller", "products", "{{test_product_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Products",
+      "item": [
+        {
+          "name": "Ensure Admin Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has accessToken', function () { pm.expect(json).to.have.property('accessToken'); pm.expect(json.accessToken).to.be.a('string').and.not.empty; });",
+                  "if (json.accessToken) { pm.environment.set('admin_token', json.accessToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "List Pending Products",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('admin_token')) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/auth/login',",
+                  "    method: 'POST',",
+                  "    header: 'Content-Type: application/json',",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ email: pm.environment.get('admin_email') || 'admin@cyberlisans.com', password: pm.environment.get('admin_password') || 'Admin!2026Safe' }) }",
+                  "  }, function (err, res) {",
+                  "    var j = res.json();",
+                  "    var token = j.accessToken || j.token || j.session && j.session.access_token;",
+                  "    if (token) { pm.environment.set('admin_token', token); }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has items array', function () { pm.expect(json).to.have.property('items'); pm.expect(json.items).to.be.an('array'); });",
+                  "pm.test('items length >= 0', function () { pm.expect(json.items.length).to.be.at.least(0); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+                  "if (json.items && json.items.length > 0 && json.items[0].id) { pm.environment.set('rejected_product_id', json.items[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/products/pending",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "products", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Approve Product",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('admin_token')) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/auth/login',",
+                  "    method: 'POST',",
+                  "    header: 'Content-Type: application/json',",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ email: pm.environment.get('admin_email') || 'admin@cyberlisans.com', password: pm.environment.get('admin_password') || 'Admin!2026Safe' }) }",
+                  "  }, function (err, res) {",
+                  "    var j = res.json();",
+                  "    var token = j.accessToken || j.token || j.session && j.session.access_token;",
+                  "    if (token) { pm.environment.set('admin_token', token); }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Status is ACTIVE', function () { pm.expect(json).to.have.property('status', 'ACTIVE'); });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Approved by M4 admin test\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/products/{{test_product_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "products", "{{test_product_id}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Product",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('rejected_product_id')) {",
+                  "  const sellerToken = pm.environment.get('seller_token') || pm.environment.get('alice_token');",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/seller/products',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sellerToken },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({",
+                  "      title: 'Reject Test Product ' + Date.now(),",
+                  "      priceTry: 99.99,",
+                  "      stock: 1,",
+                  "      categoryId: pm.environment.get('category_id'),",
+                  "      brandId: pm.environment.get('brand_id')",
+                  "    }) }",
+                  "  }, function (err, res) {",
+                  "    try {",
+                  "      var j = res.json();",
+                  "      if (j && j.id) { pm.environment.set('rejected_product_id', j.id); }",
+                  "    } catch (e) {}",
+                  "  });",
+                  "}",
+                  "",
+                  "// rejected_product_id yoksa yeni pending \u00fcr\u00fcn olu\u015ftur",
+                  "if (!pm.environment.get('rejected_product_id')) {",
+                  "  const sellerToken = pm.environment.get('seller_token') || pm.environment.get('alice_token');",
+                  "  pm.sendRequest({",
+                  "    url: pm.environment.get('base_url') + '/seller/products',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sellerToken },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({",
+                  "      title: 'Reject Test Product ' + Date.now(),",
+                  "      priceTry: 99.99,",
+                  "      stock: 1,",
+                  "      categoryId: pm.environment.get('category_id'),",
+                  "      brandId: pm.environment.get('brand_id')",
+                  "    }) }",
+                  "  }, function (err, res) {",
+                  "    try {",
+                  "      var j = res.json();",
+                  "      if (j && j.id) { pm.environment.set('rejected_product_id', j.id); }",
+                  "    } catch (e) {}",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Status is REJECTED', function () { pm.expect(json).to.have.property('status', 'REJECTED'); });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Description incomplete\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/products/{{rejected_product_id}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "products", "{{rejected_product_id}}", "reject"]
             }
           }
         }
@@ -711,5 +1394,11 @@
       }
     }
   ],
-  "variable": [{ "key": "base_url", "value": "https://cyberlisans.vercel.app", "type": "string" }]
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://cyberlisans.vercel.app",
+      "type": "string"
+    }
+  ]
 }

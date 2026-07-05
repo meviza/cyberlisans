@@ -37,6 +37,6 @@ export {
   captureAuthFailure,
   captureEscrowEvent,
   addBreadcrumb,
-} from './lib/sentry-helpers';
+} from './lib/sentry-helpers.ts';
 
 export { Sentry };

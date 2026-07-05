@@ -18,4 +18,8 @@ export default defineConfig({
   build: {
     external: [],
   },
+  globals: {
+    API_URL: process.env.API_URL,
+    INTERNAL_SERVICE_SECRET: process.env.INTERNAL_SERVICE_SECRET,
+  },
 });

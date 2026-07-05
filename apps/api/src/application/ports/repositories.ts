@@ -255,6 +255,96 @@ export interface IProductRepository {
   incrementStock(productId: string, qty: number): Promise<void>;
 }
 
+export type ProductReviewStatus = 'PENDING_REVIEW' | 'ACTIVE' | 'REJECTED' | 'DELETED';
+
+export interface SellerProductEntity {
+  id: string;
+  sellerId: string;
+  categoryId: string;
+  brandId: string | null;
+  slug: string;
+  name: string;
+  description: string | null;
+  images: string[];
+  price: number;
+  currency: 'TRY' | 'USD' | 'EUR' | 'USDT';
+  stock: number;
+  listingType: 'PLATFORM' | 'SELLER';
+  status: ProductReviewStatus;
+  approvedById: string | null;
+  approvedAt: Date | null;
+  rejectedById: string | null;
+  rejectedAt: Date | null;
+  rejectedReason: string | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateSellerProductInput {
+  sellerId: string;
+  categoryId: string;
+  brandId?: string | null;
+  slug: string;
+  title: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  images?: string[];
+  priceTry?: number;
+  priceUsd?: number;
+  priceEur?: number;
+  priceUsdt?: number;
+  stock: number;
+  deliveryType?: 'AUTO' | 'MANUAL' | 'KEY';
+  digitalContent?: string | null;
+  autoDelivery?: boolean;
+  minDeliverySeconds?: number;
+  maxDeliverySeconds?: number;
+}
+
+export interface UpdateSellerProductInput {
+  title?: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  images?: string[];
+  priceTry?: number;
+  priceUsd?: number;
+  priceEur?: number;
+  priceUsdt?: number;
+  stock?: number;
+  categoryId?: string;
+  brandId?: string | null;
+}
+
+export interface ListSellerProductsFilter {
+  sellerId: string;
+  status?: ProductReviewStatus;
+  page: number;
+  limit: number;
+}
+
+export interface ListPendingProductsFilter {
+  page: number;
+  limit: number;
+}
+
+export interface ISellerProductRepository {
+  listForSeller(
+    filter: ListSellerProductsFilter,
+  ): Promise<{ items: SellerProductEntity[]; total: number }>;
+  createSellerProduct(data: CreateSellerProductInput): Promise<SellerProductEntity>;
+  updateSellerProduct(id: string, data: UpdateSellerProductInput): Promise<SellerProductEntity>;
+  softDeleteSellerProduct(id: string): Promise<SellerProductEntity>;
+  approveSellerProduct(id: string, adminId: string): Promise<SellerProductEntity>;
+  rejectSellerProduct(id: string, adminId: string, reason: string): Promise<SellerProductEntity>;
+  findSellerProductById(id: string): Promise<SellerProductEntity | null>;
+  listPendingProducts(
+    filter: ListPendingProductsFilter,
+  ): Promise<{ items: SellerProductEntity[]; total: number }>;
+  hasActiveEscrowForProduct(productId: string): Promise<boolean>;
+  attachKeysToProduct(productId: string, keyIds: string[]): Promise<number>;
+}
+
 export interface IProductKeyRepository {
   listByProduct(
     productId: string,

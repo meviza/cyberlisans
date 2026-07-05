@@ -25,7 +25,7 @@ export interface CreateDisputeDeps {
 }
 
 export interface CreateDisputeOutput {
-  disputeId: string;
+  id: string;
   status: DisputeEntity['status'];
 }
 
@@ -81,6 +81,6 @@ export class CreateDisputeUseCase {
       userAgent: input.meta?.userAgent,
     });
 
-    return { disputeId: dispute.id, status: dispute.status };
+    return { id: dispute.id, status: dispute.status };
   }
 }

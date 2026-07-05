@@ -6,7 +6,7 @@ End-to-end integration tests for the Cyberlisans backend API. Built on Postman v
 
 ```
 postman/
-├── cyberlisans.postman_collection.json         # 20 requests across 6 folders
+├── cyberlisans.postman_collection.json         # 31 requests across 9 folders
 ├── environments/
 │   ├── local.postman_environment.json          # http://localhost:3000
 │   └── production.postman_environment.json     # https://cyberlisans.vercel.app
@@ -26,32 +26,44 @@ scripts/
 4. Run the **Auth** folder first — it logs in three test users and writes `admin_token`, `alice_token`, `bob_token` into the environment. Subsequent requests reuse those tokens automatically.
 
 > Tokens are stored as `secret` type variables and never printed by test scripts.
+>
+> **Test seed credentials:** the local environment ships with default seed passwords (`Alice!2026Safe`, `Admin!2026Safe`, etc.) so the collection can run unattended against a freshly seeded stack. The production environment deliberately ships with **empty** `seller_email` / `admin_email` / `*_password` values — fill them in locally before running against prod, or override via `--env-var` in Newman. Never commit a populated production environment JSON.
 
 ## Endpoints Covered
 
-| #   | Folder   | Method | Path                                    | Auth   |
-| --- | -------- | ------ | --------------------------------------- | ------ |
-| 1   | Auth     | POST   | `/api/auth/login` (admin)               | public |
-| 2   | Auth     | POST   | `/api/auth/login` (alice)               | public |
-| 3   | Auth     | POST   | `/api/auth/login` (bob)                 | public |
-| 4   | Auth     | GET    | `/api/profile/me`                       | Bearer |
-| 5   | Sellers  | POST   | `/api/sellers/apply`                    | Bearer |
-| 6   | Sellers  | GET    | `/api/sellers/me`                       | Bearer |
-| 7   | Sellers  | GET    | `/api/sellers/alice-gaming-keys/public` | public |
-| 8   | Sellers  | GET    | `/api/admin/sellers/pending`            | Admin  |
-| 9   | Escrow   | POST   | `/api/escrow`                           | Bearer |
-| 10  | Escrow   | GET    | `/api/escrow/:id`                       | Bearer |
-| 11  | Escrow   | POST   | `/api/escrow/:id/release`               | Bearer |
-| 12  | Disputes | POST   | `/api/disputes`                         | Bearer |
-| 13  | Disputes | GET    | `/api/disputes/me`                      | Bearer |
-| 14  | Payouts  | POST   | `/api/payouts`                          | Bearer |
-| 15  | Payouts  | GET    | `/api/payouts/me`                       | Bearer |
-| 16  | Payouts  | GET    | `/api/payouts/:id`                      | Bearer |
-| 17  | Admin    | GET    | `/api/admin/escrow/escrow`              | Admin  |
-| 18  | Admin    | POST   | `/api/admin/escrow/escrow/auto-release` | Admin  |
-| 19  | Admin    | GET    | `/api/admin/escrow/payouts`             | Admin  |
-| 20  | Admin    | GET    | `/api/debug/db`                         | public |
-| 21  | Health   | GET    | `/api/health`                           | public |
+| #   | Folder          | Method | Path                                     | Auth   |
+| --- | --------------- | ------ | ---------------------------------------- | ------ |
+| 1   | Auth            | POST   | `/api/auth/login` (admin)                | public |
+| 2   | Auth            | POST   | `/api/auth/login` (alice)                | public |
+| 3   | Auth            | POST   | `/api/auth/login` (bob)                  | public |
+| 4   | Auth            | GET    | `/api/profile/me`                        | Bearer |
+| 5   | Sellers         | POST   | `/api/sellers/apply`                     | Bearer |
+| 6   | Sellers         | GET    | `/api/sellers/me`                        | Bearer |
+| 7   | Sellers         | GET    | `/api/sellers/alice-gaming-keys/public`  | public |
+| 8   | Sellers         | GET    | `/api/admin/sellers/pending`             | Admin  |
+| 9   | Escrow          | POST   | `/api/escrow`                            | Bearer |
+| 10  | Escrow          | GET    | `/api/escrow/:id`                        | Bearer |
+| 11  | Escrow          | POST   | `/api/escrow/:id/release`                | Bearer |
+| 12  | Disputes        | POST   | `/api/disputes`                          | Bearer |
+| 13  | Disputes        | GET    | `/api/disputes/me`                       | Bearer |
+| 14  | Payouts         | POST   | `/api/payouts`                           | Bearer |
+| 15  | Payouts         | GET    | `/api/payouts/me`                        | Bearer |
+| 16  | Payouts         | GET    | `/api/payouts/:id`                       | Bearer |
+| 17  | Admin           | GET    | `/api/admin/escrow/escrow`               | Admin  |
+| 18  | Admin           | POST   | `/api/admin/escrow/escrow/auto-release`  | Admin  |
+| 19  | Admin           | GET    | `/api/admin/escrow/payouts`              | Admin  |
+| 20  | Admin           | GET    | `/api/debug/db`                          | public |
+| 21  | Health          | GET    | `/api/health`                            | public |
+| 22  | Seller Products | POST   | `/api/auth/login` (seller, ensure token) | public |
+| 23  | Seller Products | POST   | `/api/seller/products` (create)          | Bearer |
+| 24  | Seller Products | GET    | `/api/seller/products?status=PENDING`    | Bearer |
+| 25  | Seller Products | PATCH  | `/api/seller/products/:id` (update)      | Bearer |
+| 26  | Seller Products | GET    | `/api/seller/products/:id` (detail)      | Bearer |
+| 27  | Seller Products | DELETE | `/api/seller/products/:id` (soft del)    | Bearer |
+| 28  | Admin Products  | POST   | `/api/auth/login` (admin, ensure token)  | public |
+| 29  | Admin Products  | GET    | `/api/admin/products/pending`            | Admin  |
+| 30  | Admin Products  | POST   | `/api/admin/products/:id/approve`        | Admin  |
+| 31  | Admin Products  | POST   | `/api/admin/products/:id/reject`         | Admin  |
 
 Every request carries a test script with five automated assertions (status code, response time, JSON validity, expected keys, no `error` envelope) and writes captured IDs back into environment variables for chained calls.
 
@@ -82,17 +94,26 @@ Both artifacts are uploaded on success and failure (`if: always()`) so failed ru
 
 ## Environment Variables
 
-| Key               | Description                                 | Type   |
-| ----------------- | ------------------------------------------- | ------ |
-| `base_url`        | API origin                                  | string |
-| `admin_token`     | JWT for admin@cyberlisans.com               | secret |
-| `alice_token`     | JWT for alice@cyberlisans.com               | secret |
-| `bob_token`       | JWT for bob@cyberlisans.com                 | secret |
-| `test_order_id`   | Order UUID used by escrow create            | string |
-| `test_seller_id`  | Seller UUID captured after `/sellers/apply` | string |
-| `test_escrow_id`  | Escrow UUID captured after `/escrow`        | string |
-| `test_dispute_id` | Dispute UUID captured after `/disputes`     | string |
-| `test_payout_id`  | Payout UUID captured after `/payouts`       | string |
+| Key                   | Description                                                   | Type   |
+| --------------------- | ------------------------------------------------------------- | ------ |
+| `base_url`            | API origin                                                    | string |
+| `admin_token`         | JWT for admin@cyberlisans.com                                 | secret |
+| `alice_token`         | JWT for alice@cyberlisans.com                                 | secret |
+| `bob_token`           | JWT for bob@cyberlisans.com                                   | secret |
+| `test_order_id`       | Order UUID used by escrow create                              | string |
+| `test_seller_id`      | Seller UUID captured after `/sellers/apply`                   | string |
+| `test_escrow_id`      | Escrow UUID captured after `/escrow`                          | string |
+| `test_dispute_id`     | Dispute UUID captured after `/disputes`                       | string |
+| `test_payout_id`      | Payout UUID captured after `/payouts`                         | string |
+| `seller_token`        | JWT for the seller test account (alias of `alice_token`)      | secret |
+| `seller_email`        | Login email for seller flow (default `alice@cyberlisans.com`) | string |
+| `seller_password`     | Login password for seller flow (default `Alice!2026Safe`)     | secret |
+| `admin_email`         | Login email for admin flow                                    | string |
+| `admin_password`      | Login password for admin flow                                 | secret |
+| `test_product_id`     | Product UUID captured after create                            | string |
+| `rejected_product_id` | Pending product UUID captured for reject                      | string |
+| `category_id`         | Test category UUID                                            | string |
+| `brand_id`            | Test brand UUID                                               | string |
 
 Sensitive values stay in the Postman environment or in CI secrets — they are never logged.
 

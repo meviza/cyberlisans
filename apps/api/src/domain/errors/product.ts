@@ -77,3 +77,21 @@ export class OrderNotCancellableError extends PaymentError {
     super('Bu sipariş iptal edilemez', 'ORDER_NOT_CANCELLABLE', 409);
   }
 }
+
+export class ProductOwnershipError extends PaymentError {
+  constructor() {
+    super('Bu ürün üzerinde işlem yetkiniz yok', 'PRODUCT_NOT_OWNED', 403);
+  }
+}
+
+export class ProductReviewStatusError extends PaymentError {
+  constructor(message = 'Ürün durumu bu işlem için uygun değil') {
+    super(message, 'PRODUCT_REVIEW_STATUS_INVALID', 409);
+  }
+}
+
+export class ProductDeleteConflictError extends PaymentError {
+  constructor() {
+    super('Aktif sipariş/eMANYAT kaydı olan ürün silinemez', 'PRODUCT_DELETE_CONFLICT', 409);
+  }
+}

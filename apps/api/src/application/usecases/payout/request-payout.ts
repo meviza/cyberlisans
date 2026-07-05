@@ -28,7 +28,7 @@ export interface RequestPayoutDeps {
 }
 
 export interface RequestPayoutOutput {
-  payoutId: string;
+  id: string;
   status: SellerPayoutEntity['status'];
   eta: string;
   amount: number;
@@ -87,7 +87,7 @@ export class RequestPayoutUseCase {
     const eta = new Date(Date.now() + ETA_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
     return {
-      payoutId: payout.id,
+      id: payout.id,
       status: payout.status,
       eta,
       amount: payout.amount,

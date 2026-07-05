@@ -36,6 +36,12 @@ const ITEMS: NavItem[] = [
     roles: ['CUSTOMER', 'DEALER', 'ADMIN', 'SUPER_ADMIN'],
   },
   {
+    href: '/dashboard/seller/products',
+    label: 'Ürünlerim',
+    icon: Package,
+    roles: ['DEALER', 'ADMIN', 'SUPER_ADMIN'],
+  },
+  {
     href: '/dashboard/seller/payouts',
     label: 'Payoutlar',
     icon: Wallet,
@@ -45,6 +51,12 @@ const ITEMS: NavItem[] = [
     href: '/dashboard/admin/disputes',
     label: 'Disputes',
     icon: Gavel,
+    roles: ['ADMIN', 'SUPER_ADMIN'],
+  },
+  {
+    href: '/dashboard/admin/products',
+    label: 'Ürün Onayları',
+    icon: Package,
     roles: ['ADMIN', 'SUPER_ADMIN'],
   },
   {

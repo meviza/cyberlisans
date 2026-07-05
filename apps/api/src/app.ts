@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { initSentry, bindSentryErrorHandler } from './instrument';
-import { captureApiError } from './lib/sentry-helpers';
+import { captureApiError } from './lib/sentry-helpers.ts';
 import { authRoutes } from './interface/routes/auth';
 import { profileRoutes } from './interface/routes/profile';
 import { sessionRoutes } from './interface/routes/sessions';
@@ -9,6 +9,7 @@ import { walletRoutes } from './interface/routes/wallet';
 import { paymentsRoutes } from './interface/routes/payments';
 import { productsRoutes } from './interface/routes/products';
 import { adminProductsRoutes } from './interface/routes/admin/products';
+import { adminSellerProductsRoutes } from './interface/routes/admin/seller-products';
 import { adminCategoriesRoutes } from './interface/routes/admin/categories';
 import { adminBrandsRoutes } from './interface/routes/admin/brands';
 import { adminUsersRoutes } from './interface/routes/admin/users';
@@ -23,6 +24,7 @@ import { dealerRoutes } from './interface/routes/dealer';
 import { dealerPublicRoutes } from './interface/routes/dealer-public';
 import { adminDealersRoutes } from './interface/routes/admin/dealers';
 import { sellerRoutes } from './interface/routes/sellers';
+import { sellerProductsRoutes } from './interface/routes/seller-products';
 import { adminSellersRoutes } from './interface/routes/admin/sellers';
 import { escrowRoutes } from './interface/routes/escrow';
 import { payoutsRoutes } from './interface/routes/payouts';
@@ -51,7 +53,7 @@ app.use(
   }),
 );
 
-app.onError((err, c) => {
+app.onError(async (err, c) => {
   const status =
     (err as { statusCode?: number; status?: number }).statusCode ??
     (err as { status?: number }).status ??
@@ -62,6 +64,8 @@ app.onError((err, c) => {
       method: c.req.method,
       statusCode: status,
     });
+    const { Sentry } = await import('./instrument');
+    await Sentry.flush(2000);
   }
   return errorHandler(err, c);
 });
@@ -105,6 +109,7 @@ app.route('/sessions', sessionRoutes);
 app.route('/wallet', walletRoutes);
 app.route('/payments', paymentsRoutes);
 app.route('/products', productsRoutes);
+app.route('/admin/products', adminSellerProductsRoutes);
 app.route('/admin/products', adminProductsRoutes);
 app.route('/admin/categories', adminCategoriesRoutes);
 app.route('/admin/brands', adminBrandsRoutes);
@@ -120,6 +125,7 @@ app.route('/dealer', dealerRoutes);
 app.route('/dealer-public', dealerPublicRoutes);
 app.route('/admin/dealers', adminDealersRoutes);
 app.route('/sellers', sellerRoutes);
+app.route('/seller/products', sellerProductsRoutes);
 app.route('/admin/sellers', adminSellersRoutes);
 app.route('/escrow', escrowRoutes);
 app.route('/payouts', payoutsRoutes);
