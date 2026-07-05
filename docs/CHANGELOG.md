@@ -2,14 +2,65 @@
 
 Tüm önemli değişiklikler bu dosyada kayıt altına alınır. [SemVer](https://semver.org/) uyumlu.
 
-## [Unreleased] — M3.1
+## [Unreleased] — M5.1.1 (schema drift fix)
 
 ### To Do
 
-- Vercel alias drift düzeltme (cyberlisans.vercel.app başka projeye atanmış)
-- Sentry source map upload (SENTRY_AUTH_TOKEN gerekli)
-- Supabase service_role key rotate
-- Trigger.dev dashboard secret eşleştirme
+- 0006-0011 diskte yok, reverse-engineer gerek (M4.1 security hardening)
+- M6: Review/rating + email verification + 2FA
+- Redis-backed rate limiter (Upstash)
+
+## [5.1.0] — 2026-07-05 — M5.1 Supabase Vault (Secret Store)
+
+### Added
+
+- **DB:** `public.app_secrets` tablosu + `public.secret_rotation_log` (append-only) + 2 RLS policy
+- **DB:** `set_app_secret()` / `get_app_secret()` / `derive_secret_key()` SECURITY DEFINER fonksiyonları (pgcrypto AES-256, service_role only)
+- **DB:** 7 migration: 0012-0018 (vault table, pgsodium → pgcrypto migration, schema fixes)
+- **Backend:** `apps/api/src/lib/secret-store.ts` — env → Vault fallback, 60s in-memory cache
+- **Backend:** `apps/api/src/interface/routes/admin/secrets.ts` — admin-only CRUD (list/value/log/delete)
+- **Backend:** `apps/api/src/interface/routes/admin/allowed-secrets.ts` — 9 secret whitelist
+- **Scripts:** `scripts/rotate-secret.ts` — CLI secret rotation (env value, actor = cli:<user>)
+- **Scripts:** `scripts/vercel-env-update.sh` — Vercel encrypted env push (3 target)
+- **Docs:** MILESTONE-5.1.md + STATUS.md güncellendi
+
+### Security
+
+- AES-256 encryption ile encrypted_value at-rest şifreli
+- `REVOKE EXECUTE` PUBLIC/anon/authenticated'dan, `GRANT EXECUTE` service_role'a
+- Append-only audit log (UPDATE/DELETE trigger block)
+- ALLOWED_SECRET_NAMES whitelist (9 secret), diğer adlar reject
+- Schema hardening: `touch_updated_at` camelCase `"updatedAt"` eklendi
+
+### Verification
+
+- 4 ardışık rotation (1× CREATED + 3× ROTATED) PASS
+- Admin GET value (decrypted, length 18) PASS
+- Audit log rotation history 5/5 PASS
+- TypeScript typecheck temiz
+
+### Known Issues
+
+- pgsodium `randombytes_buf` permission denied → pgcrypto AES-256 fallback (decision recorded)
+- `digest()` schema-qualified (`extensions.digest()`) zorunlu
+
+---
+
+## [5.0.0] — 2026-07-05 — M5 Shopier Multi-PSP
+
+### Added
+
+- **Backend:** `packages/payments/src/shopier.ts` — Shopier provider (HMAC-SHA256, redirect + webhook)
+- **Backend:** `packages/payments/src/provider-selector.ts` — currency/country/amount-based selection
+- **Backend:** `POST /payments/available-providers` endpoint
+- **Frontend:** `apps/web/src/components/checkout/provider-picker.tsx` — runtime provider UI
+- **Postman:** 5 yeni request, "Payments M5 (Shopier)" klasörü (165/165 PASS)
+- **Docs:** MILESTONE-5.md
+
+### Changed
+
+- Hexagonal mimari: PSP eklemek tek dosya (~170 satır)
+- `package.json` (payments) `export ./shopier` + `./provider-selector`
 
 ---
 

@@ -3,8 +3,8 @@
 > **Bu dosya her oturum başında okunacak tek sayfa özettir.**
 > Yeni AI agent veya ekip üyesi bu dosyayı okuyarak projeye 30 saniyede bağlam kurabilir.
 
-**Son güncelleme:** 2026-07-05
-**Mevcut milestone:** M4 tamamlandı, M5 planlanıyor
+**Son güncelleme:** 2026-07-05 22:50
+**Mevcut milestone:** M5.1 (Supabase Vault) tamamlandı, M6 planlanıyor
 **Production:** https://cyberlisans-mp.vercel.app (Vercel alias sorunu M3.1'de çözülecek)
 
 ---
@@ -26,7 +26,8 @@ Cyberlisans, **Clean Architecture monorepo** olarak geliştirilen, **Supabase RE
 | **M3**    | Escrow + payout + dispute tam akış                                 | ✅ Tamamlandı | **v3.0-escrow**          |
 | **M3.1**  | Vercel alias düzeltme + Sentry clean install + rotate              | 🔴 Blocker    | —                        |
 | **M4**    | Satıcı ürün yönetimi (CRUD + admin onay) + M4.1 security hardening | ✅ Tamamlandı | **v4.0-seller-products** |
-| **M5**    | Payments entegrasyonu (PayTR + Papara + Crypto)                    | ⚪ Plan       | v5.0-payments            |
+| **M5**    | Shopier provider + provider selector + multi-PSP altyapı           | ✅ Tamamlandı | **v5.0-payments**        |
+| **M5.1**  | Supabase Vault (AES-256 encrypted secret store) + rotation tools   | ✅ Tamamlandı | **v5.1-secret-store**    |
 | **M6**    | Review/rating + email verification + 2FA aktif                     | ⚪ Plan       | v6.0-trust               |
 | **M7**    | SEO + multi-language + landing page                                | ⚪ Plan       | v7.0-growth              |
 | **M8**    | Beta launch + analytics + A/B test                                 | ⚪ Plan       | v8.0-launch              |
@@ -248,20 +249,32 @@ curl -X POST https://cyberlisans-mp.vercel.app/api/auth/login \
 
 ---
 
-## 🎯 Sonraki Adımlar (M4)
+## 🎯 Sonraki Adımlar (M5.1)
 
-**M4 paralel 4 ajan:**
+**M5.1 (tamamlandı):**
 
-1. **Backend ajanı:** create-product, update-product, delete-product, list-products use-case'leri (apps/api/src/application/usecases/product/)
-2. **Seller UI ajanı:** seller dashboard ürün yönetimi (apps/web/src/app/dashboard/seller/products/)
-3. **Admin UI ajanı:** admin ürün onaylama (apps/web/src/app/dashboard/admin/products/)
-4. **DB seed + Postman ajanı:** 30 örnek ürün (5 seller × 6 ürün) + Postman collection'a product endpoint'leri ekle
+- Supabase Vault (AES-256, pgcrypto)
+- secret-store.ts runtime loader (env → Vault fallback, 60s cache)
+- rotate-secret.ts CLI + vercel-env-update.sh scripts
+- Admin secrets CRUD endpoints (auth + requireAdmin)
+- 4 ardışık rotation test PASS
 
-**M4 sonunda:**
+**Kullanıcı aksiyonu bekleniyor:**
 
-- Newman tüm endpoint'ler geçer
-- Commit + tag v4.0-products
-- docs/STATUS.md güncellenir
+- 6 hassas token'ı Dashboard'lardan rotate et
+- `tsx scripts/rotate-secret.ts <name>` ile Vault'a yaz
+- `bash scripts/vercel-env-update.sh <NAME> "<value>"` ile Vercel push
+
+**M5.1.1 (sıradaki):**
+
+- 0006-0011 diskte yok, reverse-engineer gerek (M4.1 hardening)
+- Bu ayrı milestone, information_schema'dan SQL çıkarılacak
+
+**M6 (planlanıyor):**
+
+- Review/rating system (buyer → seller + seller → buyer)
+- Email verification (SMTP provider entegrasyonu)
+- 2FA aktif (TOTP) — schema zaten var, route eksik
 
 ---
 
