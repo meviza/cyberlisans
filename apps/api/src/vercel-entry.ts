@@ -1,5 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'http';
+import { initSentry } from './instrument.js';
 import app from './app.js';
+
+initSentry();
 
 type VercelRequest = IncomingMessage & {
   method?: string;

@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
+import { initSentry, bindSentryErrorHandler } from './instrument';
+import { captureApiError } from './lib/sentry-helpers';
 import { authRoutes } from './interface/routes/auth';
 import { profileRoutes } from './interface/routes/profile';
 import { sessionRoutes } from './interface/routes/sessions';
@@ -22,12 +24,20 @@ import { dealerPublicRoutes } from './interface/routes/dealer-public';
 import { adminDealersRoutes } from './interface/routes/admin/dealers';
 import { sellerRoutes } from './interface/routes/sellers';
 import { adminSellersRoutes } from './interface/routes/admin/sellers';
+import { escrowRoutes } from './interface/routes/escrow';
+import { payoutsRoutes } from './interface/routes/payouts';
+import { disputesRoutes } from './interface/routes/disputes';
+import { adminEscrowRoutes } from './interface/routes/admin/escrow';
+import { internalRoutes } from './interface/routes/internal';
 import { createCorsMiddleware } from './interface/middleware/cors';
 import { honoSecureHeaders, securityHeaders } from './interface/middleware/security-headers';
 import { errorHandler } from './interface/middleware/error-handler';
 import { createRateLimiter, RATE_LIMIT_CONFIGS } from './interface/middleware/security/rate-limit';
 
 export const app = new Hono();
+
+initSentry();
+bindSentryErrorHandler(app);
 
 app.use('*', logger());
 app.use('*', honoSecureHeaders());
@@ -41,10 +51,39 @@ app.use(
   }),
 );
 
-app.onError((err, c) => errorHandler(err, c));
+app.onError((err, c) => {
+  const status =
+    (err as { statusCode?: number; status?: number }).statusCode ??
+    (err as { status?: number }).status ??
+    500;
+  if (status >= 500) {
+    captureApiError(err, {
+      route: c.req.path,
+      method: c.req.method,
+      statusCode: status,
+    });
+  }
+  return errorHandler(err, c);
+});
 
 app.get('/', (c) => c.json({ name: 'CyberLisans API', version: '0.1.0', status: 'ok' }));
 app.get('/health', (c) => c.json({ status: 'healthy', timestamp: new Date().toISOString() }));
+
+app.get('/debug/env', (c) => {
+  const keys = Object.keys(process.env).filter(
+    (k) =>
+      k.startsWith('SUPABASE_') ||
+      k.startsWith('INTERNAL_') ||
+      k === 'JWT_SECRET' ||
+      k === 'NODE_ENV',
+  );
+  const obj: Record<string, unknown> = { count: keys.length, keys };
+  for (const k of keys) {
+    const v = process.env[k];
+    obj[k] = v ? `<set len=${(v as string).length}>` : '<empty>';
+  }
+  return c.json(obj);
+});
 
 app.get('/debug/db', async (c) => {
   try {
@@ -82,6 +121,11 @@ app.route('/dealer-public', dealerPublicRoutes);
 app.route('/admin/dealers', adminDealersRoutes);
 app.route('/sellers', sellerRoutes);
 app.route('/admin/sellers', adminSellersRoutes);
+app.route('/escrow', escrowRoutes);
+app.route('/payouts', payoutsRoutes);
+app.route('/disputes', disputesRoutes);
+app.route('/admin/escrow', adminEscrowRoutes);
+app.route('/internal', internalRoutes);
 
 app.notFound((c) => c.json({ error: 'Not found', code: 'NOT_FOUND' }, 404));
 

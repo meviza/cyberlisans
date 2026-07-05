@@ -10,15 +10,19 @@
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md,json,css}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "trigger:dev": "trigger dev",
+    "trigger:deploy": "trigger deploy"
   },
   "devDependencies": {
-    "turbo": "2.3.3",
-    "typescript": "5.7.3",
-    "prettier": "3.4.2",
+    "@trigger.dev/sdk": "^4.5.0",
+    "@types/node": "22.10.10",
     "husky": "9.1.7",
     "lint-staged": "15.4.0",
-    "@types/node": "22.10.10"
+    "prettier": "3.4.2",
+    "trigger.dev": "^4.5.0",
+    "turbo": "2.3.3",
+    "typescript": "5.7.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

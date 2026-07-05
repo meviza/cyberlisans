@@ -1,0 +1,62 @@
+name: API Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/api/**"
+      - "packages/auth/**"
+      - "postman/**"
+      - "scripts/test-api.sh"
+      - ".github/workflows/api-tests.yml"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "apps/api/**"
+      - "packages/auth/**"
+      - "postman/**"
+      - "scripts/test-api.sh"
+      - ".github/workflows/api-tests.yml"
+
+jobs:
+  newman:
+    name: Newman API Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-html
+
+      - name: Make script executable
+        run: chmod +x scripts/test-api.sh
+
+      - name: Run API tests (production)
+        run: ./scripts/test-api.sh postman/environments/production.postman_environment.json
+        continue-on-error: false
+
+      - name: Upload Newman HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: postman/reports/newman-report.html
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Newman CLI log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-cli-log
+          path: postman/reports/newman-cli.log
+          if-no-files-found: warn
+          retention-days: 7

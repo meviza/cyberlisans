@@ -3,25 +3,70 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Wallet, Receipt, Settings, Store } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Package,
+  Wallet,
+  Receipt,
+  Settings,
+  Store,
+  Gavel,
+  ShieldCheck,
+} from 'lucide-react';
 import { cn } from '@cyberlisans/ui/cn';
+import { useAuth } from '@/lib/auth-context';
 
-const ITEMS = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  roles?: Array<'CUSTOMER' | 'DEALER' | 'ADMIN' | 'SUPER_ADMIN'>;
+}
+
+const ITEMS: NavItem[] = [
   { href: '/dashboard', label: 'Genel Bakış', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/products', label: 'Ürünlerim', icon: Package },
   { href: '/dashboard/seller', label: 'Satıcı Mağazam', icon: Store },
   { href: '/dashboard/wallet', label: 'Cüzdan', icon: Wallet },
-  { href: '/dashboard/orders', label: 'Siparişler', icon: Receipt },
+  {
+    href: '/dashboard/orders',
+    label: 'Siparişlerim',
+    icon: Receipt,
+    roles: ['CUSTOMER', 'DEALER', 'ADMIN', 'SUPER_ADMIN'],
+  },
+  {
+    href: '/dashboard/seller/payouts',
+    label: 'Payoutlar',
+    icon: Wallet,
+    roles: ['DEALER', 'ADMIN', 'SUPER_ADMIN'],
+  },
+  {
+    href: '/dashboard/admin/disputes',
+    label: 'Disputes',
+    icon: Gavel,
+    roles: ['ADMIN', 'SUPER_ADMIN'],
+  },
+  {
+    href: '/dashboard/admin/escrow',
+    label: 'Escrow',
+    icon: ShieldCheck,
+    roles: ['ADMIN', 'SUPER_ADMIN'],
+  },
   { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const role = user?.role;
+
+  const visible = ITEMS.filter((item) => !item.roles || (role && item.roles.includes(role)));
 
   return (
     <aside className="hidden w-64 shrink-0 border-r border-cyber-cyan/20 bg-cyber-darker/60 backdrop-blur-sm md:block">
       <nav className="sticky top-20 flex flex-col gap-1 p-4">
-        {ITEMS.map((item) => {
+        {visible.map((item) => {
           const Icon = item.icon;
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
           return (

@@ -5,6 +5,8 @@ dist
 build
 .env
 .env.local
+.env.production
+.env.production.test
 .DS_Store
 *.log
 .vercel

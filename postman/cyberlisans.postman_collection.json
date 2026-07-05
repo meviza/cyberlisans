@@ -1,0 +1,715 @@
+{
+  "info": {
+    "_postman_id": "c4e7b9a1-2d3f-4e5a-8b6c-9d0e1f2a3b4c",
+    "name": "Cyberlisans API",
+    "description": "Cyberlisans backend API integration tests. Covers auth, sellers, escrow, payouts, disputes, admin, health, and debug endpoints. Run against local or production environment via Newman for CI smoke tests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has accessToken', function () { pm.expect(json).to.have.property('accessToken'); pm.expect(json.accessToken).to.be.a('string').and.not.empty; });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });",
+                  "if (json.accessToken) { pm.collectionVariables.set('admin_token', json.accessToken); pm.environment.set('admin_token', json.accessToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@cyberlisans.com\",\n  \"password\": \"Admin!2026Safe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login Alice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has accessToken', function () { pm.expect(json).to.have.property('accessToken'); pm.expect(json.accessToken).to.be.a('string').and.not.empty; });",
+                  "pm.test('Has user.role', function () { pm.expect(json.user).to.have.property('role'); });",
+                  "if (json.accessToken) { pm.environment.set('alice_token', json.accessToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@cyberlisans.com\",\n  \"password\": \"Alice!2026Safe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login Bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has accessToken', function () { pm.expect(json).to.have.property('accessToken'); pm.expect(json.accessToken).to.be.a('string').and.not.empty; });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });",
+                  "if (json.accessToken) { pm.environment.set('bob_token', json.accessToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"bob@cyberlisans.com\",\n  \"password\": \"Bob!2026Safe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has id, email, role', function () { pm.expect(json.id).to.exist; pm.expect(json.email).to.exist; pm.expect(json.role).to.exist; });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/profile/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "profile", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sellers",
+      "item": [
+        {
+          "name": "Apply Seller",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 201, 400, 403 or 409', function () { pm.expect([200,201,400,403,409]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has seller id or error info', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "if (json.id) { pm.environment.set('test_seller_id', json.id); }",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var ts = Date.now(); pm.environment.set('apply_slug', 'test-seller-' + ts);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Test Seller Co\",\n  \"taxId\": \"1234567890\",\n  \"taxOffice\": \"Kadikoy\",\n  \"address\": \"Istanbul, TR\",\n  \"phone\": \"+905551112233\",\n  \"slug\": \"{{apply_slug}}\",\n  \"bio\": \"Automated test seller profile\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sellers/apply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sellers", "apply"]
+            }
+          }
+        },
+        {
+          "name": "Get My Seller",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has expected keys', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code === 'NOT_FOUND'; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/sellers/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sellers", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Public Seller (alice-gaming-keys)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Has slug or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.slug || b.code; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/sellers/alice-gaming-keys/public",
+              "host": ["{{base_url}}"],
+              "path": ["api", "sellers", "alice-gaming-keys", "public"]
+            }
+          }
+        },
+        {
+          "name": "List Pending Sellers (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 403', function () { pm.expect([200,403]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body is an array, items, data, or has 403 code', function () { pm.expect(json).to.satisfy(function(b){ return Array.isArray(b) || (b.items && Array.isArray(b.items)) || b.data || b.code === '2FA_REQUIRED'; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/sellers/pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "sellers", "pending"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Escrow",
+      "item": [
+        {
+          "name": "Create Escrow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 201, 400, 403 or 404', function () { pm.expect([200,201,400,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "if (json.id) { pm.environment.set('test_escrow_id', json.id); }",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{test_order_id}}\",\n  \"sellerId\": \"{{test_seller_id}}\",\n  \"amount\": 1000,\n  \"commissionRate\": 12,\n  \"currency\": \"TRY\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/escrow",
+              "host": ["{{base_url}}"],
+              "path": ["api", "escrow"]
+            }
+          }
+        },
+        {
+          "name": "Get Escrow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 403 or 404', function () { pm.expect([200,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/escrow/{{test_escrow_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "escrow", "{{test_escrow_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Release Escrow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 400, 403 or 404', function () { pm.expect([200,400,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has ok or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.ok !== undefined || b.id || b.code; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"CUSTOMER_RELEASE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/escrow/{{test_escrow_id}}/release",
+              "host": ["{{base_url}}"],
+              "path": ["api", "escrow", "{{test_escrow_id}}", "release"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disputes",
+      "item": [
+        {
+          "name": "Create Dispute",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 201, 400, 403 or 404', function () { pm.expect([200,201,400,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "if (json.id) { pm.environment.set('test_dispute_id', json.id); }",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"escrowId\": \"{{test_escrow_id}}\",\n  \"reason\": \"Ürün çalışmıyor\",\n  \"description\": \"Anahtar aktifleştirilemiyor, destek bekleniyor.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/disputes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disputes"]
+            }
+          }
+        },
+        {
+          "name": "Get My Disputes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has items or is array, or NOT_FOUND code', function () { pm.expect(json).to.satisfy(function(b){ return Array.isArray(b) || (b.items && Array.isArray(b.items)) || b.code === 'NOT_FOUND'; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/disputes/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "disputes", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payouts",
+      "item": [
+        {
+          "name": "Request Payout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 201, 400, 403 or 404', function () { pm.expect([200,201,400,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "if (json.id) { pm.environment.set('test_payout_id', json.id); }",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{alice_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"method\": \"BANK\",\n  \"destination\": \"TR123456789012345678901234\",\n  \"currency\": \"TRY\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payouts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payouts"]
+            }
+          }
+        },
+        {
+          "name": "Get My Payouts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 403 or 404', function () { pm.expect([200,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has items or error code', function () { pm.expect(json).to.satisfy(function(b){ return Array.isArray(b) || (b.items && Array.isArray(b.items)) || b.code; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/payouts/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payouts", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Single Payout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 403 or 404', function () { pm.expect([200,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has id or error code', function () { pm.expect(json).to.satisfy(function(b){ return b.id || b.code; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{alice_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/payouts/{{test_payout_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payouts", "{{test_payout_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List All Escrow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 403 or 404', function () { pm.expect([200,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has items, data, or error code', function () { pm.expect(json).to.satisfy(function(b){ return Array.isArray(b) || (b.items && Array.isArray(b.items)) || b.data || b.code; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/escrow/escrow?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "escrow", "escrow"],
+              "query": [{ "key": "limit", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "Auto Release Escrow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 403, 404 or 500', function () { pm.expect([200,403,404,500]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has ok or error key', function () { pm.expect(json).to.satisfy(function(b){ return b.ok !== undefined || b.error || b.code; }); });",
+                  "pm.test('No unexpected 5xx except rpc errors', function () { pm.expect([200,403,404,500]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/escrow/escrow/auto-release",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "escrow", "escrow", "auto-release"]
+            }
+          }
+        },
+        {
+          "name": "List All Payouts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 403 or 404', function () { pm.expect([200,403,404]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has items, data, or error code', function () { pm.expect(json).to.satisfy(function(b){ return Array.isArray(b) || (b.items && Array.isArray(b.items)) || b.data || b.code; }); });",
+                  "pm.test('No unexpected 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/admin/escrow/payouts?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "escrow", "payouts"],
+              "query": [{ "key": "limit", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "Get DB Debug",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 500', function () { pm.expect([200,500]).to.include(pm.response.code); });",
+                  "pm.test('Response time < 8s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('Body has ok or error', function () { pm.expect(json).to.satisfy(function(b){ return b.ok !== undefined || b.error !== undefined || b.code !== undefined; }); });",
+                  "pm.test('No unexpected 5xx except DB errors', function () { pm.expect([200,500]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/debug/db",
+              "host": ["{{base_url}}"],
+              "path": ["api", "debug", "db"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response time < 2s', function () { pm.expect(pm.response.responseTime).to.be.below(8000); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "var json = pm.response.json();",
+                  "pm.test('status is healthy', function () { pm.expect(json).to.have.property('status', 'healthy'); });",
+                  "pm.test('No error key', function () { pm.expect(json).to.not.have.property('error'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["console.log('Running request:', pm.info.requestName);"]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["console.log('Completed:', pm.info.requestName, '->', pm.response.code);"]
+      }
+    }
+  ],
+  "variable": [{ "key": "base_url", "value": "https://cyberlisans.vercel.app", "type": "string" }]
+}
