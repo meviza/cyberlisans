@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import {
   Users,
   ShoppingCart,
@@ -117,13 +118,13 @@ export default function AdminDashboardPage() {
             Gelir, sipariş, stok ve bayi risklerini tek ekranda izle.
           </p>
         </div>
-        <a
+        <Link
           href="/admin/audit"
           className="inline-flex items-center gap-1 rounded-md border border-cyber-cyan/30 bg-cyber-cyan/5 px-3 py-1.5 text-xs text-cyber-cyan transition-colors hover:bg-cyber-cyan/10"
         >
           Audit Log
           <ArrowUpRight className="h-3 w-3" />
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -157,7 +158,7 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-        <a
+        <Link
           href="/admin/orders?status=PENDING"
           className="group rounded-xl border border-cyber-cyan/20 bg-cyber-cyan/5 p-4 transition-colors hover:border-cyber-cyan/50 hover:bg-cyber-cyan/10"
         >
@@ -170,8 +171,8 @@ export default function AdminDashboardPage() {
             </div>
             <ShieldCheck className="h-6 w-6 text-cyber-cyan" />
           </div>
-        </a>
-        <a
+        </Link>
+        <Link
           href="/admin/products"
           className="group rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 transition-colors hover:border-amber-300/50 hover:bg-amber-300/10"
         >
@@ -184,8 +185,8 @@ export default function AdminDashboardPage() {
             </div>
             <AlertTriangle className="h-6 w-6 text-amber-300" />
           </div>
-        </a>
-        <a
+        </Link>
+        <Link
           href="/admin/dealers?status=PENDING"
           className="group rounded-xl border border-cyber-magenta/20 bg-cyber-magenta/5 p-4 transition-colors hover:border-cyber-magenta/50 hover:bg-cyber-magenta/10"
         >
@@ -198,7 +199,7 @@ export default function AdminDashboardPage() {
             </div>
             <Store className="h-6 w-6 text-cyber-magenta" />
           </div>
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

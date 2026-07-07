@@ -23,3 +23,8 @@ postman/environments/*-secrets.postman_environment.json
 
 # Newman temporary reports
 newman/
+
+# TestSprite artifacts and credentials
+.testsprite/
+testsprite.config.json
+supabase/.temp/

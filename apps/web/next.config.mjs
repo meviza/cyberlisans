@@ -13,11 +13,9 @@ const nextConfig = {
     '@cyberlisans/payments',
   ],
   serverExternalPackages: ['@prisma/client', 'prisma'],
-  experimental: {
-    outputFileTracingIncludes: {
-      '/api/[...path]': ['./node_modules/.pnpm/@prisma+client*/**', './node_modules/.prisma/**'],
-      '/api/**': ['./node_modules/.pnpm/@prisma+client*/**', './node_modules/.prisma/**'],
-    },
+  outputFileTracingIncludes: {
+    '/api/[...path]': ['./node_modules/.pnpm/@prisma+client*/**', './node_modules/.prisma/**'],
+    '/api/**': ['./node_modules/.pnpm/@prisma+client*/**', './node_modules/.prisma/**'],
   },
   webpack: (config, { isServer }) => {
     if (isServer) {

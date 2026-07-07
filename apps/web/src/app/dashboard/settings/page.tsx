@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { Save, Lock, Shield, Trash2, Download, X, QrCode } from 'lucide-react';
 import { Card, CardContent, Button, Input, Label, Badge, Spinner } from '@cyberlisans/ui/atoms';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -316,13 +317,13 @@ export default function DashboardSettingsPage() {
         <CardContent className="p-6">
           <h2 className="mb-4 font-orbitron text-lg font-bold text-white">KVKK & Veri</h2>
           <div className="space-y-3">
-            <a
+            <Link
               href="/legal/kvkk"
               className="flex items-center gap-2 text-sm text-cyber-cyan hover:text-cyber-magenta"
             >
               <Download className="h-4 w-4" />
               KVKK aydınlatma metnini görüntüle
-            </a>
+            </Link>
             <button
               type="button"
               className="flex items-center gap-2 text-sm text-cyber-cyan hover:text-cyber-magenta"
@@ -384,7 +385,7 @@ export default function DashboardSettingsPage() {
       {showDisable2FAModal && (
         <Modal title="2FA Kapat" onClose={() => setShowDisable2FAModal(false)}>
           <div className="space-y-4">
-            <p className="text-sm text-white/70">2FA'yı kapatmak için şifreni gir:</p>
+            <p className="text-sm text-white/70">2FA&apos;yı kapatmak için şifreni gir:</p>
             <Input
               type="password"
               value={disablePwd}
@@ -405,7 +406,7 @@ export default function DashboardSettingsPage() {
                 onClick={disable2FA}
                 disabled={!disablePwd}
               >
-                2FA'yı Kapat
+                2FA&apos;yı Kapat
               </Button>
             </div>
           </div>

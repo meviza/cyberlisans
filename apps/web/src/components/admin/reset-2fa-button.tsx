@@ -88,7 +88,7 @@ export function Reset2FAButton({
                 2FA Sıfırla
               </Dialog.Title>
               <Dialog.Description className="text-xs text-white/60">
-                @{username} kullanıcısının 2FA'sı sıfırlanacak
+                @{username} kullanıcısının 2FA&apos;sı sıfırlanacak
               </Dialog.Description>
             </div>
           </div>

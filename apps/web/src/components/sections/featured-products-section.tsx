@@ -1,7 +1,6 @@
-'use client';
-
 import Link from 'next/link';
-import { featuredProducts, type Product } from '@/lib/products';
+import type { Product } from '@/lib/products';
+import { fetchFeaturedProducts } from '@/lib/products-fetcher';
 
 function ProductCardInline({ product }: { product: Product }) {
   return (
@@ -11,10 +10,14 @@ function ProductCardInline({ product }: { product: Product }) {
     >
       <div className="aspect-square w-full" style={{ background: product.image }} />
       <div className="p-4">
-        <div className="mb-1 text-xs uppercase tracking-wider text-cyber-magenta">{product.brand}</div>
+        <div className="mb-1 text-xs uppercase tracking-wider text-cyber-magenta">
+          {product.brand}
+        </div>
         <h3 className="mb-2 font-display text-base font-bold text-white">{product.title}</h3>
         <div className="flex items-center justify-between">
-          <span className="font-display text-lg font-black text-cyber-cyan text-glow-cyan">{product.price} ₺</span>
+          <span className="font-display text-lg font-black text-cyber-cyan text-glow-cyan">
+            {product.price} ₺
+          </span>
           <span className="text-xs text-cyber-cyan/60">{product.stock} stok</span>
         </div>
       </div>
@@ -22,7 +25,32 @@ function ProductCardInline({ product }: { product: Product }) {
   );
 }
 
-export function FeaturedProductsSection() {
+function toCardProduct(p: import('@/lib/products-fetcher').ProductSummary): Product {
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    category:
+      p.categorySlug === 'yazilim' ? 'Yazılım' : p.categorySlug === 'ai-api' ? 'AI API' : 'Oyun',
+    categorySlug:
+      p.categorySlug === 'yazilim' || p.categorySlug === 'ai-api' ? p.categorySlug : 'oyun',
+    brand: p.brand,
+    image: p.image ?? '',
+    images: [],
+    price: p.price,
+    currency: 'TRY',
+    stock: p.stock,
+    featured: p.featured,
+    sold: p.sold,
+    createdAt: p.createdAt,
+    description: '',
+  };
+}
+
+export async function FeaturedProductsSection() {
+  const featured = await fetchFeaturedProducts(8);
+  const items = featured.map(toCardProduct);
+
   return (
     <section className="relative bg-cyber-dark py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -42,7 +70,7 @@ export function FeaturedProductsSection() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {featuredProducts.map((p) => (
+          {items.map((p) => (
             <ProductCardInline key={p.id} product={p} />
           ))}
         </div>

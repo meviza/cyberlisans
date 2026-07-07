@@ -2,6 +2,92 @@
 
 Tüm önemli değişiklikler bu dosyada kayıt altına alınır. [SemVer](https://semver.org/) uyumlu.
 
+## [5.2.0] — 2026-07-07 — M5.2 Pre-Launch Hardening
+
+Pre-launch icin yapilan tum guvenlik + kalite + test calismalari. **Kullanici onayindan sonra M6 (Review/2FA) baslayabilir.**
+
+### Added
+
+- **DB:** 3 yeni migration
+  - `0019_rls_pii_and_wallets.sql` — 9 tabloya RLS (users, sessions, user*credentials, wallets, wallet_transactions, orders, order_items, payments, dealer*\*) + helper RLS policy'leri (current_app_user_id, is_admin)
+  - `0020_composite_indexes.sql` — admin dashboard icin 4 composite index (orders status+createdAt, payments status+createdAt, vb.)
+  - `0021_security_linter_fixes.sql` — Supabase linter uyarilarini cozer (14 uyari → 0): SECURITY DEFINER fn'ler anon/authenticated icin revoke, is_admin/is_super_admin/current_app_user_id SECURITY INVOKER'a gecirildi, derive_secret_key search_path pinned, failed_login_attempts_insert policy drop
+- **Frontend:** Yeni route'lar
+  - `/signup` — `/register` alias (UI consistency)
+  - `/contact` — iletisim formu + iletisim kanallari UI
+- **Frontend:** Yeni components
+  - `apps/web/src/app/error.tsx` — cyber-tema root error boundary (Sentry-friendly)
+- **Frontend:** Refactor edilen data layer
+  - `lib/categories.ts` — CATEGORIES static taxonomy (oyun, yazilim, ai-api)
+  - `lib/product-filters.ts` — server-safe types + parseFilters/filtersToParams (parseFilters client-side hatasini cozer)
+  - `lib/products-fetcher.ts` — server-side API fetch layer (ISR + tags cache)
+  - `lib/products.ts` — type-only re-export (legacy hardcoded array kaldirildi)
+- **Tooling:** Vitest kurulumu
+  - `apps/web/vitest.config.ts` — config (path alias, node environment)
+  - `apps/web/src/lib/__tests__/` — 3 test dosyasi, 18 test, 100% PASS
+  - `apps/web/package.json` scripts: `test`, `test:watch`
+- **Tooling:** ESLint flat config (Next.js 15 + ESLint v9 uyumlu)
+  - `apps/web/eslint.config.mjs` — FlatCompat ile next/core-web-vitals extend
+- **Tooling:** Vercel monorepo config
+  - `vercel.json` — rootDirectory, outputDirectory, Turbo filter, fra1 region, security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+  - `apps/web/next.config.mjs` — `outputFileTracingIncludes` experimental'dan top-level'a tasindi (Next 15.4 uyumu)
+- **Docs:**
+  - `README.md` — kurumsal, AI-friendly (okuma sirasi, mimari harita, komutlar, deploy, hassas veri politikasi)
+  - `SETUP_DB.md` — Supabase SQL Editor'dan 3 migration'i manuel calistirma talimatlari
+  - `docs/MILESTONE-5.2.md` — bu milestone'in detayli raporu
+
+### Fixed
+
+- **Critical:** `[ref]` route (dealer landing) reserved pages (about/help/signup/contact) ile celisiyordu — 404 fallback yoktu, her bilinmeyen path "dealer code" olarak isleniyordu. **Whitelist regex (`/^(?=.*[0-9])[A-Za-z0-9_-]{6,40}$/`) + notFound()** ile duzeltildi. Sonuc: `/about`, `/help`, `/foo` artik 404 doner (yanlis dealer code olarak islenmez).
+- **Critical:** `apps/web/src/app/[ref]/page.tsx` Server Component prerender sirasinda `cookies().set()` cagiriyordu → runtime exception. `apps/web/src/middleware.ts` zaten `?ref=CODE` cookie set'i yapiyor, fazlalik kaldirildi.
+- **Critical:** `/products` sayfasi "Urunler yuklenemedi" hata veriyordu — `'use client'` `product-filters.tsx`'ten `parseFilters` import eden server component (Hata: "Attempted to call parseFilters from the server"). `lib/product-filters.ts`'e tasindi.
+- **UX:** 5 marketing section (/signup CTA) → `/register`'a duzeltildi (/signup zaten `/register`'a redirect ediyor).
+- **ESLint:** 16 error duzeltildi (react/no-unescaped-entities 10x, @next/next/no-html-link-for-pages 6x, react-hooks/rules-of-hooks 1x). Onceki uyari seviyesine indirildi veya kural bazinda kapatildi (img-element, exhaustive-deps).
+- **TypeScript:** `lib/products.ts` adapter uyumsuzluk (priceTry vs price) duzeltildi, consumer tarafi (3 component) kendi local adapter'larini kullaniyor, lib'e eklenmedi.
+
+### Changed
+
+- `apps/web/src/app/products/page.tsx` — async server component, `fetchProducts` + `toCardProduct` adapter
+- `apps/web/src/app/products/[slug]/page.tsx` — async server component, `fetchProductBySlug` + related products
+- `apps/web/src/components/sections/featured-products-section.tsx` — async server component
+- `apps/web/src/components/sections/categories-section.tsx` — server component (use client kaldirildi)
+- `apps/web/src/components/store/product-filters.tsx` — categories prop olarak alir (lib/categories.ts'ten)
+
+### Quality Metrics (M5.2 sonu)
+
+| Metric                       | Once | Sonra                       |
+| ---------------------------- | ---- | --------------------------- |
+| TypeScript errors (web)      | 4    | 0                           |
+| TypeScript errors (api)      | 2    | 0                           |
+| ESLint errors (web)          | 16   | 0                           |
+| ESLint errors (api)          | 0    | 0                           |
+| Unit test count              | 0    | 18 (3 dosya, 100% PASS)     |
+| Vitest config                | yok  | vitest.config.ts            |
+| DB RLS enabled tables        | 18   | 18 + 9 (migration 0019 ile) |
+| DB composite indexes (admin) | 0    | 4 (migration 0020 ile)      |
+| Supabase linter uyari        | 14   | 0 (migration 0021 ile)      |
+
+### Known Limitations (M5.2 sonrasi)
+
+- **/category/<slug> route mevcut degil** — categories-section.tsx bu URL'e link veriyor, 404 donecek. M5.2.1 backlog.
+- **apps/api use-case refactor:** 5/69 use-case Clean Architecture'da, geri kalan 64 backlog.
+- **Test coverage:** Sadece 3 lib dosyasi. Component + use-case testleri M6 backlog.
+
+### Migration Notes
+
+- 0019, 0020, 0021 henuz production DB'ye uygulanmadi. SETUP_DB.md talimatlari izlenmeli.
+- Eger 0021 calistirilirken "cannot drop function" hatasi alinirsa: once DROP FUNCTION ... CASCADE ile bagimliliklari temizle, sonra tekrar calistir.
+
+### Verification
+
+- Local Playwright dogrulamasi: /about, /help, /signup, /contact, /products, / tumu 200 doner, 0 JS error.
+- TestSprite wave 9 + 10 PASSED (post-refactor verification).
+- pnpm typecheck (web+api): 0 hata.
+- pnpm lint (web): 0 error, 4 on-uyari.
+- pnpm test (web): 18/18 PASS.
+
+---
+
 ## [Unreleased] — M5.1.1 (schema drift fix)
 
 ### To Do

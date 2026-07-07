@@ -10,7 +10,7 @@ const plans = [
     badge: null,
     features: ['Kayıt + cüzdan', '%1 geri kazanım', 'Standart destek', 'Tüm temel lisanslar'],
     cta: 'Ücretsiz Başla',
-    href: '/signup',
+    href: '/register',
     highlight: false,
   },
   {
@@ -18,9 +18,15 @@ const plans = [
     price: 49,
     period: 'ay',
     badge: 'En Popüler',
-    features: ['Öncelikli destek', 'Erken erişim kampanyaları', 'Özel sadakat çarpanı', '%2 geri kazanım', 'Hediye seçenekleri'],
-    cta: 'Pro\'ya Geç',
-    href: '/signup?plan=pro',
+    features: [
+      'Öncelikli destek',
+      'Erken erişim kampanyaları',
+      'Özel sadakat çarpanı',
+      '%2 geri kazanım',
+      'Hediye seçenekleri',
+    ],
+    cta: "Pro'ya Geç",
+    href: '/register?plan=pro',
     highlight: true,
   },
   {
@@ -28,7 +34,13 @@ const plans = [
     price: 199,
     period: 'ay',
     badge: null,
-    features: ['API erişimi', 'Beyaz etiket', 'Özel hesap yöneticisi', '%3 geri kazanım', 'Toplu lisans alımları'],
+    features: [
+      'API erişimi',
+      'Beyaz etiket',
+      'Özel hesap yöneticisi',
+      '%3 geri kazanım',
+      'Toplu lisans alımları',
+    ],
     cta: 'İletişime Geç',
     href: '/contact?plan=business',
     highlight: false,
@@ -73,7 +85,15 @@ export function PricingSection() {
               <ul className="mb-8 flex-1 space-y-3">
                 {plan.features.map((feat) => (
                   <li key={feat} className="flex items-start gap-3 text-sm text-white/80">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyber-cyan">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyber-cyan"
+                    >
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                     <span>{feat}</span>

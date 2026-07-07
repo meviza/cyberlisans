@@ -77,7 +77,7 @@ export function OrderEscrowCard({
           <div className="mt-4 flex items-start gap-2 rounded-md border border-cyber-magenta/30 bg-cyber-magenta/5 p-3 text-xs text-white/70">
             <AlertCircle className="h-4 w-4 shrink-0 text-cyber-magenta" />
             <span>
-              Tutar escrow\'da. 7 gün içinde otomatik olarak satıcıya aktarılır. Sorun yaşarsan
+              Tutar escrow&apos;da. 7 gün içinde otomatik olarak satıcıya aktarılır. Sorun yaşarsan
               itiraz açabilirsin.
             </span>
           </div>

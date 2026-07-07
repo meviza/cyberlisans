@@ -52,6 +52,11 @@ export function DealerSettingsForm() {
     } catch {}
   }, []);
 
+  React.useEffect(() => {
+    if (user) return;
+    router.replace('/login?next=/dealer/settings');
+  }, [router, user]);
+
   const savePrefs = () => {
     try {
       localStorage.setItem(NOTIF_KEY, JSON.stringify(prefs));
@@ -115,9 +120,6 @@ export function DealerSettingsForm() {
   };
 
   if (!user) {
-    React.useEffect(() => {
-      router.replace('/login?next=/dealer/settings');
-    }, [router]);
     return null;
   }
 
@@ -295,7 +297,7 @@ export function DealerSettingsForm() {
       {showDisable2FAModal && (
         <Modal title="2FA Kapat" onClose={() => setShowDisable2FAModal(false)}>
           <div className="space-y-4">
-            <p className="text-sm text-white/70">2FA'yı kapatmak için şifreni gir:</p>
+            <p className="text-sm text-white/70">2FA&apos;yı kapatmak için şifreni gir:</p>
             <Input
               type="password"
               value={disablePwd}

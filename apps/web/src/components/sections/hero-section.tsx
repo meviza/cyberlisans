@@ -28,8 +28,8 @@ export function HeroSection({ scene }: HeroSectionProps) {
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-32 lg:px-8">
         <div className="flex flex-col justify-center">
           <span className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-cyber-cyan/40 bg-cyber-cyan/10 px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-cyber-cyan text-glow-cyan">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-cyber-cyan" />
-            ⚡ Anında Teslim · 7/24 Otomatik
+            <span className="h-2 w-2 animate-pulse rounded-full bg-cyber-cyan" />⚡ Anında Teslim ·
+            7/24 Otomatik
           </span>
 
           <h1 className="mb-6 font-display text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
@@ -40,13 +40,13 @@ export function HeroSection({ scene }: HeroSectionProps) {
           </h1>
 
           <p className="mb-8 max-w-xl text-base text-white/70 sm:text-lg">
-            Steam, PlayStation, Xbox ve daha fazlası için orijinal anahtarlar, yazılım lisansları ve AI API kredileri.
-            Saniyeler içinde teslim, güvenli ödeme.
+            Steam, PlayStation, Xbox ve daha fazlası için orijinal anahtarlar, yazılım lisansları ve
+            AI API kredileri. Saniyeler içinde teslim, güvenli ödeme.
           </p>
 
           <div className="mb-10 flex flex-wrap items-center gap-4">
             <Link
-              href="/signup"
+              href="/register"
               className="inline-flex items-center gap-2 rounded-lg bg-cyber-cyan px-6 py-3 font-display text-sm font-bold uppercase tracking-wider text-cyber-darker shadow-glow-cyan transition-all hover:brightness-110"
             >
               Hemen Başla →

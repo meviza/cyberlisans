@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Save, AlertCircle, Building2, Phone, Globe, MapPin, FileText } from 'lucide-react';
 import {
@@ -207,9 +208,9 @@ export function DealerProfileForm({ initialProfile }: { initialProfile: DealerPr
               <p className="font-orbitron text-2xl text-white">{fmtTRY(initialProfile.balance)}</p>
               <p className="mt-1 text-xs text-white/50">
                 Çekim için{' '}
-                <a className="text-cyber-cyan hover:underline" href="/dealer/payouts">
+                <Link className="text-cyber-cyan hover:underline" href="/dealer/payouts">
                   ödeme talebi
-                </a>{' '}
+                </Link>{' '}
                 oluştur.
               </p>
             </div>

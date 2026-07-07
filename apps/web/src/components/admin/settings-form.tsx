@@ -205,7 +205,7 @@ export function SettingsForm({ initial }: { initial: AppSettings }) {
           </div>
 
           <div>
-            <p className="mb-2 text-xs text-white/50">Webhook URL'leri</p>
+            <p className="mb-2 text-xs text-white/50">Webhook URL&apos;leri</p>
             <ul className="space-y-1 rounded border border-cyber-cyan/10 bg-cyber-darker/40 p-3 text-xs">
               {Object.entries(settings.payments.webhookUrls).map(([provider, url]) => (
                 <li key={provider} className="flex items-center justify-between gap-3">

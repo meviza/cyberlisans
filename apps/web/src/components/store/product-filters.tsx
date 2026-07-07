@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Input, Button } from '@cyberlisans/ui/atoms';
-import { categories } from '@/lib/products';
+import type { CategoryDisplay } from '@/lib/categories';
 
 export type SortKey = 'newest' | 'price_asc' | 'price_desc' | 'popular';
 
@@ -51,9 +51,10 @@ export function filtersToParams(state: ProductFiltersState): URLSearchParams {
 
 export interface ProductFiltersProps {
   brands: string[];
+  categories: CategoryDisplay[];
 }
 
-export function ProductFilters({ brands }: ProductFiltersProps) {
+export function ProductFilters({ brands, categories }: ProductFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

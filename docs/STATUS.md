@@ -3,9 +3,9 @@
 > **Bu dosya her oturum başında okunacak tek sayfa özettir.**
 > Yeni AI agent veya ekip üyesi bu dosyayı okuyarak projeye 30 saniyede bağlam kurabilir.
 
-**Son güncelleme:** 2026-07-05 22:50
-**Mevcut milestone:** M5.1 (Supabase Vault) tamamlandı, M6 planlanıyor
-**Production:** https://cyberlisans-mp.vercel.app (Vercel alias sorunu M3.1'de çözülecek)
+**Son güncelleme:** 2026-07-07 11:30
+**Mevcut milestone:** M5.2 pre-launch hardening (refactor + RLS + lint + tests)
+**Production:** https://cyberlisans-mp.vercel.app
 
 ---
 
@@ -17,20 +17,21 @@ Cyberlisans, **Clean Architecture monorepo** olarak geliştirilen, **Supabase RE
 
 ## 📊 Milestone İlerlemesi
 
-| Milestone | Açıklama                                                           | Durum         | Tag                      |
-| --------- | ------------------------------------------------------------------ | ------------- | ------------------------ |
-| **M0**    | Marketplace pivot kararı, mevcut state analizi                     | ✅ Tamamlandı | —                        |
-| **M1**    | Clean Architecture başlangıç, auth/login refactor                  | ✅ Tamamlandı | v1.0-clean-arch          |
-| **M2**    | Marketplace schema + seller profile + public storefront            | ✅ Tamamlandı | v2.0-marketplace         |
-| **M2.1**  | Prisma → Supabase REST migration, production login                 | ✅ Tamamlandı | v2.1-supabase-rest       |
-| **M3**    | Escrow + payout + dispute tam akış                                 | ✅ Tamamlandı | **v3.0-escrow**          |
-| **M3.1**  | Vercel alias düzeltme + Sentry clean install + rotate              | 🔴 Blocker    | —                        |
-| **M4**    | Satıcı ürün yönetimi (CRUD + admin onay) + M4.1 security hardening | ✅ Tamamlandı | **v4.0-seller-products** |
-| **M5**    | Shopier provider + provider selector + multi-PSP altyapı           | ✅ Tamamlandı | **v5.0-payments**        |
-| **M5.1**  | Supabase Vault (AES-256 encrypted secret store) + rotation tools   | ✅ Tamamlandı | **v5.1-secret-store**    |
-| **M6**    | Review/rating + email verification + 2FA aktif                     | ⚪ Plan       | v6.0-trust               |
-| **M7**    | SEO + multi-language + landing page                                | ⚪ Plan       | v7.0-growth              |
-| **M8**    | Beta launch + analytics + A/B test                                 | ⚪ Plan       | v8.0-launch              |
+| Milestone | Açıklama                                                            | Durum         | Tag                      |
+| --------- | ------------------------------------------------------------------- | ------------- | ------------------------ |
+| **M0**    | Marketplace pivot kararı, mevcut state analizi                      | ✅ Tamamlandı | —                        |
+| **M1**    | Clean Architecture başlangıç, auth/login refactor                   | ✅ Tamamlandı | v1.0-clean-arch          |
+| **M2**    | Marketplace schema + seller profile + public storefront             | ✅ Tamamlandı | v2.0-marketplace         |
+| **M2.1**  | Prisma → Supabase REST migration, production login                  | ✅ Tamamlandı | v2.1-supabase-rest       |
+| **M3**    | Escrow + payout + dispute tam akış                                  | ✅ Tamamlandı | **v3.0-escrow**          |
+| **M3.1**  | Vercel alias düzeltme + Sentry clean install + rotate               | 🔴 Blocker    | —                        |
+| **M4**    | Satıcı ürün yönetimi (CRUD + admin onay) + M4.1 security hardening  | ✅ Tamamlandı | **v4.0-seller-products** |
+| **M5**    | Shopier provider + provider selector + multi-PSP altyapı            | ✅ Tamamlandı | **v5.0-payments**        |
+| **M5.1**  | Supabase Vault (AES-256 encrypted secret store) + rotation tools    | ✅ Tamamlandı | **v5.1-secret-store**    |
+| **M5.2**  | Pre-launch hardening: RLS + lint + tests + DB security linter fixes | ✅ Tamamlandı | **v5.2-prelaunch**       |
+| **M6**    | Review/rating + email verification + 2FA aktif                      | ⚪ Plan       | v6.0-trust               |
+| **M7**    | SEO + multi-language + landing page                                 | ⚪ Plan       | v7.0-growth              |
+| **M8**    | Beta launch + analytics + A/B test                                  | ⚪ Plan       | v8.0-launch              |
 
 ---
 
@@ -265,10 +266,25 @@ curl -X POST https://cyberlisans-mp.vercel.app/api/auth/login \
 - `tsx scripts/rotate-secret.ts <name>` ile Vault'a yaz
 - `bash scripts/vercel-env-update.sh <NAME> "<value>"` ile Vercel push
 
-**M5.1.1 (sıradaki):**
+**M5.2 (tamamlandı — pre-launch hardening):**
 
-- 0006-0011 diskte yok, reverse-engineer gerek (M4.1 hardening)
-- Bu ayrı milestone, information_schema'dan SQL çıkarılacak
+- 3 yeni migration yazildi: 0019 (RLS), 0020 (indexes), 0021 (security linter)
+- Vercel monorepo config duzeltildi (security headers, fra1 region, Turbo filter)
+- ESLint flat config migrate edildi, 16 error fix'lendi (entity escape, raw <a>→Link, rules-of-hooks)
+- Vitest kuruldu, 18 unit test (categories, product-filters, products-fetcher) %100 PASS
+- lib/products.ts refactor: type-only, lib/products-fetcher.ts server-side, lib/categories.ts static taxonomy
+- [ref] route bug fix: whitelist regex + cookies().set() middleware tarafina tasindi
+- TSC: 0 hata, ESLint: 0 error (4 on-uyari), Vitest: 18/18 PASS
+
+**M5.2.1 (kullanici aksiyonu bekleniyor):**
+
+- 3 migration'i Supabase SQL Editor'dan calistir (SETUP_DB.md talimatlari)
+- Vercel deploy'un basarili oldugunu dogrula
+
+**M5.2.2 (siradaki — M6 oncesi):**
+
+- /category/<slug> route ekle (categories-section.tsx link bug)
+- apps/api refactor: kalan 64 use-case'i Clean Architecture'a tasi
 
 **M6 (planlanıyor):**
 
@@ -277,5 +293,15 @@ curl -X POST https://cyberlisans-mp.vercel.app/api/auth/login \
 - 2FA aktif (TOTP) — schema zaten var, route eksik
 
 ---
+
+---
+
+## Yapilan Migration'lar (M5.2)
+
+| Migration                        | Aciklama                                                                                                                                                                                             | Uygulandi mi?                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `0019_rls_pii_and_wallets.sql`   | users, sessions, wallets, orders, payments, order*items, dealer*\* tablolarina RLS                                                                                                                   | Hazir, SETUP_DB.md ile uygulanacak |
+| `0020_composite_indexes.sql`     | orders_status_createdAt, orders_userId_status_createdAt, payments_status_createdAt, product_keys_productId_isUsed_reservedFor                                                                        | Hazir, SETUP_DB.md ile uygulanacak |
+| `0021_security_linter_fixes.sql` | SECURITY DEFINER fn'ler anon/authenticated icin revoke; is_admin/is_super_admin/current_app_user_id SECURITY INVOKER; derive_secret_key search_path pinned; failed_login_attempts_insert policy drop | Hazir, SETUP_DB.md ile uygulanacak |
 
 **Bu dosyayı güncellemek için:** milestone tamamlandığında status, blocker ve next steps bölümlerini düzenle.

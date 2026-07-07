@@ -32,7 +32,7 @@ export function CTASection({ scene }: CTASectionProps) {
 
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/signup"
+            href="/register"
             className="inline-flex items-center gap-2 rounded-lg bg-cyber-cyan px-8 py-4 font-display text-base font-black uppercase tracking-wider text-cyber-darker shadow-glow-cyan transition-all hover:brightness-110"
           >
             Ücretsiz Kayıt Ol →

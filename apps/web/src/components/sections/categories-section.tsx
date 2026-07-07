@@ -1,11 +1,17 @@
-'use client';
-
 import Link from 'next/link';
-import { categories } from '@/lib/products';
+import { CATEGORIES } from '@/lib/categories';
 
 const ICONS: Record<string, React.ReactNode> = {
   gamepad: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-8 w-8"
+    >
       <line x1="6" y1="11" x2="10" y2="11" />
       <line x1="8" y1="9" x2="8" y2="13" />
       <line x1="15" y1="12" x2="15.01" y2="12" />
@@ -14,7 +20,15 @@ const ICONS: Record<string, React.ReactNode> = {
     </svg>
   ),
   package: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-8 w-8"
+    >
       <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
       <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
@@ -22,7 +36,15 @@ const ICONS: Record<string, React.ReactNode> = {
     </svg>
   ),
   sparkles: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-8 w-8"
+    >
       <path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z" />
       <path d="M5 3v4M3 5h4M19 17v4M17 19h4" />
     </svg>
@@ -49,7 +71,7 @@ export function CategoriesSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {categories.map((cat) => (
+          {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
@@ -62,7 +84,7 @@ export function CategoriesSection() {
                 </div>
                 <div>
                   <h3 className="mb-1 font-display text-2xl font-black text-white">{cat.name}</h3>
-                  <p className="font-mono text-sm text-white/60">{cat.count} ürün</p>
+                  <p className="font-mono text-sm text-white/60">{cat.count ?? 0} ürün</p>
                 </div>
                 <div className="mt-2 font-mono text-xs uppercase tracking-widest text-cyber-cyan opacity-0 transition-opacity group-hover:opacity-100">
                   Keşfet →

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { initSentry, bindSentryErrorHandler } from './instrument';
-import { captureApiError } from './lib/sentry-helpers.ts';
+import { captureApiError } from './lib/sentry-helpers';
 import { authRoutes } from './interface/routes/auth';
 import { profileRoutes } from './interface/routes/profile';
 import { sessionRoutes } from './interface/routes/sessions';

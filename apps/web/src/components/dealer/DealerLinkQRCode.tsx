@@ -92,7 +92,7 @@ export function DealerLinkQRCode({ link }: { link: DealerLink }) {
         </button>
         <h1 className="font-orbitron text-2xl font-black text-white">QR Kod</h1>
         <p className="text-sm text-white/60">
-          <span className="font-mono text-cyber-cyan">{link.code}</span> kodlu linkin QR'ı
+          <span className="font-mono text-cyber-cyan">{link.code}</span> kodlu linkin QR&apos;ı
         </p>
       </div>
 
@@ -164,7 +164,7 @@ export function DealerLinkQRCode({ link }: { link: DealerLink }) {
               </div>
             </div>
             <p className="border-t border-cyber-cyan/20 pt-3 text-xs text-white/50">
-              QR'ı okutarak müşterilerin linkinle ürün satın alabilir.
+              QR&apos;ı okutarak müşterilerin linkinle ürün satın alabilir.
             </p>
             <Link
               href={`/dealer/links/${link.id}`}

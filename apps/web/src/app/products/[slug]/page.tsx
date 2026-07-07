@@ -4,27 +4,51 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ChevronRight, Star } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
 import { ProductGallery } from '@/components/store/product-gallery';
 import { ProductDetail } from '@/components/store/product-detail';
 import { ProductCard } from '@/components/store/product-card';
 import { StorefrontHeader } from '@/components/store/storefront-header';
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/json-ld';
-import { findProductBySlug, findRelated, products } from '@/lib/products';
+import { fetchProductBySlug, fetchProducts, type ProductSummary } from '@/lib/products-fetcher';
+import type { Product } from '@/lib/products';
+
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+function toCardProduct(p: ProductSummary): Product {
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    category:
+      p.categorySlug === 'yazilim' ? 'Yazılım' : p.categorySlug === 'ai-api' ? 'AI API' : 'Oyun',
+    categorySlug:
+      p.categorySlug === 'yazilim' || p.categorySlug === 'ai-api' ? p.categorySlug : 'oyun',
+    brand: p.brand,
+    image: p.image ?? '',
+    images: (p.images ?? []).map((i) => i.url).filter(Boolean),
+    price: p.price,
+    currency: 'TRY',
+    stock: p.stock,
+    featured: p.featured,
+    sold: p.sold,
+    createdAt: p.createdAt,
+    description: '',
+  };
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = findProductBySlug(slug);
+  const product = await fetchProductBySlug(slug);
   if (!product) return { title: 'Ürün bulunamadı' };
-  const description = `${product.brand} ${product.title}. ${product.description.split('.')[0]}.`;
+  const description = `${product.brand} ${product.title}. ${(product.description ?? '').split('.')[0]}.`;
   return {
     title: product.title,
     description,
-    keywords: [product.brand, product.category, 'dijital lisans', product.slug],
+    keywords: [product.brand, 'dijital lisans', product.slug],
     alternates: { canonical: `https://cyberlisans.com/products/${product.slug}` },
     openGraph: {
       title: product.title,
@@ -36,15 +60,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export async function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+  const list = await fetchProducts({ limit: 100 });
+  return list.items.map((p) => ({ slug: p.slug }));
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = findProductBySlug(slug);
-  if (!product) notFound();
+  const fetched = await fetchProductBySlug(slug);
+  if (!fetched) notFound();
+  const product = toCardProduct(fetched);
 
-  const related = findRelated(product, 4);
+  const relatedList = await fetchProducts({
+    category: fetched.categorySlug,
+    limit: 5,
+  });
+  const related = relatedList.items
+    .filter((p) => p.slug !== slug)
+    .slice(0, 4)
+    .map(toCardProduct);
 
   return (
     <>
