@@ -142,7 +142,16 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {error && <p className="text-sm text-brand-text-secondary">{error}</p>}
+        {error && (
+          <p className="rounded-lg border border-brand-danger/30 bg-brand-danger/10 px-3 py-2 text-sm text-brand-danger">
+            {error}
+            {error.includes('doğrulama') && (
+              <span className="mt-1 block text-xs text-white/60">
+                E-posta gelmediyse destek ile iletişime geç veya yeniden kayıt olmayı dene.
+              </span>
+            )}
+          </p>
+        )}
 
         <Button type="submit" variant="primary" className="w-full" disabled={loading}>
           {loading ? <Spinner size="sm" /> : null}

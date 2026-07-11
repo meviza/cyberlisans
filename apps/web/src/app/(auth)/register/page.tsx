@@ -77,7 +77,8 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register({ ...parsed.data, marketingOptIn: marketing });
-      router.push('/verify-email');
+      // auth-context auto-logs-in when emailVerified; otherwise go to verify
+      router.push('/dashboard');
     } catch (err) {
       if (err instanceof ApiError) setServerError(err.message);
       else setServerError('Bir hata oluştu');
@@ -171,7 +172,7 @@ export default function RegisterPage() {
               required
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
-              placeholder="En az 8 karakter"
+              placeholder="En az 12 karakter, Aa1!"
               className="pl-10 pr-10"
             />
             <button
@@ -182,8 +183,11 @@ export default function RegisterPage() {
               {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+          <p className="mt-1 text-xs text-white/40">
+            Min. 12 karakter · büyük/küçük harf · rakam · özel karakter
+          </p>
           {errMsg('password') && (
-            <p className="mt-1 text-sm text-brand-text-secondary">{errMsg('password')}</p>
+            <p className="mt-1 text-sm text-brand-danger">{errMsg('password')}</p>
           )}
         </div>
 

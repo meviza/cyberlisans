@@ -88,9 +88,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [refresh],
   );
 
-  const register = React.useCallback(async (input: RegisterPayload) => {
-    await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(input) });
-  }, []);
+  const register = React.useCallback(
+    async (input: RegisterPayload) => {
+      const res = await apiFetch<{ message?: string; emailVerified?: boolean; userId?: string }>(
+        '/auth/register',
+        { method: 'POST', body: JSON.stringify(input) },
+      );
+      // Auto-verified accounts: log in immediately for smoother UX
+      if (res.emailVerified) {
+        try {
+          const loginRes = await apiFetch<{
+            accessToken: string;
+            refreshToken: string;
+          }>('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email: input.email, password: input.password }),
+          });
+          setTokens(loginRes.accessToken, loginRes.refreshToken);
+          await refresh();
+        } catch {
+          // Register ok; login can be done manually
+        }
+      }
+    },
+    [refresh],
+  );
 
   const logout = React.useCallback(async () => {
     try {

@@ -24,6 +24,7 @@ export interface RegisterResult {
   userId: string;
   email: string;
   message: string;
+  emailVerified?: boolean;
 }
 
 function generateUniqueCode(): string {
@@ -102,6 +103,26 @@ export async function registerUser(
     userAgent: meta.userAgent,
   });
 
+  // Mail yoksa veya AUTH_SKIP_EMAIL_VERIFY=1 ise hesabı hemen aktif et
+  // (aksi halde kullanıcı PENDING kalır ve giriş yapamaz)
+  const mailConfigured = Boolean(
+    process.env['RESEND_API_KEY'] || process.env['SMTP_HOST'] || process.env['MAIL_FROM'],
+  );
+  const skipVerify =
+    process.env['AUTH_SKIP_EMAIL_VERIFY'] === '1' ||
+    process.env['AUTH_SKIP_EMAIL_VERIFY'] === 'true' ||
+    !mailConfigured;
+
+  if (skipVerify) {
+    await userRepository.setEmailVerified(user.id);
+    return {
+      userId: user.id,
+      email: user.email,
+      message: 'Kayıt başarılı. Giriş yapabilirsiniz.',
+      emailVerified: true as const,
+    };
+  }
+
   const token = await signEmailVerifyToken({ sub: user.id, email: user.email });
   const appUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000';
   const link = `${appUrl}/verify-email?token=${token}`;
@@ -110,12 +131,21 @@ export async function registerUser(
     await getMailService().send({ to: user.email, ...tpl });
   } catch (err) {
     console.error('[register] email send failed', err);
+    // Mail patlarsa yine de hesabı kilitlemeyelim
+    await userRepository.setEmailVerified(user.id);
+    return {
+      userId: user.id,
+      email: user.email,
+      message: 'Kayıt başarılı (doğrulama e-postası gönderilemedi). Giriş yapabilirsiniz.',
+      emailVerified: true as const,
+    };
   }
 
   return {
     userId: user.id,
     email: user.email,
     message: 'Kayıt başarılı. E-posta adresinizi doğrulayın.',
+    emailVerified: false as const,
   };
 }
 
@@ -126,24 +156,22 @@ export interface GenericRegisterResult {
 export async function registerUserGeneric(
   input: RegisterInput,
   meta: RequestMeta,
-): Promise<GenericRegisterResult> {
+): Promise<GenericRegisterResult & { emailVerified?: boolean; userId?: string }> {
   try {
-    await registerUser(input, meta);
+    const result = await registerUser(input, meta);
+    return {
+      message: result.message,
+      emailVerified: result.emailVerified,
+      userId: result.userId,
+    };
   } catch (err) {
+    // Anti-enumeration for duplicate identity only
     if (err instanceof EmailAlreadyExistsError || err instanceof UsernameTakenError) {
       return {
         message: 'Eğer bu bilgilerle yeni bir hesap oluşturulabilirse e-posta gönderildi.',
       };
     }
-    if (
-      err instanceof AgeRestrictionError ||
-      err instanceof MissingConsentError ||
-      err instanceof InvalidReferralError
-    ) {
-      throw err;
-    }
+    // Real failures must surface (DB, validation, etc.)
+    throw err;
   }
-  return {
-    message: 'Eğer bu bilgilerle yeni bir hesap oluşturulabilirse e-posta gönderildi.',
-  };
 }

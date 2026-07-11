@@ -82,7 +82,21 @@ export async function loginUser(input: LoginInput, meta: RequestMeta): Promise<L
     throw new AccountBannedError();
   }
   if (user.status === 'SUSPENDED') throw new AccountLockedError();
-  if (user.status === 'PENDING_VERIFICATION') throw new AccountPendingError();
+  if (user.status === 'PENDING_VERIFICATION') {
+    // Mail altyapısı yoksa veya skip flag: hesabı otomatik aktifleştir
+    const mailConfigured = Boolean(
+      process.env['RESEND_API_KEY'] || process.env['SMTP_HOST'] || process.env['MAIL_FROM'],
+    );
+    const skipVerify =
+      process.env['AUTH_SKIP_EMAIL_VERIFY'] === '1' ||
+      process.env['AUTH_SKIP_EMAIL_VERIFY'] === 'true' ||
+      !mailConfigured;
+    if (skipVerify) {
+      await userRepository.setEmailVerified(user.id);
+    } else {
+      throw new AccountPendingError();
+    }
+  }
 
   const twoFaRecord = await userTwoFactorRepository.findByUserId(user.id);
   const twoFactorEnabled = twoFaRecord?.enabled === true;
