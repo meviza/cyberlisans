@@ -27,10 +27,17 @@ const CURRENCY_OPTS = [
   { value: 'USDT', label: '₮ USDT' },
 ];
 
+/** Form allows false while editing; schema enforces true on submit. */
+type RegisterFormState = Omit<RegisterInput, 'isAdult' | 'consentKvkk' | 'consentTerms'> & {
+  isAdult: boolean;
+  consentKvkk: boolean;
+  consentTerms: boolean;
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
-  const [form, setForm] = React.useState<RegisterInput>({
+  const [form, setForm] = React.useState<RegisterFormState>({
     email: '',
     password: '',
     username: '',
@@ -49,8 +56,14 @@ export default function RegisterPage() {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [serverError, setServerError] = React.useState<string | null>(null);
 
-  const update = <K extends keyof RegisterInput>(key: K, value: RegisterInput[K]) => {
+  const update = <K extends keyof RegisterFormState>(key: K, value: RegisterFormState[K]) => {
     setForm((p) => ({ ...p, [key]: value }));
+    setErrors((prev) => {
+      if (!prev[key as string]) return prev;
+      const next = { ...prev };
+      delete next[key as string];
+      return next;
+    });
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -246,40 +259,62 @@ export default function RegisterPage() {
           />
         </div>
 
-        <div className="space-y-3 pt-2">
+        <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.03] p-3 pt-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-white/45">
+            Zorunlu onaylar
+          </p>
           <Checkbox
             checked={form.isAdult}
-            onChange={(e) => update('isAdult', e.target.checked as true)}
+            onChange={(e) => update('isAdult', e.target.checked)}
             label={
               <>
                 18 yaş üstüyüm <span className="text-brand-text-secondary">*</span>
               </>
             }
           />
+          {errMsg('isAdult') && <p className="text-sm text-brand-danger">{errMsg('isAdult')}</p>}
           <Checkbox
             checked={form.consentKvkk}
-            onChange={(e) => update('consentKvkk', e.target.checked as true)}
+            onChange={(e) => update('consentKvkk', e.target.checked)}
             label={
               <>
-                <Link href="/legal/kvkk" className="text-brand-accent hover:underline">
+                <Link
+                  href="/legal/kvkk"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-accent hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   KVKK aydınlatma metnini
                 </Link>{' '}
                 okudum <span className="text-brand-text-secondary">*</span>
               </>
             }
           />
+          {errMsg('consentKvkk') && (
+            <p className="text-sm text-brand-danger">{errMsg('consentKvkk')}</p>
+          )}
           <Checkbox
             checked={form.consentTerms}
-            onChange={(e) => update('consentTerms', e.target.checked as true)}
+            onChange={(e) => update('consentTerms', e.target.checked)}
             label={
               <>
-                <Link href="/legal/terms" className="text-brand-accent hover:underline">
+                <Link
+                  href="/legal/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-accent hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Kullanım koşullarını
                 </Link>{' '}
                 kabul ediyorum <span className="text-brand-text-secondary">*</span>
               </>
             }
           />
+          {errMsg('consentTerms') && (
+            <p className="text-sm text-brand-danger">{errMsg('consentTerms')}</p>
+          )}
           <Checkbox
             checked={marketing}
             onChange={(e) => setMarketing(e.target.checked)}
@@ -287,7 +322,12 @@ export default function RegisterPage() {
           />
         </div>
 
-        {serverError && <p className="text-sm text-brand-text-secondary">{serverError}</p>}
+        {Object.keys(errors).length > 0 && !serverError && (
+          <p className="text-sm text-brand-danger">
+            Lütfen formdaki hataları düzeltin (zorunlu onaylar ve alanlar).
+          </p>
+        )}
+        {serverError && <p className="text-sm text-brand-danger">{serverError}</p>}
 
         <Button type="submit" variant="primary" className="w-full" disabled={loading}>
           {loading ? <Spinner size="sm" /> : null}

@@ -42,8 +42,12 @@ export const registerSchema = z.object({
   currency: currencySchema.default('TRY'),
   referralCode: z.string().trim().max(60).optional(),
   isAdult: z.literal(true, { errorMap: () => ({ message: '18 yaş üstü olmalısınız' }) }),
-  consentKvkk: z.literal(true),
-  consentTerms: z.literal(true),
+  consentKvkk: z.literal(true, {
+    errorMap: () => ({ message: 'KVKK metnini onaylamanız gerekir' }),
+  }),
+  consentTerms: z.literal(true, {
+    errorMap: () => ({ message: 'Kullanım koşullarını kabul etmelisiniz' }),
+  }),
 });
 
 export const loginSchema = z.object({
