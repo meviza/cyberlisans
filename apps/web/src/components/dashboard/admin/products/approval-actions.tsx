@@ -75,7 +75,7 @@ export function ApprovalActions({
           Reddet
         </Button>
         <Link
-          href={`/dashboard/admin/products/${productId}`}
+          href={`/admin/product-approvals/${productId}`}
           className="rounded-md border border-cyber-cyan/40 px-2 py-1 text-xs text-cyber-cyan hover:bg-cyber-cyan/10"
         >
           İncele →

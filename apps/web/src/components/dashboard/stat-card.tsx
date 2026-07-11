@@ -17,29 +17,28 @@ export function StatCard({ label, value, icon: Icon, trend, hint }: StatCardProp
         aria-hidden
         className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background:
-            'radial-gradient(circle at top right, rgba(0,240,255,0.1), transparent 60%)',
+          background: 'radial-gradient(circle at top right, rgba(0,87,255,0.12), transparent 60%)',
         }}
       />
       <CardContent className="relative p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-white/60">{label}</p>
-            <p className="font-orbitron text-2xl font-bold text-white">{value}</p>
-            {hint && <p className="text-xs text-white/50">{hint}</p>}
+            <p className="text-xs font-medium uppercase tracking-wider text-brand-muted">{label}</p>
+            <p className="text-2xl font-semibold tracking-tight text-white">{value}</p>
+            {hint && <p className="text-xs text-brand-muted">{hint}</p>}
             {trend && (
               <p
                 className={
                   trend.positive
-                    ? 'text-xs font-medium text-cyber-lime'
-                    : 'text-xs font-medium text-cyber-magenta'
+                    ? 'text-xs font-medium text-brand-success'
+                    : 'text-xs font-medium text-brand-danger'
                 }
               >
                 {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}%
               </p>
             )}
           </div>
-          <div className="rounded-md border border-cyber-cyan/30 bg-cyber-cyan/10 p-2.5 text-cyber-cyan transition-all group-hover:border-cyber-cyan group-hover:shadow-[0_0_20px_rgba(0,240,255,0.5)]">
+          <div className="rounded-xl border border-white/10 bg-brand-accent/10 p-2.5 text-brand-accent transition group-hover:border-brand-accent/40">
             <Icon className="h-5 w-5" />
           </div>
         </div>

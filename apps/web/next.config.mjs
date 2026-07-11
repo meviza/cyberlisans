@@ -3,6 +3,35 @@ import { withSentryConfig } from '@sentry/nextjs';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: '/dashboard/admin/disputes',
+        destination: '/admin/disputes',
+        permanent: false,
+      },
+      {
+        source: '/dashboard/admin/disputes/:id',
+        destination: '/admin/disputes/:id',
+        permanent: false,
+      },
+      {
+        source: '/dashboard/admin/escrow',
+        destination: '/admin/escrow',
+        permanent: false,
+      },
+      {
+        source: '/dashboard/admin/products',
+        destination: '/admin/product-approvals',
+        permanent: false,
+      },
+      {
+        source: '/dashboard/admin/products/:id',
+        destination: '/admin/product-approvals/:id',
+        permanent: false,
+      },
+    ];
+  },
   transpilePackages: [
     '@cyberlisans/api',
     '@cyberlisans/ui',

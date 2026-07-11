@@ -24,7 +24,7 @@ export function ProductApprovalPanel({ productId, status }: ProductApprovalPanel
     const ok = await approve();
     if (ok) {
       setSuccess('APPROVED');
-      setTimeout(() => router.push('/dashboard/admin/products'), 800);
+      setTimeout(() => router.push('/admin/product-approvals'), 800);
     }
   };
 
@@ -32,7 +32,7 @@ export function ProductApprovalPanel({ productId, status }: ProductApprovalPanel
     const ok = await reject(reason);
     if (ok) {
       setSuccess('REJECTED');
-      setTimeout(() => router.push('/dashboard/admin/products'), 800);
+      setTimeout(() => router.push('/admin/product-approvals'), 800);
     }
   };
 

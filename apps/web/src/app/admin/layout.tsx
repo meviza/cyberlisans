@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AdminShell } from '@/components/admin/admin-shell';
+import { AdminShell } from '@/components/shell/admin-shell';
 
 export const metadata = {
   title: 'Admin Panel | CyberLisans',

@@ -1,20 +1,20 @@
 # M9 — Premium Redesign + Architecture Hardening Plan
 
 > **Tarih:** 2026-07-11  
-> **Durum:** Phase 1–2 in progress (foundation + landing uygulandı)  
+> **Durum:** Phase 1–3 in progress (shell + landing + tokens)  
 > **Amaç:** CyberLisans’ı GamsGo modelinde, sade-premium-kurumsal, 3D landing + 3 dashboard ile production-ready kaliteye yükseltmek.
 
 ### İlerleme (2026-07-11)
 
-| Phase             | Durum     | Not                                                |
-| ----------------- | --------- | -------------------------------------------------- |
-| 0 MCP + erişim    | ⚠️ Kısmi  | GitHub ✅ Vercel ✅ Supabase CLI yanlış org        |
-| 1 Design system   | ✅ Kısmi  | Tokens, Button/Badge/Card/Input, globals           |
-| 2 Landing         | ✅ Kısmi  | Hero 3D lazy, trust strip, sections sadeleştirildi |
-| 3 Dashboard       | ⚪ Sırada | AppShell + 3 rol                                   |
-| 4 Backend cleanup | ⚪        |                                                    |
-| 5 DB/perf         | ⚪        | Supabase link sonrası                              |
-| 6 QA              | ⚪        | web vitest 18/18 geçti                             |
+| Phase             | Durum    | Not                                                |
+| ----------------- | -------- | -------------------------------------------------- |
+| 0 MCP + erişim    | ⚠️ Kısmi | GitHub ✅ Vercel ✅ Supabase CLI yanlış org        |
+| 1 Design system   | ✅       | Tokens, Button/Badge/Card/Input, globals           |
+| 2 Landing         | ✅       | Hero 3D lazy, trust strip, sections sadeleştirildi |
+| 3 Dashboard       | ✅ Kısmi | AppShell 3 rol, mobile nav, admin route redirects  |
+| 4 Backend cleanup | ⚪       |                                                    |
+| 5 DB/perf         | ⚪       | Supabase link sonrası                              |
+| 6 QA              | ⚪       | web vitest 18/18 geçti                             |
 
 ---
 

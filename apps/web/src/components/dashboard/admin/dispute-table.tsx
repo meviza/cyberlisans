@@ -66,7 +66,7 @@ export function DisputeTable({ rows }: DisputeTableProps) {
                   <td className="px-4 py-3 text-xs text-white/50">{formatDateTime(r.openedAt)}</td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/dashboard/admin/disputes/${r.id}`}
+                      href={`/admin/disputes/${r.id}`}
                       className="rounded-md border border-cyber-cyan/40 px-2 py-1 text-xs text-cyber-cyan hover:bg-cyber-cyan/10"
                     >
                       Çöz →
