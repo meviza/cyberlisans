@@ -41,7 +41,7 @@ export function CancelOrderModal({
     setError(null);
     setBusy(true);
     try {
-      await apiFetch(`/api/admin/orders/${orderId}/cancel`, {
+      await apiFetch(`/admin/orders/${orderId}/cancel`, {
         method: 'POST',
         body: JSON.stringify({ reason: reason.trim(), restoreKeys }),
       });

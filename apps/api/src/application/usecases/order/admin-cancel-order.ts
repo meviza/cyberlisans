@@ -1,6 +1,8 @@
-import { prisma } from '../../../infrastructure/db';
 import { orderRepository } from '../../../infrastructure/repositories/order.repository';
+import { productRepository } from '../../../infrastructure/repositories/product.repository';
+import { productKeyRepository } from '../../../infrastructure/repositories/product-key.repository';
 import { auditRepository } from '../../../infrastructure/repositories/audit.repository';
+import { supabaseAdmin, dbError } from '../../../infrastructure/db';
 import { OrderNotFoundError } from '../../../domain/errors/wallet';
 
 export interface AdminCancelOrderInput {
@@ -16,40 +18,44 @@ export async function adminCancelOrder(input: AdminCancelOrderInput) {
   const order = await orderRepository.findById(input.orderId, true);
   if (!order) throw new OrderNotFoundError();
   if (order.status === 'CANCELLED') {
-    return { order, idempotent: true };
+    return { order, idempotent: true as const };
   }
   if (order.status !== 'PENDING') {
     return { ok: false as const, reason: 'NOT_CANCELLABLE' as const, order };
   }
 
-  await prisma.$transaction(async (tx: typeof prisma) => {
-    if (input.restoreKeys && order.items) {
-      for (const item of order.items) {
-        if (item.productKeyId) {
-          await tx.productKey.update({
-            where: { id: item.productKeyId },
-            data: { reservedAt: null, reservedFor: null },
-          });
+  if (input.restoreKeys && order.items) {
+    for (const item of order.items) {
+      if (item.id) {
+        try {
+          await productKeyRepository.returnKeysForOrderItem(item.id);
+        } catch {
+          /* best-effort */
         }
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
+      }
+      try {
+        await productRepository.incrementStock(item.productId, item.quantity || item.qty || 1);
+      } catch {
+        /* best-effort */
       }
     }
-    await tx.order.update({
-      where: { id: order.id },
-      data: {
-        status: 'CANCELLED',
-        cancelledAt: new Date(),
-        notes: order.notes
-          ? `${order.notes}\n[ADMIN CANCEL] ${input.reason}`
-          : `[ADMIN CANCEL] ${input.reason}`,
-      },
-    });
+  }
+
+  const notes = order.notes
+    ? `${order.notes}\n[ADMIN CANCEL] ${input.reason}`
+    : `[ADMIN CANCEL] ${input.reason}`;
+
+  await orderRepository.updateStatus(order.id, 'CANCELLED', {
+    cancelledAt: new Date(),
   });
 
-  const updated = await orderRepository.findById(order.id);
+  const { error: nErr } = await supabaseAdmin()
+    .from('orders')
+    .update({ notes, updatedAt: new Date().toISOString() })
+    .eq('id', order.id);
+  if (nErr) throw dbError(nErr);
+
+  const updated = await orderRepository.findById(order.id, true);
   await auditRepository.log({
     actorId: input.adminId,
     targetUserId: order.userId,

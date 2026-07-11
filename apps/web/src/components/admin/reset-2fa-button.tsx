@@ -31,7 +31,7 @@ export function Reset2FAButton({
     setError(null);
     setBusy(true);
     try {
-      await apiFetch(`/api/admin/users/${userId}/reset-2fa`, { method: 'POST' });
+      await apiFetch(`/admin/users/${userId}/reset-2fa`, { method: 'POST' });
       setOpen(false);
       setConfirm('');
       onDone?.();

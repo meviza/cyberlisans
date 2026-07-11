@@ -10,8 +10,11 @@ export const createOrderSchema = z.object({
     )
     .min(1)
     .max(20),
-  currency: z.enum(['TRY', 'USD', 'EUR', 'USDT']),
-  paymentMethod: z.enum(['PAYTR', 'PAPARA', 'NOWPAYMENTS', 'STRIPE', 'BANK_TRANSFER', 'WALLET']),
+  currency: z.enum(['TRY', 'USD', 'EUR', 'USDT']).default('TRY'),
+  // Payment providers deferred — BANK_TRANSFER = "manual / pending payment"
+  paymentMethod: z
+    .enum(['PAYTR', 'PAPARA', 'NOWPAYMENTS', 'STRIPE', 'BANK_TRANSFER', 'WALLET'])
+    .default('BANK_TRANSFER'),
   notes: z.string().max(500).optional(),
   refCode: z.string().min(3).max(60).optional(),
 });

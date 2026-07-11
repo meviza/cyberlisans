@@ -48,7 +48,7 @@ export function RefundPaymentModal({
     setError(null);
     setBusy(true);
     try {
-      await apiFetch(`/api/admin/payments/${paymentId}/refund`, {
+      await apiFetch(`/admin/payments/${paymentId}/refund`, {
         method: 'POST',
         body: JSON.stringify({
           amount: amtNum,

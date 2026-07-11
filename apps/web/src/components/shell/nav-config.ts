@@ -15,6 +15,7 @@ import {
   Users,
   ScrollText,
   Boxes,
+  UserCheck,
 } from 'lucide-react';
 
 export type ShellVariant = 'customer' | 'seller' | 'admin';
@@ -45,6 +46,12 @@ export const SELLER_NAV: ShellNavItem[] = [
 
 export const ADMIN_NAV: ShellNavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, group: 'Genel' },
+  {
+    href: '/admin/sellers',
+    label: 'Satıcılar / KYC',
+    icon: UserCheck,
+    group: 'Marketplace',
+  },
   {
     href: '/admin/product-approvals',
     label: 'Ürün onayları',

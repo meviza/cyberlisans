@@ -21,17 +21,33 @@ export function OrderActionButtons({
   currentStatus,
   onDone,
 }: OrderActionButtonsProps) {
-  const [busy, setBusy] = React.useState<null | 'fulfill' | 'cancel'>(null);
+  const [busy, setBusy] = React.useState<null | 'fulfill' | 'cancel' | 'paid'>(null);
 
+  const markablePaid = mode === 'inline' && currentStatus === 'PENDING';
   const fulfillable = mode === 'inline' && currentStatus === 'PAID';
   const cancellable =
     mode === 'inline' && (currentStatus === 'PENDING' || currentStatus === 'PAID');
+
+  const markPaid = async () => {
+    if (!orderId || busy) return;
+    setBusy('paid');
+    try {
+      // api-client prefixes /api
+      await apiFetch(`/admin/orders/${orderId}/mark-paid`, { method: 'POST' });
+      onDone?.();
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : 'İşlem başarısız';
+      window.alert(msg);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const fulfill = async () => {
     if (!orderId || busy) return;
     setBusy('fulfill');
     try {
-      await apiFetch(`/api/admin/orders/${orderId}/fulfill`, { method: 'POST' });
+      await apiFetch(`/admin/orders/${orderId}/fulfill`, { method: 'POST' });
       onDone?.();
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : 'İşlem başarısız';
@@ -47,7 +63,7 @@ export function OrderActionButtons({
     if (!reason || reason.trim().length < 5) return;
     setBusy('cancel');
     try {
-      await apiFetch(`/api/admin/orders/${orderId}/cancel`, {
+      await apiFetch(`/admin/orders/${orderId}/cancel`, {
         method: 'POST',
         body: JSON.stringify({ reason: reason.trim(), restoreKeys: true }),
       });
@@ -68,7 +84,7 @@ export function OrderActionButtons({
       let ok = 0;
       for (const id of orderIds) {
         try {
-          await apiFetch(`/api/admin/orders/${id}/fulfill`, { method: 'POST' });
+          await apiFetch(`/admin/orders/${id}/fulfill`, { method: 'POST' });
           ok++;
         } catch {
           /* swallow */
@@ -87,7 +103,7 @@ export function OrderActionButtons({
       let ok = 0;
       for (const id of orderIds) {
         try {
-          await apiFetch(`/api/admin/orders/${id}/cancel`, {
+          await apiFetch(`/admin/orders/${id}/cancel`, {
             method: 'POST',
             body: JSON.stringify({ reason: reason.trim(), restoreKeys: true }),
           });
@@ -136,6 +152,21 @@ export function OrderActionButtons({
 
   return (
     <div className="flex items-center gap-1">
+      {markablePaid && (
+        <button
+          type="button"
+          onClick={markPaid}
+          disabled={busy !== null}
+          title="Ödendi işaretle (manuel)"
+          className="rounded p-1.5 text-brand-accent/80 transition-colors hover:bg-brand-accent/10 hover:text-brand-accent disabled:opacity-40"
+        >
+          {busy === 'paid' ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </button>
+      )}
       {fulfillable && (
         <button
           type="button"

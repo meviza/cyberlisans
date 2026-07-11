@@ -111,7 +111,7 @@ export function PaymentsTable({
       if (filters.from) qs.set('from', filters.from);
       if (filters.to) qs.set('to', filters.to);
       const res = await apiFetch<{ items: AdminPaymentRow[]; total: number; totalPages: number }>(
-        `/api/admin/payments?${qs.toString()}`,
+        `/admin/payments?${qs.toString()}`,
       );
       setData(res.items);
       setTotal(res.total);
@@ -164,7 +164,7 @@ export function PaymentsTable({
     let fail = 0;
     for (const id of Array.from(selected)) {
       try {
-        await apiFetch(`/api/admin/payments/${id}/refund`, {
+        await apiFetch(`/admin/payments/${id}/refund`, {
           method: 'POST',
           body: JSON.stringify({ creditWallet: true }),
         });

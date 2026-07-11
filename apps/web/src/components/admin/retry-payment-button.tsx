@@ -20,7 +20,7 @@ export function RetryPaymentButton({ paymentId, onDone, className }: RetryPaymen
     setBusy(true);
     setErr(null);
     try {
-      await apiFetch(`/api/admin/payments/${paymentId}/retry`, { method: 'POST' });
+      await apiFetch(`/admin/payments/${paymentId}/retry`, { method: 'POST' });
       onDone?.();
     } catch (e) {
       if (e instanceof ApiError) setErr(e.message);

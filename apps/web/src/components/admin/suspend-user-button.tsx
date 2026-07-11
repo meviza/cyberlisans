@@ -37,7 +37,7 @@ export function SuspendUserButton({
       return;
     setBusy(true);
     try {
-      await apiFetch(`/api/admin/users/${userId}`, {
+      await apiFetch(`/admin/users/${userId}`, {
         method: 'PATCH',
         body: JSON.stringify({ status: isSuspended ? 'ACTIVE' : 'SUSPENDED' }),
       });

@@ -35,11 +35,11 @@ export default function AdminUserDetailPage() {
     setError(null);
     try {
       const [u, o, p, a] = await Promise.all([
-        apiFetch<AdminUserDetail>(`/api/admin/users/${userId}`),
-        apiFetch<{ items: UserOrderRow[] }>(`/api/admin/orders?limit=50`),
-        apiFetch<{ items: UserPaymentRow[] }>(`/api/admin/payments?limit=50`),
+        apiFetch<AdminUserDetail>(`/admin/users/${userId}`),
+        apiFetch<{ items: UserOrderRow[] }>(`/admin/orders?limit=50`),
+        apiFetch<{ items: UserPaymentRow[] }>(`/admin/payments?limit=50`),
         apiFetch<{ items: AuditLogRow[] }>(
-          `/api/admin/audit/export?actorId=${userId}&targetUserId=${userId}&limit=50`,
+          `/admin/audit/export?actorId=${userId}&targetUserId=${userId}&limit=50`,
         ),
       ]);
       setUser(u);
@@ -67,7 +67,7 @@ export default function AdminUserDetailPage() {
     if (!window.confirm(`${user.username} için şifre sıfırlama e-postası gönder?`)) return;
     setResetBusy(true);
     try {
-      await apiFetch(`/api/admin/users/${user.id}/send-password-reset`, { method: 'POST' });
+      await apiFetch(`/admin/users/${user.id}/send-password-reset`, { method: 'POST' });
       window.alert('Şifre sıfırlama e-postası gönderildi');
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : 'Gönderilemedi';
@@ -88,7 +88,7 @@ export default function AdminUserDetailPage() {
     setDeleteBusy(true);
     try {
       const token = getAccessToken();
-      const res = await fetch(`/api/admin/users/${user.id}/delete`, {
+      const res = await fetch(`/admin/users/${user.id}/delete`, {
         method: 'DELETE',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });

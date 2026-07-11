@@ -7,8 +7,8 @@ import { getAdminOrder } from '../../../application/usecases/order/get-admin-ord
 import { adminFulfillOrder } from '../../../application/usecases/order/admin-fulfill-order';
 import { adminRefundOrder } from '../../../application/usecases/order/admin-refund-order';
 import { adminCancelOrder } from '../../../application/usecases/order/admin-cancel-order';
+import { adminMarkPaid } from '../../../application/usecases/order/admin-mark-paid';
 import { adminResendOrderConfirmation } from '../../../application/usecases/order/admin-resend-confirmation';
-import { prisma } from '../../../infrastructure/db';
 import { getRequestMeta } from '../../middleware/request-meta';
 
 export const adminOrdersRoutes = new Hono();
@@ -58,33 +58,16 @@ adminOrdersRoutes.get('/', zValidator('query', listQuerySchema), async (c) => {
 
 adminOrdersRoutes.get('/export', zValidator('query', listQuerySchema), async (c) => {
   const q = c.req.valid('query');
-  const where: Record<string, unknown> = {};
-  if (q.status) where['status'] = q.status;
-  if (q.paymentMethod) where['paymentMethod'] = q.paymentMethod;
-  if (q.currency) where['currency'] = q.currency;
-  if (q.from || q.to) {
-    where['createdAt'] = {
-      ...(q.from ? { gte: new Date(q.from) } : {}),
-      ...(q.to ? { lte: new Date(q.to) } : {}),
-    };
-  }
-  if (q.search && q.search.trim().length > 0) {
-    const term = q.search.trim();
-    where['OR'] = [
-      { orderNumber: { contains: term, mode: 'insensitive' } },
-      { id: { equals: term } },
-      { user: { email: { contains: term, mode: 'insensitive' } } },
-    ];
-  }
-  const items = await prisma.order.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    take: 10000,
-    include: {
-      user: { select: { email: true, username: true } },
-      items: { select: { quantity: true, totalPrice: true } },
-      payments: { orderBy: { createdAt: 'desc' }, take: 1, select: { status: true } },
-    },
+  const result = await listAdminOrders({
+    search: q.search,
+    status: q.status,
+    paymentStatus: q.paymentStatus,
+    paymentMethod: q.paymentMethod,
+    currency: q.currency,
+    from: q.from ? new Date(q.from) : undefined,
+    to: q.to ? new Date(q.to) : undefined,
+    page: 1,
+    limit: 10000,
   });
   const headers = [
     'id',
@@ -108,7 +91,7 @@ adminOrdersRoutes.get('/export', zValidator('query', listQuerySchema), async (c)
     return s;
   };
   const lines = [headers.join(',')];
-  for (const o of items) {
+  for (const o of result.items) {
     lines.push(
       [
         o.id,
@@ -117,11 +100,11 @@ adminOrdersRoutes.get('/export', zValidator('query', listQuerySchema), async (c)
         o.user.email,
         o.user.username,
         o.status,
-        o.payments[0]?.status ?? '',
+        o.paymentStatus ?? '',
         o.paymentMethod ?? '',
         o.currency,
         Number(o.totalAmount).toFixed(2),
-        o.items.reduce((s: number, it: { quantity: number }) => s + it.quantity, 0),
+        o.itemsCount,
       ]
         .map(escape)
         .join(','),
@@ -141,6 +124,17 @@ adminOrdersRoutes.get('/export', zValidator('query', listQuerySchema), async (c)
 adminOrdersRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
   return c.json(await getAdminOrder(id));
+});
+
+adminOrdersRoutes.post('/:id/mark-paid', async (c) => {
+  const admin = c.get('user');
+  const id = c.req.param('id');
+  const meta = getRequestMeta(c);
+  const result = await adminMarkPaid({ orderId: id, adminId: admin.sub, ...meta });
+  if ('ok' in result && result.ok === false) {
+    return c.json({ error: 'Sipariş PENDING değil', code: result.reason }, 409);
+  }
+  return c.json(result);
 });
 
 adminOrdersRoutes.post('/:id/fulfill', async (c) => {

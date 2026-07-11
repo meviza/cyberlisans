@@ -56,7 +56,7 @@ export function AdjustWalletModal({ user, open, onClose, onSuccess }: AdjustWall
     setError(null);
     setBusy(true);
     try {
-      await apiFetch(`/api/admin/users/${user.id}/wallet-adjust`, {
+      await apiFetch(`/admin/users/${user.id}/wallet-adjust`, {
         method: 'POST',
         body: JSON.stringify({
           amount: amountNum,
