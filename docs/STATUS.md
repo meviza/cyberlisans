@@ -7,7 +7,7 @@
 **Mevcut milestone:** M9 premium redesign (Phase 1–4) + hosting → Netlify
 **Son tamamlanan:** M5.2 pre-launch hardening; M9 FE redesign main'de
 **Production (legacy):** https://cyberlisans-mp.vercel.app (son deploys Error)
-**Production (hedef):** Netlify (kurulum: `netlify.toml` + `scripts/netlify-bootstrap.sh`)
+**Production:** https://cyberlisans.netlify.app
 
 ---
 
