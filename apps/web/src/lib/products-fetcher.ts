@@ -158,10 +158,9 @@ export async function fetchCategories(): Promise<CategoryRow[]> {
       revalidate: 300,
       tags: ['categories'],
     });
-    return data.items;
-  } catch (err) {
-    if (isNetworkError(err)) return [];
-    throw err;
+    return data.items ?? [];
+  } catch {
+    return [];
   }
 }
 
@@ -171,9 +170,8 @@ export async function fetchBrands(): Promise<BrandRow[]> {
       revalidate: 300,
       tags: ['brands'],
     });
-    return data.items;
-  } catch (err) {
-    if (isNetworkError(err)) return [];
-    throw err;
+    return data.items ?? [];
+  } catch {
+    return [];
   }
 }
