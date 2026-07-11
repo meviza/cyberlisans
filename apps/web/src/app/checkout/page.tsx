@@ -246,8 +246,8 @@ export default function CheckoutPage() {
               {method === 'STRIPE' && (
                 <div className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-white/60">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-accent" />
-                  Stripe Checkout’a yönlendirileceksin. Link ile tek tık ödeme desteklenir (test
-                  modu).
+                  Stripe Checkout’a yönlendirileceksin (kart + Link). Minimum tutar ~₺50 / $0.50
+                  (Stripe kuralı). Test kartı: 4242 4242 4242 4242.
                 </div>
               )}
               {method === 'NOWPAYMENTS' && (

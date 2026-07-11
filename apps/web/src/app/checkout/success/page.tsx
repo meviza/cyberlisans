@@ -82,10 +82,22 @@ export default function CheckoutSuccessPage() {
           </div>
           <div className="mb-3 flex items-center gap-2 rounded-full border border-brand-accent/40 bg-brand-accent/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-brand-accent">
             <Sparkles className="h-3 w-3" />
-            Sipariş onaylandı
+            {order?.status === 'PENDING'
+              ? 'Ödeme bekleniyor'
+              : order?.status === 'PAID' || order?.status === 'FULFILLED'
+                ? 'Ödeme alındı'
+                : 'Sipariş durumu'}
           </div>
-          <h1 className="mb-2 text-3xl font-black text-white sm:text-4xl">Teşekkürler!</h1>
-          <p className="text-white/60">Siparişin başarıyla alındı. Anında teslim başladı.</p>
+          <h1 className="mb-2 text-3xl font-black text-white sm:text-4xl">
+            {order?.status === 'PENDING' ? 'Sipariş alındı' : 'Teşekkürler!'}
+          </h1>
+          <p className="text-white/60">
+            {order?.status === 'PENDING'
+              ? 'Ödeme onaylanınca anahtarların hesabına düşer.'
+              : order?.status === 'FULFILLED' || order?.status === 'PAID'
+                ? 'Siparişin işlendi. Anahtarların sipariş detayında.'
+                : 'Siparişin kaydedildi.'}
+          </p>
         </div>
 
         <Card className="w-full">

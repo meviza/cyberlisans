@@ -56,6 +56,12 @@ export class StripeProvider implements IPaymentProvider {
     if (input.amount <= 0) throw new InvalidAmountError(input.amount);
     if (!['TRY', 'USD', 'EUR'].includes(input.currency))
       throw new CurrencyNotSupportedError(input.currency, 'STRIPE');
+    // Stripe requires Checkout total ≥ ~$0.50 USD equivalent
+    const minByCurrency: Record<string, number> = { TRY: 50, USD: 0.5, EUR: 0.5 };
+    const min = minByCurrency[input.currency] ?? 0.5;
+    if (input.amount < min) {
+      throw new InvalidAmountError(input.amount);
+    }
     const currency = this.getCurrencyForStripe(input.currency);
     const amount = this.getAmountForCurrency(input.amount, currency);
 
