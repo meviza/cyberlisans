@@ -204,7 +204,7 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ChartCard title="Sipariş Trendi" description="Son 30 gün" className="lg:col-span-2">
-          <LineChart data={s.orders.last30Days} labels={orderLabels} color="#00F0FF" height={220} />
+          <LineChart data={s.orders.last30Days} labels={orderLabels} color="#0057FF" height={220} />
         </ChartCard>
 
         <ChartCard title="Ödeme Yöntemi" description="Tüm zamanlar">
@@ -223,7 +223,7 @@ export default function AdminDashboardPage() {
           <AreaChart
             data={s.revenue.last30Days}
             labels={revenueLabels}
-            color="#FF00C8"
+            color="#6B7CFF"
             height={220}
           />
         </ChartCard>
@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
           ) : (
             <BarChart
               data={s.topProducts.map((p) => ({ label: p.title, value: p.sold }))}
-              color="#00F0FF"
+              color="#0057FF"
               formatValue={(v) => `${formatNumber(v)} adet`}
             />
           )}

@@ -16,7 +16,7 @@ export interface BarChartProps {
 export function BarChart({
   data,
   height = 200,
-  color = '#00F0FF',
+  color = '#0057FF',
   formatValue = (v) => v.toLocaleString('tr-TR'),
 }: BarChartProps) {
   const rowH = 28;

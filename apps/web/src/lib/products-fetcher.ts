@@ -4,13 +4,27 @@
  * Bu modul Server Component'lerden cagrilir; Hono API'ina SSR sirasinda
  * baglanir. Browser'a fetch kodu gondermez.
  *
- * Network failures return empty data so Vercel build / cold paths do not crash
- * when API is unreachable; HTTP error status still throws.
+ * Build/prerender and cold paths must not crash: any upstream failure returns
+ * empty data for list endpoints. Detail fetch returns null.
+ *
+ * On Netlify/Vercel the Hono app is mounted under Next `/api/*`. Standalone
+ * local API (`:3001`) stays without the prefix.
  */
 
-const API_URL =
-  process.env['API_INTERNAL_URL'] ?? process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
+function resolveApiBase(): string {
+  const raw = (
+    process.env['API_INTERNAL_URL'] ??
+    process.env['NEXT_PUBLIC_API_URL'] ??
+    'http://localhost:3001'
+  ).replace(/\/$/, '');
+  if (raw.endsWith('/api')) return raw;
+  // Standalone Hono (local or separate service)
+  if (/:(3001)\b/.test(raw) || raw.includes('localhost:3001')) return raw;
+  // Same-origin Next deployment → routes live under /api
+  return `${raw}/api`;
+}
 
+const API_URL = resolveApiBase();
 export interface ProductImage {
   url: string;
   alt?: string;
@@ -94,10 +108,6 @@ async function fetchJson<T>(path: string, init: FetchOptions = {}): Promise<T> {
   return (await res.json()) as T;
 }
 
-function isNetworkError(err: unknown): boolean {
-  return err instanceof Error && err.message.startsWith('Network error');
-}
-
 export async function fetchProducts(input: {
   category?: string;
   brand?: string;
@@ -122,9 +132,8 @@ export async function fetchProducts(input: {
       revalidate: 60,
       tags: ['products'],
     });
-  } catch (err) {
-    if (isNetworkError(err)) return emptyList(input.limit ?? 24);
-    throw err;
+  } catch {
+    return emptyList(input.limit ?? 24);
   }
 }
 
@@ -134,10 +143,9 @@ export async function fetchFeaturedProducts(limit = 8): Promise<ProductSummary[]
       revalidate: 60,
       tags: ['products', 'products:featured'],
     });
-    return data.items;
-  } catch (err) {
-    if (isNetworkError(err)) return [];
-    throw err;
+    return data.items ?? [];
+  } catch {
+    return [];
   }
 }
 

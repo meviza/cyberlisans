@@ -65,9 +65,11 @@ describe('fetchProducts', () => {
     expect(url).toContain('sort=price_asc');
   });
 
-  it('throws on non-ok response', async () => {
+  it('returns empty list on non-ok response (build-safe soft-fail)', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 }) as unknown as typeof fetch;
-    await expect(fetchProducts({})).rejects.toThrow(/500/);
+    const result = await fetchProducts({});
+    expect(result.items).toEqual([]);
+    expect(result.total).toBe(0);
   });
 });
 

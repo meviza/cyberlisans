@@ -24,7 +24,7 @@ export default async function OG() {
           style={{
             fontSize: 90,
             fontWeight: 900,
-            background: 'linear-gradient(135deg, #00F0FF, #FF00C8)',
+            background: 'linear-gradient(135deg, #0057FF, #6B7CFF)',
             backgroundClip: 'text',
             color: 'transparent',
             letterSpacing: -2,
@@ -32,16 +32,16 @@ export default async function OG() {
         >
           CyberLisans
         </div>
-        <div style={{ fontSize: 32, color: '#00F0FF', marginTop: 20 }}>
+        <div style={{ fontSize: 32, color: '#0057FF', marginTop: 20 }}>
           Dijital Lisansların Yeni Adresi
         </div>
-        <div style={{ display: 'flex', gap: 40, marginTop: 50, fontSize: 26, color: '#FF00C8' }}>
+        <div style={{ display: 'flex', gap: 40, marginTop: 50, fontSize: 26, color: '#6B7CFF' }}>
           <span>Aninda Teslim</span>
           <span>Guvenli Odeme</span>
           <span>Coklu Para Birimi</span>
         </div>
       </div>
     ),
-    { ...size }
+    { ...size },
   );
 }

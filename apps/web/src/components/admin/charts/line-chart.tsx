@@ -14,9 +14,9 @@ export function LineChart({
   data,
   labels,
   height = 200,
-  color = '#00F0FF',
-  gradientFrom = 'rgba(0,240,255,0.35)',
-  gradientTo = 'rgba(0,240,255,0)',
+  color = '#0057FF',
+  gradientFrom = 'rgba(0,87,255,0.35)',
+  gradientTo = 'rgba(0,87,255,0)',
   showDots = true,
 }: LineChartProps) {
   const width = 600;

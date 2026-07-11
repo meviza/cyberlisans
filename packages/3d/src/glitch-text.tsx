@@ -74,7 +74,7 @@ function GlitchTextMaterial({ color, intensity = 1 }: { color: string; intensity
 function GlitchText({
   text,
   fontSize = 1,
-  color = '#00ffff',
+  color = '#0057FF',
   position = [0, 0, 0],
 }: GlitchTextProps) {
   return (

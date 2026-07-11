@@ -53,10 +53,10 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-function NeonGridMesh({ color = '#00ffff', speed = 1, size = 30, divisions = 20 }: NeonGridProps) {
+function NeonGridMesh({ color = '#0057FF', speed = 1, size = 30, divisions = 20 }: NeonGridProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const colorA = React.useMemo(() => new THREE.Color(color), [color]);
-  const colorB = React.useMemo(() => new THREE.Color('#ff00ff'), []);
+  const colorB = React.useMemo(() => new THREE.Color('#6B7CFF'), []);
 
   useFrame(({ clock }) => {
     if (matRef.current?.uniforms.uTime)

@@ -17,7 +17,7 @@ export interface ScrollProgressProps {
 function ScrollProgressMesh({
   height = 0.2,
   width = 4,
-  color = '#00ffff',
+  color = '#0057FF',
   bgColor = '#0a0a14',
   position = [0, 0, 0],
   scrollContainer,

@@ -39,8 +39,8 @@ function MagneticButton({ strength = 0.3, position = [0, 0, 0], onClick }: Magne
       <mesh>
         <boxGeometry args={[2.5, 0.7, 0.1]} />
         <meshStandardMaterial
-          color={hovered ? '#00ffff' : '#0a0a14'}
-          emissive={hovered ? '#00ffff' : '#00aaff'}
+          color={hovered ? '#0057FF' : '#0a0a14'}
+          emissive={hovered ? '#0057FF' : '#0044CC'}
           emissiveIntensity={hovered ? 1.2 : 0.4}
           metalness={0.6}
           roughness={0.3}

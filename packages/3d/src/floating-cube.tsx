@@ -17,8 +17,8 @@ export interface FloatingCubeProps {
 
 function FloatingCube({
   size = 1,
-  color = '#00ffff',
-  edgeColor = '#ff00ff',
+  color = '#0057FF',
+  edgeColor = '#6B7CFF',
   speed = 1,
   position = [0, 0, 0],
   enableControls = false,

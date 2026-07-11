@@ -47,7 +47,7 @@ function TiltCard({
         <boxGeometry args={[width, height, depth]} />
         <meshStandardMaterial
           color={color}
-          emissive={hovered ? '#00ffff' : '#001a1a'}
+          emissive={hovered ? '#0057FF' : '#012139'}
           emissiveIntensity={hovered ? 0.5 : 0.1}
           metalness={0.7}
           roughness={0.2}
@@ -56,7 +56,7 @@ function TiltCard({
       {hovered && (
         <mesh position={[0, 0, -depth / 2 - 0.01]}>
           <planeGeometry args={[width * 1.2, height * 1.2]} />
-          <meshBasicMaterial color="#00ffff" transparent opacity={0.1} side={THREE.DoubleSide} />
+          <meshBasicMaterial color="#0057FF" transparent opacity={0.1} side={THREE.DoubleSide} />
         </mesh>
       )}
     </group>

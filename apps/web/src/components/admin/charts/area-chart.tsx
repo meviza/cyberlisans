@@ -7,7 +7,7 @@ export interface AreaChartProps {
   color?: string;
 }
 
-export function AreaChart({ data, labels, height = 200, color = '#FF00C8' }: AreaChartProps) {
+export function AreaChart({ data, labels, height = 200, color = '#6B7CFF' }: AreaChartProps) {
   const width = 600;
   const padding = { top: 12, right: 12, bottom: 24, left: 36 };
   const w = width - padding.left - padding.right;
