@@ -4,7 +4,15 @@ export const initiatePaymentSchema = z.object({
   orderId: z.string().uuid().optional(),
   amount: z.number().positive().max(1_000_000),
   currency: z.enum(['TRY', 'USD', 'EUR', 'USDT']),
-  provider: z.enum(['PAYTR', 'PAPARA', 'NOWPAYMENTS', 'STRIPE', 'BANK_TRANSFER', 'SHOPIER']),
+  provider: z.enum([
+    'PAYTR',
+    'PAPARA',
+    'NOWPAYMENTS',
+    'STRIPE',
+    'BANK_TRANSFER',
+    'SHOPIER',
+    'WALLET',
+  ]),
   returnUrl: z.string().url().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });

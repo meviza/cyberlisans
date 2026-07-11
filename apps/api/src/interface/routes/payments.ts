@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 import { authMiddleware, requireAdmin } from '../../infrastructure/auth';
 import { paymentRepository } from '../../infrastructure/repositories/payment.repository';
 import { initiatePayment } from '../../application/usecases/payment/initiate-payment';
@@ -96,6 +96,30 @@ paymentsRoutes.post(
   },
 );
 
+/** Success-page fallback: verify Stripe session server-side when webhook is late */
+paymentsRoutes.post(
+  '/confirm-stripe-session',
+  authMiddleware,
+  zValidator('json', z.object({ sessionId: z.string().min(5).max(200) })),
+  async (c) => {
+    const user = c.get('user');
+    const { sessionId } = c.req.valid('json');
+    const { confirmStripeSession } = await import(
+      '../../application/usecases/payment/confirm-stripe-session'
+    );
+    try {
+      return c.json(await confirmStripeSession({ userId: user.sub, sessionId }));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'CONFIRM_FAILED';
+      if (msg === 'FORBIDDEN') return c.json({ error: 'Forbidden', code: 'FORBIDDEN' }, 403);
+      if (msg.includes('PaymentNotFound') || msg === 'Payment not found') {
+        return c.json({ error: 'Ödeme bulunamadı', code: 'PAYMENT_NOT_FOUND' }, 404);
+      }
+      throw err;
+    }
+  },
+);
+
 paymentsRoutes.post('/webhook/:provider', webhookRateLimit, async (c) => {
   const provider = c.req.param('provider').toUpperCase() as WebhookPayload['provider'];
   const meta = getRequestMeta(c);
@@ -115,11 +139,14 @@ paymentsRoutes.post('/webhook/:provider', webhookRateLimit, async (c) => {
   });
   headers['x-forwarded-for'] = ip;
 
+  // Stripe signature carries its own timestamp (t=); generic x-timestamp optional for others
   const stripeSig = headers['stripe-signature'];
-  const stripeTs = typeof stripeSig === 'string' ? stripeSig.match(/t=(\d+)/)?.[1] : undefined;
-  const tsCheck = verifyTimestampInWindow(headers['x-timestamp'] ?? stripeTs);
-  if (!tsCheck.valid) {
-    return c.json({ error: 'Webhook replay/time window hatası', code: 'WEBHOOK_REJECTED' }, 401);
+  const isStripe = provider === 'STRIPE';
+  if (!isStripe) {
+    const tsCheck = verifyTimestampInWindow(headers['x-timestamp']);
+    if (!tsCheck.valid && headers['x-timestamp']) {
+      return c.json({ error: 'Webhook replay/time window hatası', code: 'WEBHOOK_REJECTED' }, 401);
+    }
   }
 
   let providerInstance: any;

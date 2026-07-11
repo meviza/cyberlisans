@@ -27,15 +27,33 @@ export default function CheckoutSuccessPage() {
   const [order, setOrder] = React.useState<OrderResponse | null>(null);
   const [loading, setLoading] = React.useState(true);
 
+  const sessionId = sp.get('session_id');
+
   React.useEffect(() => {
-    if (!orderId) {
+    if (!orderId && !sessionId) {
       router.replace('/');
       return;
     }
     let cancelled = false;
     (async () => {
       try {
-        const res = await apiFetch<OrderResponse>(`/orders/${orderId}`);
+        // Confirm Stripe session if present (webhook fallback)
+        if (sessionId) {
+          try {
+            await apiFetch('/payments/confirm-stripe-session', {
+              method: 'POST',
+              body: JSON.stringify({ sessionId }),
+            });
+          } catch {
+            /* webhook may already have processed */
+          }
+        }
+        const id = orderId;
+        if (!id) {
+          if (!cancelled) setLoading(false);
+          return;
+        }
+        const res = await apiFetch<OrderResponse>(`/orders/${id}`);
         if (!cancelled) setOrder(res);
       } catch {
         if (!cancelled) setOrder(null);
@@ -46,9 +64,9 @@ export default function CheckoutSuccessPage() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, router]);
+  }, [orderId, sessionId, router]);
 
-  if (!orderId) return null;
+  if (!orderId && !sessionId) return null;
 
   return (
     <>

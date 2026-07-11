@@ -32,15 +32,13 @@ export class StripeProvider implements IPaymentProvider {
     const secretKey = config.secretKey ?? process.env['STRIPE_SECRET_KEY'];
     const webhookSecret = config.webhookSecret ?? process.env['STRIPE_WEBHOOK_SECRET'];
     if (!secretKey) throw new ProviderConfigError('STRIPE', 'secret_key');
+    const appUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000';
     this.config = {
       secretKey,
       webhookSecret: webhookSecret ?? '',
       successUrl:
-        config.successUrl ??
-        `${process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000'}/payment/success`,
-      cancelUrl:
-        config.cancelUrl ??
-        `${process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000'}/payment/cancel`,
+        config.successUrl ?? `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: config.cancelUrl ?? `${appUrl}/checkout?cancelled=1`,
     };
   }
 
@@ -61,21 +59,37 @@ export class StripeProvider implements IPaymentProvider {
     const currency = this.getCurrencyForStripe(input.currency);
     const amount = this.getAmountForCurrency(input.amount, currency);
 
+    const appUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000';
+    const successUrl = input.orderId
+      ? `${appUrl}/checkout/success?orderId=${encodeURIComponent(input.orderId)}&session_id={CHECKOUT_SESSION_ID}`
+      : this.config.successUrl;
+    const cancelUrl = input.orderId
+      ? `${appUrl}/checkout?orderId=${encodeURIComponent(input.orderId)}&cancelled=1`
+      : this.config.cancelUrl;
+
     const params = new URLSearchParams();
     params.append('mode', 'payment');
-    params.append('success_url', this.config.successUrl);
-    params.append('cancel_url', this.config.cancelUrl);
+    params.append('success_url', successUrl);
+    params.append('cancel_url', cancelUrl);
+    // Card + Link (Stripe Link one-click when enabled on the account)
     params.append('payment_method_types[]', 'card');
+    params.append('payment_method_types[]', 'link');
     params.append('line_items[0][price_data][currency]', currency);
     params.append(
       'line_items[0][price_data][product_data][name]',
-      `CyberLisans ${input.orderId ?? 'order'}`,
+      `CyberLisans sipariş ${input.orderId ?? ''}`.trim(),
     );
     params.append('line_items[0][price_data][unit_amount]', String(amount));
     params.append('line_items[0][quantity]', '1');
     params.append('metadata[userId]', input.userId);
+    params.append('client_reference_id', input.orderId ?? input.userId);
     if (input.orderId) params.append('metadata[orderId]', input.orderId);
     params.append('metadata[provider]', 'STRIPE');
+    if (input.metadata?.['paymentId']) {
+      params.append('metadata[paymentId]', input.metadata['paymentId']);
+    }
+    // Allow promo / Link autofill
+    params.append('billing_address_collection', 'auto');
 
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
@@ -91,11 +105,15 @@ export class StripeProvider implements IPaymentProvider {
     }
     const session = (await res.json()) as {
       id: string;
-      url: string;
+      url: string | null;
       payment_status: string;
       amount_total: number;
       currency: string;
     };
+
+    if (!session.url) {
+      throw new Error('Stripe Checkout Session returned no URL');
+    }
 
     return {
       paymentId: session.id,
@@ -113,37 +131,68 @@ export class StripeProvider implements IPaymentProvider {
     rawBody: string,
   ): Promise<WebhookPayload> {
     const sig = headers['stripe-signature'];
-    if (!sig || !this.config.webhookSecret) throw new WebhookSignatureError('STRIPE');
-    const event = await this.constructEvent(rawBody, sig);
+    // Allow missing webhook secret only when explicitly disabled (local dev)
+    const allowUnsigned =
+      process.env['STRIPE_WEBHOOK_ALLOW_UNSIGNED'] === '1' && !this.config.webhookSecret;
+    if (!sig && !allowUnsigned) throw new WebhookSignatureError('STRIPE');
+    if (!this.config.webhookSecret && !allowUnsigned) throw new WebhookSignatureError('STRIPE');
+
+    const event =
+      this.config.webhookSecret && sig
+        ? await this.constructEvent(rawBody, sig)
+        : (JSON.parse(rawBody) as {
+            type: string;
+            id: string;
+            data: { object: Record<string, unknown> };
+          });
+
     let status: WebhookPayload['status'] = 'PENDING';
     let amount = 0;
     let currency: Currency = 'USD';
     let providerRef = '';
+    let orderId: string | undefined;
+    let paymentId: string | undefined;
+
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as any;
-      status = session.payment_status === 'paid' ? 'SUCCEEDED' : 'PENDING';
-      amount = Number(session.amount_total) / 100;
-      currency = String(session.currency).toUpperCase() as Currency;
-      providerRef = session.id;
+      const session = event.data.object as Record<string, unknown>;
+      status = session['payment_status'] === 'paid' ? 'SUCCEEDED' : 'PENDING';
+      amount = Number(session['amount_total'] ?? 0) / 100;
+      currency = String(session['currency'] ?? 'usd').toUpperCase() as Currency;
+      providerRef = String(session['id'] ?? '');
+      const meta = (session['metadata'] ?? {}) as Record<string, string>;
+      orderId = meta['orderId'];
+      paymentId = meta['paymentId'];
+    } else if (event.type === 'checkout.session.async_payment_succeeded') {
+      const session = event.data.object as Record<string, unknown>;
+      status = 'SUCCEEDED';
+      amount = Number(session['amount_total'] ?? 0) / 100;
+      currency = String(session['currency'] ?? 'usd').toUpperCase() as Currency;
+      providerRef = String(session['id'] ?? '');
+      const meta = (session['metadata'] ?? {}) as Record<string, string>;
+      orderId = meta['orderId'];
+      paymentId = meta['paymentId'];
     } else if (event.type === 'checkout.session.expired') {
       status = 'EXPIRED';
+      const session = event.data.object as Record<string, unknown>;
+      providerRef = String(session['id'] ?? '');
     } else if (event.type === 'charge.refunded') {
       status = 'REFUNDED';
     } else {
       status = 'PROCESSING';
     }
+
     return {
       provider: 'STRIPE',
       providerRef: providerRef || event.id,
       status,
       amount,
       currency,
-      raw: event,
+      raw: { ...event, orderId, paymentId },
       receivedAt: new Date(),
     };
   }
 
-  verifyWebhook(headers: Record<string, string>, body: string): WebhookPayload {
+  verifyWebhook(_headers: Record<string, string>, _body: string): WebhookPayload {
     throw new WebhookPayloadError(
       'STRIPE',
       'Stripe requires async signature verification; use verifyWebhookAsync',
