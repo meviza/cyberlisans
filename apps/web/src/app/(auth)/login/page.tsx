@@ -47,7 +47,10 @@ export default function LoginPage() {
       footer={
         <>
           Hesabın yok mu?{' '}
-          <Link href="/register" className="font-medium text-cyber-cyan hover:text-cyber-magenta">
+          <Link
+            href="/register"
+            className="font-medium text-brand-accent hover:text-brand-text-secondary"
+          >
             Kayıt ol
           </Link>
         </>
@@ -56,7 +59,7 @@ export default function LoginPage() {
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <Label htmlFor="email" className="mb-2 block">
-            E-posta <span className="text-cyber-magenta">*</span>
+            E-posta <span className="text-brand-text-secondary">*</span>
           </Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -75,7 +78,7 @@ export default function LoginPage() {
 
         <div>
           <Label htmlFor="password" className="mb-2 block">
-            Şifre <span className="text-cyber-magenta">*</span>
+            Şifre <span className="text-brand-text-secondary">*</span>
           </Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -127,16 +130,19 @@ export default function LoginPage() {
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
-              className="h-4 w-4 rounded border-cyber-cyan/40 bg-cyber-darker text-cyber-cyan focus:ring-cyber-cyan/50"
+              className="h-4 w-4 rounded border-brand-accent/40 bg-brand-bg text-brand-accent focus:ring-brand-accent/50"
             />
             Beni hatırla
           </label>
-          <Link href="/forgot-password" className="text-sm text-cyber-cyan hover:text-cyber-magenta">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-brand-accent hover:text-brand-text-secondary"
+          >
             Şifremi unuttum
           </Link>
         </div>
 
-        {error && <p className="text-sm text-cyber-magenta">{error}</p>}
+        {error && <p className="text-sm text-brand-text-secondary">{error}</p>}
 
         <Button type="submit" variant="primary" className="w-full" disabled={loading}>
           {loading ? <Spinner size="sm" /> : null}

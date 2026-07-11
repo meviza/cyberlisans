@@ -41,10 +41,10 @@ export default function ForgotPasswordPage() {
     return (
       <AuthForm title="E-postanı Kontrol Et" subtitle="Sıfırlama bağlantısı gönderildi">
         <div className="flex flex-col items-center gap-4 py-4">
-          <CheckCircle2 className="h-16 w-16 text-cyber-cyan" />
+          <CheckCircle2 className="h-16 w-16 text-brand-accent" />
           <p className="text-center text-sm text-white/70">
-            <strong className="text-white">{email}</strong> adresine bir sıfırlama bağlantısı gönderdik.
-            Spam klasörünü de kontrol etmeyi unutma.
+            <strong className="text-white">{email}</strong> adresine bir sıfırlama bağlantısı
+            gönderdik. Spam klasörünü de kontrol etmeyi unutma.
           </p>
           <Link href="/login" className="w-full">
             <Button variant="outline" className="w-full">
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
       title="Şifremi Unuttum"
       subtitle="E-postanı gir, sıfırlama bağlantısı gönderelim"
       footer={
-        <Link href="/login" className="text-cyber-cyan hover:text-cyber-magenta">
+        <Link href="/login" className="text-brand-accent hover:text-brand-text-secondary">
           ← Giriş sayfasına dön
         </Link>
       }
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <Label htmlFor="email" className="mb-2 block">
-            E-posta <span className="text-cyber-magenta">*</span>
+            E-posta <span className="text-brand-text-secondary">*</span>
           </Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        {error && <p className="text-sm text-cyber-magenta">{error}</p>}
+        {error && <p className="text-sm text-brand-text-secondary">{error}</p>}
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Spinner size="sm" /> : null}

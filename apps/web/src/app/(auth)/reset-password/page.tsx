@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
     return (
       <AuthForm title="Şifre Sıfırlandı" subtitle="Yeni şifrenle giriş yapabilirsin">
         <div className="flex flex-col items-center gap-4 py-4">
-          <CheckCircle2 className="h-16 w-16 text-cyber-lime" />
+          <CheckCircle2 className="h-16 w-16 text-brand-success" />
           <Button onClick={() => router.push('/login')} className="w-full">
             Giriş Yap
           </Button>
@@ -67,14 +67,11 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthForm
-      title="Yeni Şifre Belirle"
-      subtitle="Hesabın için yeni bir şifre oluştur"
-    >
+    <AuthForm title="Yeni Şifre Belirle" subtitle="Hesabın için yeni bir şifre oluştur">
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <Label htmlFor="password" className="mb-2 block">
-            Yeni şifre <span className="text-cyber-magenta">*</span>
+            Yeni şifre <span className="text-brand-text-secondary">*</span>
           </Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -99,7 +96,7 @@ export default function ResetPasswordPage() {
 
         <div>
           <Label htmlFor="confirmPwd" className="mb-2 block">
-            Şifre tekrar <span className="text-cyber-magenta">*</span>
+            Şifre tekrar <span className="text-brand-text-secondary">*</span>
           </Label>
           <Input
             id="confirmPwd"
@@ -111,14 +108,17 @@ export default function ResetPasswordPage() {
           />
         </div>
 
-        {error && <p className="text-sm text-cyber-magenta">{error}</p>}
+        {error && <p className="text-sm text-brand-text-secondary">{error}</p>}
 
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? <Spinner size="sm" /> : null}
           {loading ? 'Sıfırlanıyor...' : 'Şifreyi Sıfırla'}
         </Button>
 
-        <Link href="/login" className="block text-center text-sm text-cyber-cyan hover:text-cyber-magenta">
+        <Link
+          href="/login"
+          className="block text-center text-sm text-brand-accent hover:text-brand-text-secondary"
+        >
           Giriş sayfasına dön
         </Link>
       </form>

@@ -23,7 +23,7 @@ export function SellerHero({ seller }: SellerHeroProps) {
       <CardContent className="relative -mt-14 p-6 sm:p-8">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-end gap-4">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-cyber-cyan/50 bg-cyber-darker shadow-[0_0_30px_rgba(0,240,255,0.3)]">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-brand-accent/50 bg-brand-bg shadow-[0_0_30px_rgba(0,240,255,0.3)]">
               {seller.logoUrl ? (
                 <img
                   src={seller.logoUrl}
@@ -31,18 +31,16 @@ export function SellerHero({ seller }: SellerHeroProps) {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <Store className="h-10 w-10 text-cyber-cyan" />
+                <Store className="h-10 w-10 text-brand-accent" />
               )}
             </div>
             <div>
-              <h1 className="font-orbitron text-2xl font-black text-white sm:text-3xl">
-                {seller.companyName}
-              </h1>
+              <h1 className="text-2xl font-black text-white sm:text-3xl">{seller.companyName}</h1>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <Badge variant="success" size="sm">
                   <CheckBadge /> Doğrulanmış Satıcı
                 </Badge>
-                <span className="flex items-center gap-1 text-sm text-cyber-yellow">
+                <span className="flex items-center gap-1 text-sm text-brand-warning">
                   <Star className="h-4 w-4 fill-current" />
                   {seller.rating.toFixed(1)}{' '}
                   <span className="text-white/50">({seller.ratingCount})</span>
@@ -55,7 +53,7 @@ export function SellerHero({ seller }: SellerHeroProps) {
               href={seller.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-cyber-cyan hover:text-cyber-magenta"
+              className="text-sm text-brand-accent hover:text-brand-text-secondary"
             >
               <ExternalLink className="inline h-3 w-3" /> Web Sitesi
             </a>

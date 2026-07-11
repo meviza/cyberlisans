@@ -22,14 +22,14 @@ export function CartSummary({ subtotal, itemCount }: CartSummaryProps) {
   return (
     <Card className="sticky top-20 self-start">
       <CardContent className="p-6">
-        <h2 className="mb-4 font-orbitron text-lg font-bold text-white">Sipariş Özeti</h2>
-        <div className="space-y-2 border-b border-cyber-cyan/20 pb-4 text-sm">
-          <div className="flex justify-between text-white/70">
+        <h2 className="mb-4 text-lg font-semibold text-white">Sipariş özeti</h2>
+        <div className="space-y-2 border-b border-white/[0.08] pb-4 text-sm">
+          <div className="flex justify-between text-brand-text-secondary">
             <span>Ara toplam ({itemCount} ürün)</span>
             <span>{format(subtotal)}</span>
           </div>
           {discount > 0 && (
-            <div className="flex justify-between text-cyber-lime">
+            <div className="flex justify-between text-brand-success">
               <span>İndirim</span>
               <span>-{format(discount)}</span>
             </div>
@@ -37,7 +37,7 @@ export function CartSummary({ subtotal, itemCount }: CartSummaryProps) {
         </div>
 
         <div className="mt-4 flex items-center gap-2">
-          <Tag className="h-4 w-4 shrink-0 text-cyber-cyan" />
+          <Tag className="h-4 w-4 shrink-0 text-brand-accent" />
           <Input
             placeholder="Kupon kodu"
             value={coupon}
@@ -55,24 +55,22 @@ export function CartSummary({ subtotal, itemCount }: CartSummaryProps) {
             {applied ? '✓' : 'Uygula'}
           </Button>
         </div>
-        <p className="mt-1 text-[10px] text-white/40">Para birimi: {currency}</p>
+        <p className="mt-1 text-[10px] text-brand-muted">Para birimi: {currency}</p>
 
-        <div className="mt-4 flex items-center justify-between border-t border-cyber-cyan/20 pt-4">
+        <div className="mt-4 flex items-center justify-between border-t border-white/[0.08] pt-4">
           <span className="font-medium text-white">Toplam</span>
-          <span className="font-orbitron text-2xl font-black text-cyber-cyan text-glow-cyan">
-            {format(total)}
-          </span>
+          <span className="text-2xl font-semibold tracking-tight text-white">{format(total)}</span>
         </div>
 
         <Link href="/checkout" className="mt-6 block">
           <Button className="w-full" size="lg" disabled={itemCount === 0}>
-            Ödemeye Geç
+            Ödemeye geç
             <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>
 
-        <div className="mt-4 flex items-center gap-2 rounded-md border border-cyber-cyan/20 bg-cyber-cyan/5 p-3 text-xs text-white/70">
-          <Shield className="h-4 w-4 shrink-0 text-cyber-cyan" />
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/[0.08] bg-brand-accent/5 p-3 text-xs text-brand-text-secondary">
+          <Shield className="h-4 w-4 shrink-0 text-brand-accent" />
           <span>256-bit SSL şifreleme ile güvenli ödeme</span>
         </div>
       </CardContent>

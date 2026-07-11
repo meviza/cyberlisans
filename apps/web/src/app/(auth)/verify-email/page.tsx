@@ -49,7 +49,7 @@ export default function VerifyEmailPage() {
     return (
       <AuthForm title="E-posta Doğrulandı" subtitle="Hesabın artık aktif">
         <div className="flex flex-col items-center gap-4 py-4">
-          <CheckCircle2 className="h-16 w-16 text-cyber-lime" />
+          <CheckCircle2 className="h-16 w-16 text-brand-success" />
           <p className="text-center text-sm text-white/70">
             E-postan başarıyla doğrulandı. Artık giriş yapabilirsin.
           </p>
@@ -64,7 +64,7 @@ export default function VerifyEmailPage() {
   return (
     <AuthForm title="Doğrulama Başarısız" subtitle="Token geçersiz olabilir">
       <div className="flex flex-col items-center gap-4 py-4">
-        <XCircle className="h-16 w-16 text-cyber-magenta" />
+        <XCircle className="h-16 w-16 text-brand-text-secondary" />
         <p className="text-center text-sm text-white/70">
           Token geçersiz veya süresi dolmuş. Yeni bir doğrulama bağlantısı talep edebilirsin.
         </p>

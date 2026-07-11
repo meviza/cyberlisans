@@ -27,15 +27,15 @@ export function PaymentMethodCard({
       onClick={() => onSelect(value)}
       className={
         selected
-          ? 'flex w-full items-center gap-3 rounded-md border border-cyber-cyan/50 bg-cyber-cyan/10 p-4 text-left transition-all'
-          : 'flex w-full items-center gap-3 rounded-md border border-white/10 bg-white/5 p-4 text-left transition-colors hover:border-cyber-cyan/30'
+          ? 'flex w-full items-center gap-3 rounded-md border border-brand-accent/50 bg-brand-accent/10 p-4 text-left transition-all'
+          : 'flex w-full items-center gap-3 rounded-md border border-white/10 bg-white/5 p-4 text-left transition-colors hover:border-brand-accent/30'
       }
     >
       <div
         className={
           selected
-            ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-cyber-cyan/50 bg-cyber-cyan/20 text-cyber-cyan'
-            : 'flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/20 bg-cyber-darker text-white/70'
+            ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-brand-accent/50 bg-brand-accent/20 text-brand-accent'
+            : 'flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/20 bg-brand-bg text-white/70'
         }
       >
         <Icon className="h-5 w-5" />
@@ -44,7 +44,7 @@ export function PaymentMethodCard({
         <div className="flex items-center gap-2">
           <p className="font-medium text-white">{label}</p>
           {badge && (
-            <span className="rounded-full border border-cyber-magenta/40 bg-cyber-magenta/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-cyber-magenta">
+            <span className="rounded-full border border-white/40 bg-[#6B7CFF]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brand-text-secondary">
               {badge}
             </span>
           )}
@@ -54,7 +54,7 @@ export function PaymentMethodCard({
       <div
         className={
           selected
-            ? 'h-4 w-4 shrink-0 rounded-full border-2 border-cyber-cyan bg-cyber-cyan shadow-[0_0_8px_rgba(0,240,255,0.8)]'
+            ? 'h-4 w-4 shrink-0 rounded-full border-2 border-brand-accent bg-brand-accent shadow-[0_0_8px_rgba(0,240,255,0.8)]'
             : 'h-4 w-4 shrink-0 rounded-full border-2 border-white/30'
         }
       />

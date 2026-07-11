@@ -10,10 +10,7 @@ import { Select } from '@/components/ui/select';
 import { useAuth } from '@/lib/auth-context';
 import { ApiError } from '@/lib/api-client';
 import { AuthForm } from '@/components/auth/auth-form';
-import {
-  registerSchema,
-  type RegisterInput,
-} from '@cyberlisans/validators';
+import { registerSchema, type RegisterInput } from '@cyberlisans/validators';
 
 const LOCALE_OPTS = [
   { value: 'TR', label: 'Türkçe' },
@@ -97,7 +94,10 @@ export default function RegisterPage() {
       footer={
         <>
           Zaten hesabın var mı?{' '}
-          <Link href="/login" className="font-medium text-cyber-cyan hover:text-cyber-magenta">
+          <Link
+            href="/login"
+            className="font-medium text-brand-accent hover:text-brand-text-secondary"
+          >
             Giriş yap
           </Link>
         </>
@@ -106,7 +106,7 @@ export default function RegisterPage() {
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <Label htmlFor="email" className="mb-2 block">
-            E-posta <span className="text-cyber-magenta">*</span>
+            E-posta <span className="text-brand-text-secondary">*</span>
           </Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -120,12 +120,14 @@ export default function RegisterPage() {
               className="pl-10"
             />
           </div>
-          {errMsg('email') && <p className="mt-1 text-sm text-cyber-magenta">{errMsg('email')}</p>}
+          {errMsg('email') && (
+            <p className="mt-1 text-sm text-brand-text-secondary">{errMsg('email')}</p>
+          )}
         </div>
 
         <div>
           <Label htmlFor="username" className="mb-2 block">
-            Kullanıcı adı <span className="text-cyber-magenta">*</span>
+            Kullanıcı adı <span className="text-brand-text-secondary">*</span>
           </Label>
           <div className="relative">
             <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -139,7 +141,9 @@ export default function RegisterPage() {
               className="pl-10"
             />
           </div>
-          {errMsg('username') && <p className="mt-1 text-sm text-cyber-magenta">{errMsg('username')}</p>}
+          {errMsg('username') && (
+            <p className="mt-1 text-sm text-brand-text-secondary">{errMsg('username')}</p>
+          )}
         </div>
 
         <div>
@@ -157,7 +161,7 @@ export default function RegisterPage() {
 
         <div>
           <Label htmlFor="password" className="mb-2 block">
-            Şifre <span className="text-cyber-magenta">*</span>
+            Şifre <span className="text-brand-text-secondary">*</span>
           </Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -178,12 +182,14 @@ export default function RegisterPage() {
               {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          {errMsg('password') && <p className="mt-1 text-sm text-cyber-magenta">{errMsg('password')}</p>}
+          {errMsg('password') && (
+            <p className="mt-1 text-sm text-brand-text-secondary">{errMsg('password')}</p>
+          )}
         </div>
 
         <div>
           <Label htmlFor="confirmPwd" className="mb-2 block">
-            Şifre tekrar <span className="text-cyber-magenta">*</span>
+            Şifre tekrar <span className="text-brand-text-secondary">*</span>
           </Label>
           <Input
             id="confirmPwd"
@@ -193,7 +199,9 @@ export default function RegisterPage() {
             onChange={(e) => setConfirmPwd(e.target.value)}
             placeholder="••••••••"
           />
-          {errMsg('confirmPwd') && <p className="mt-1 text-sm text-cyber-magenta">{errMsg('confirmPwd')}</p>}
+          {errMsg('confirmPwd') && (
+            <p className="mt-1 text-sm text-brand-text-secondary">{errMsg('confirmPwd')}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -240,7 +248,7 @@ export default function RegisterPage() {
             onChange={(e) => update('isAdult', e.target.checked as true)}
             label={
               <>
-                18 yaş üstüyüm <span className="text-cyber-magenta">*</span>
+                18 yaş üstüyüm <span className="text-brand-text-secondary">*</span>
               </>
             }
           />
@@ -249,10 +257,10 @@ export default function RegisterPage() {
             onChange={(e) => update('consentKvkk', e.target.checked as true)}
             label={
               <>
-                <Link href="/legal/kvkk" className="text-cyber-cyan hover:underline">
+                <Link href="/legal/kvkk" className="text-brand-accent hover:underline">
                   KVKK aydınlatma metnini
                 </Link>{' '}
-                okudum <span className="text-cyber-magenta">*</span>
+                okudum <span className="text-brand-text-secondary">*</span>
               </>
             }
           />
@@ -261,10 +269,10 @@ export default function RegisterPage() {
             onChange={(e) => update('consentTerms', e.target.checked as true)}
             label={
               <>
-                <Link href="/legal/terms" className="text-cyber-cyan hover:underline">
+                <Link href="/legal/terms" className="text-brand-accent hover:underline">
                   Kullanım koşullarını
                 </Link>{' '}
-                kabul ediyorum <span className="text-cyber-magenta">*</span>
+                kabul ediyorum <span className="text-brand-text-secondary">*</span>
               </>
             }
           />
@@ -275,7 +283,7 @@ export default function RegisterPage() {
           />
         </div>
 
-        {serverError && <p className="text-sm text-cyber-magenta">{serverError}</p>}
+        {serverError && <p className="text-sm text-brand-text-secondary">{serverError}</p>}
 
         <Button type="submit" variant="primary" className="w-full" disabled={loading}>
           {loading ? <Spinner size="sm" /> : null}

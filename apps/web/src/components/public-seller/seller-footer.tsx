@@ -11,9 +11,9 @@ interface StatRowProps {
 
 function StatRow({ icon: Icon, label, value }: StatRowProps) {
   return (
-    <div className="flex items-center justify-between rounded-md border border-cyber-cyan/20 bg-cyber-cyan/5 px-3 py-2">
+    <div className="flex items-center justify-between rounded-md border border-brand-accent/20 bg-brand-accent/5 px-3 py-2">
       <div className="flex items-center gap-2 text-white/70">
-        <Icon className="h-4 w-4 text-cyber-cyan" />
+        <Icon className="h-4 w-4 text-brand-accent" />
         <span className="text-xs uppercase tracking-wider">{label}</span>
       </div>
       <span className="font-medium text-white">{value}</span>
@@ -35,7 +35,7 @@ export function SellerFooter({ seller }: SellerFooterProps) {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-2">
         <CardContent className="p-6">
-          <h2 className="mb-3 font-orbitron text-lg font-bold text-white">Hakkında</h2>
+          <h2 className="mb-3 text-lg font-bold text-white">Hakkında</h2>
           <p className="text-sm leading-relaxed text-white/80">
             {seller.bio || 'Bu satıcı henüz bir açıklama eklememiş.'}
           </p>

@@ -18,8 +18,8 @@ export default function CartPage() {
         <StorefrontHeader />
         <main className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-10 w-48 rounded bg-cyber-cyan/10" />
-            <div className="h-32 rounded-xl bg-cyber-darker/40" />
+            <div className="h-10 w-48 rounded bg-brand-accent/10" />
+            <div className="h-32 rounded-xl bg-brand-bg/40" />
           </div>
         </main>
       </>
@@ -51,7 +51,7 @@ export default function CartPage() {
       <StorefrontHeader />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="font-orbitron text-3xl font-black text-white">Sepetim</h1>
+          <h1 className="text-3xl font-black text-white">Sepetim</h1>
           <p className="mt-2 text-white/60">{count} ürün sepetinde</p>
         </div>
 
@@ -63,7 +63,7 @@ export default function CartPage() {
             <div className="pt-2">
               <Link
                 href="/products"
-                className="text-sm text-cyber-cyan transition-colors hover:text-cyber-magenta"
+                className="text-sm text-brand-accent transition-colors hover:text-brand-text-secondary"
               >
                 ← Alışverişe devam et
               </Link>

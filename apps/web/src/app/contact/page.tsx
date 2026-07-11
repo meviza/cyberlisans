@@ -35,21 +35,21 @@ export default async function ContactPage({ searchParams }: PageProps) {
       <StorefrontHeader />
       <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
         <header className="mb-12 text-center">
-          <p className="mb-2 font-mono text-xs uppercase tracking-widest text-cyber-cyan">
+          <p className="mb-2 font-mono text-xs uppercase tracking-widest text-brand-accent">
             Iletisim
           </p>
-          <h1 className="mb-3 font-orbitron text-3xl font-black text-white sm:text-4xl">
-            Bize <span className="text-cyber-cyan text-glow-cyan">Ulas</span>
+          <h1 className="mb-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Bize <span className="text-brand-accent ">Ulas</span>
           </h1>
-          <p className="mx-auto max-w-xl text-white/60">
+          <p className="mx-auto max-w-xl text-brand-text-secondary">
             Destek, is ortakligi veya toplu lisans talepleri icin asagidaki kanallardan birini
             kullanabilirsin. Genelde 24 saat icinde donus yapiyoruz.
           </p>
         </header>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          <section className="rounded-xl border border-cyber-cyan/20 bg-cyber-darker/40 p-6">
+          <section className="rounded-xl border border-brand-accent/20 bg-brand-bg/40 p-6">
             <h2 className="mb-5 flex items-center gap-2 font-display text-lg font-bold text-white">
-              <MessageSquare className="h-5 w-5 text-cyber-cyan" />
+              <MessageSquare className="h-5 w-5 text-brand-accent" />
               Mesaj Gonder
             </h2>
 
@@ -63,7 +63,7 @@ export default async function ContactPage({ searchParams }: PageProps) {
                   id="name"
                   name="name"
                   required
-                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-cyber-cyan"
+                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-brand-accent"
                 />
               </div>
               <div>
@@ -75,7 +75,7 @@ export default async function ContactPage({ searchParams }: PageProps) {
                   name="email"
                   type="email"
                   required
-                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-cyber-cyan"
+                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-brand-accent"
                 />
               </div>
               <div>
@@ -86,7 +86,7 @@ export default async function ContactPage({ searchParams }: PageProps) {
                   id="subject"
                   name="subject"
                   defaultValue={plan === 'business' ? 'business' : 'support'}
-                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-cyber-cyan"
+                  className="w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-brand-accent"
                 >
                   {SUBJECTS.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -104,12 +104,12 @@ export default async function ContactPage({ searchParams }: PageProps) {
                   name="message"
                   rows={5}
                   required
-                  className="w-full resize-none rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-cyber-cyan"
+                  className="w-full resize-none rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-brand-accent"
                 />
               </div>
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-cyber-cyan px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-cyber-darker shadow-glow-cyan transition-all hover:brightness-110"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-accent px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wider text-brand-bg shadow-accent-glow transition-all hover:brightness-110"
               >
                 Gonder
                 <ArrowRight className="h-4 w-4" />
@@ -122,26 +122,26 @@ export default async function ContactPage({ searchParams }: PageProps) {
           </section>
 
           <aside className="space-y-6">
-            <div className="rounded-xl border border-cyber-magenta/20 bg-cyber-darker/40 p-6">
+            <div className="rounded-xl border border-white/20 bg-brand-bg/40 p-6">
               <h2 className="mb-5 flex items-center gap-2 font-display text-lg font-bold text-white">
-                <Building2 className="h-5 w-5 text-cyber-magenta" />
+                <Building2 className="h-5 w-5 text-brand-text-secondary" />
                 Diger Kanallar
               </h2>
               <ul className="space-y-3 text-sm text-white/70">
                 <li className="flex items-start gap-3">
-                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-cyber-cyan" />
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-accent" />
                   <div>
                     <p className="text-white">E-posta</p>
                     <a
                       href="mailto:destek@cyberlisans.com"
-                      className="text-cyber-cyan hover:underline"
+                      className="text-brand-accent hover:underline"
                     >
                       destek@cyberlisans.com
                     </a>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-cyber-cyan" />
+                  <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-brand-accent" />
                   <div>
                     <p className="text-white">Canli Destek</p>
                     <p className="text-white/50">
@@ -150,12 +150,12 @@ export default async function ContactPage({ searchParams }: PageProps) {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-cyber-cyan" />
+                  <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-accent" />
                   <div>
                     <p className="text-white">Is Ortakligi</p>
                     <a
                       href="mailto:partner@cyberlisans.com"
-                      className="text-cyber-cyan hover:underline"
+                      className="text-brand-accent hover:underline"
                     >
                       partner@cyberlisans.com
                     </a>
@@ -164,14 +164,14 @@ export default async function ContactPage({ searchParams }: PageProps) {
               </ul>
             </div>
 
-            <div className="rounded-xl border border-cyber-cyan/20 bg-cyber-darker/40 p-6 text-sm text-white/60">
+            <div className="rounded-xl border border-brand-accent/20 bg-brand-bg/40 p-6 text-sm text-brand-text-secondary">
               <h3 className="mb-2 font-display text-base font-bold text-white">SSS</h3>
               <p className="mb-3">
                 Sikca sorulan sorularin yanitlarina SSS sayfasindan daha hizli ulasabilirsin.
               </p>
               <Link
                 href="/legal/sss"
-                className="inline-flex items-center gap-1 text-cyber-cyan hover:underline"
+                className="inline-flex items-center gap-1 text-brand-accent hover:underline"
               >
                 SSS&apos;ye git
                 <ArrowRight className="h-3.5 w-3.5" />

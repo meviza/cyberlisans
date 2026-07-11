@@ -100,24 +100,24 @@ export default function CheckoutPage() {
     <>
       <StorefrontHeader />
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="mb-6 font-orbitron text-3xl font-black text-white">Sipariş Tamamla</h1>
+        <h1 className="mb-6 text-3xl font-black text-white">Sipariş Tamamla</h1>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
           <Card>
             <CardContent className="space-y-4 p-6">
-              <h2 className="font-orbitron text-lg font-bold text-white">Ürünler</h2>
-              <ul className="divide-y divide-cyber-cyan/10 text-sm">
+              <h2 className="text-lg font-bold text-white">Ürünler</h2>
+              <ul className="divide-y divide-white/[0.06] text-sm">
                 {items.map((it) => (
                   <li key={it.id} className="flex items-center justify-between py-3">
                     <span className="text-white">
                       {it.qty}x {it.title}
                     </span>
-                    <span className="font-mono text-cyber-cyan">
+                    <span className="font-mono text-brand-accent">
                       {format(it.unitPrice * it.qty)}
                     </span>
                   </li>
                 ))}
               </ul>
-              <h2 className="font-orbitron text-lg font-bold text-white">Ödeme Yöntemi</h2>
+              <h2 className="text-lg font-bold text-white">Ödeme Yöntemi</h2>
               <div className="space-y-2">
                 {METHODS.map((m) => (
                   <button
@@ -126,11 +126,11 @@ export default function CheckoutPage() {
                     onClick={() => setMethod(m.value)}
                     className={
                       method === m.value
-                        ? 'flex w-full items-center gap-3 rounded-md border border-cyber-cyan/60 bg-cyber-cyan/10 p-3 text-left'
-                        : 'flex w-full items-center gap-3 rounded-md border border-white/10 bg-white/5 p-3 text-left hover:border-cyber-cyan/40'
+                        ? 'flex w-full items-center gap-3 rounded-md border border-brand-accent/60 bg-brand-accent/10 p-3 text-left'
+                        : 'flex w-full items-center gap-3 rounded-md border border-white/10 bg-white/5 p-3 text-left hover:border-brand-accent/40'
                     }
                   >
-                    <m.Icon className="h-5 w-5 text-cyber-cyan" />
+                    <m.Icon className="h-5 w-5 text-brand-accent" />
                     <div>
                       <p className="font-medium text-white">{m.label}</p>
                       <p className="text-xs text-white/60">{m.desc}</p>
@@ -139,7 +139,7 @@ export default function CheckoutPage() {
                 ))}
               </div>
               {error && (
-                <p className="flex items-center gap-2 text-sm text-cyber-magenta">
+                <p className="flex items-center gap-2 text-sm text-brand-text-secondary">
                   <AlertCircle className="h-4 w-4" />
                   {error}
                 </p>
@@ -156,12 +156,10 @@ export default function CheckoutPage() {
           </Card>
           <Card>
             <CardContent className="p-6">
-              <h2 className="font-orbitron text-lg font-bold text-white">Özet</h2>
-              <div className="mt-4 flex items-center justify-between border-t border-cyber-cyan/20 pt-4">
+              <h2 className="text-lg font-bold text-white">Özet</h2>
+              <div className="mt-4 flex items-center justify-between border-t border-brand-accent/20 pt-4">
                 <span className="font-medium text-white">Toplam</span>
-                <span className="font-orbitron text-2xl font-black text-cyber-cyan">
-                  {format(total)}
-                </span>
+                <span className="text-2xl font-black text-brand-accent">{format(total)}</span>
               </div>
             </CardContent>
           </Card>

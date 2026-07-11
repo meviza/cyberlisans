@@ -60,8 +60,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export async function generateStaticParams() {
-  const list = await fetchProducts({ limit: 100 });
-  return list.items.map((p) => ({ slug: p.slug }));
+  try {
+    const list = await fetchProducts({ limit: 100 });
+    return list.items.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
@@ -83,19 +87,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
     <>
       <StorefrontHeader />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <nav className="mb-6 flex items-center gap-1.5 text-sm text-white/60">
-          <Link href="/" className="hover:text-cyber-cyan">
+        <nav className="mb-6 flex items-center gap-1.5 text-sm text-brand-muted">
+          <Link href="/" className="hover:text-white">
             Anasayfa
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link href="/products" className="hover:text-cyber-cyan">
+          <Link href="/products" className="hover:text-white">
             Mağaza
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
-          <Link
-            href={`/products?category=${product.categorySlug}`}
-            className="hover:text-cyber-cyan"
-          >
+          <Link href={`/products?category=${product.categorySlug}`} className="hover:text-white">
             {product.category}
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
@@ -108,16 +109,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
         </div>
 
         <section className="mt-16">
-          <h2 className="mb-6 font-orbitron text-2xl font-black text-white">Yorumlar</h2>
-          <div className="rounded-xl border border-cyber-cyan/20 bg-cyber-darker/60 p-8 text-center text-white/60">
-            <Star className="mx-auto mb-3 h-8 w-8 text-cyber-cyan/40" />
+          <h2 className="mb-6 text-2xl font-semibold tracking-tight text-white">Yorumlar</h2>
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-8 text-center text-brand-muted">
+            <Star className="mx-auto mb-3 h-8 w-8 text-brand-accent/40" />
             <p>Yorum sistemi yakında aktif olacak.</p>
           </div>
         </section>
 
         {related.length > 0 && (
           <section className="mt-16">
-            <h2 className="mb-6 font-orbitron text-2xl font-black text-white">Benzer Ürünler</h2>
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-white">
+              Benzer ürünler
+            </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((p) => (
                 <ProductCard key={p.id} product={p} soldCount={p.sold} />

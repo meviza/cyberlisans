@@ -56,19 +56,17 @@ export default function CheckoutSuccessPage() {
       <main className="mx-auto flex max-w-3xl flex-col items-center px-4 py-16 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="relative mb-6 flex h-24 w-24 items-center justify-center">
-            <span className="absolute inset-0 animate-ping rounded-full bg-cyber-lime/20" />
-            <span className="absolute inset-2 animate-pulse rounded-full bg-cyber-lime/10" />
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-cyber-lime bg-cyber-lime/20 text-cyber-lime shadow-[0_0_30px_rgba(190,242,100,0.6)]">
+            <span className="absolute inset-0 animate-ping rounded-full bg-brand-success/20" />
+            <span className="absolute inset-2 animate-pulse rounded-full bg-brand-success/10" />
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-brand-success bg-brand-success/20 text-brand-success shadow-[0_0_30px_rgba(190,242,100,0.6)]">
               <Check className="h-12 w-12" strokeWidth={3} />
             </div>
           </div>
-          <div className="mb-3 flex items-center gap-2 rounded-full border border-cyber-cyan/40 bg-cyber-cyan/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-cyber-cyan">
+          <div className="mb-3 flex items-center gap-2 rounded-full border border-brand-accent/40 bg-brand-accent/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-brand-accent">
             <Sparkles className="h-3 w-3" />
             Sipariş onaylandı
           </div>
-          <h1 className="mb-2 font-orbitron text-3xl font-black text-white sm:text-4xl">
-            Teşekkürler!
-          </h1>
+          <h1 className="mb-2 text-3xl font-black text-white sm:text-4xl">Teşekkürler!</h1>
           <p className="text-white/60">Siparişin başarıyla alındı. Anında teslim başladı.</p>
         </div>
 
@@ -80,10 +78,10 @@ export default function CheckoutSuccessPage() {
               </div>
             ) : order ? (
               <>
-                <div className="mb-6 grid grid-cols-2 gap-4 border-b border-cyber-cyan/20 pb-6">
+                <div className="mb-6 grid grid-cols-2 gap-4 border-b border-brand-accent/20 pb-6">
                   <div>
                     <p className="text-xs uppercase tracking-wider text-white/50">Sipariş No</p>
-                    <p className="mt-1 font-mono text-cyber-cyan">{order.id}</p>
+                    <p className="mt-1 font-mono text-brand-accent">{order.id}</p>
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-wider text-white/50">Tarih</p>
@@ -97,14 +95,14 @@ export default function CheckoutSuccessPage() {
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-wider text-white/50">Durum</p>
-                    <p className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-cyber-lime/40 bg-cyber-lime/10 px-2.5 py-0.5 font-mono text-xs uppercase tracking-wider text-cyber-lime">
-                      <span className="h-1.5 w-1.5 rounded-full bg-cyber-lime" />
+                    <p className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-brand-success/40 bg-brand-success/10 px-2.5 py-0.5 font-mono text-xs uppercase tracking-wider text-brand-success">
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand-success" />
                       {order.status}
                     </p>
                   </div>
                 </div>
 
-                <h2 className="mb-3 font-orbitron text-base font-bold text-white">Ürünler</h2>
+                <h2 className="mb-3 text-base font-bold text-white">Ürünler</h2>
                 <ul className="space-y-2 text-sm">
                   {order.items.map((it, i) => (
                     <li key={i} className="flex items-center justify-between gap-2 text-white/70">
@@ -116,16 +114,16 @@ export default function CheckoutSuccessPage() {
                   ))}
                 </ul>
 
-                <div className="mt-6 flex items-center justify-between border-t border-cyber-cyan/20 pt-4">
+                <div className="mt-6 flex items-center justify-between border-t border-brand-accent/20 pt-4">
                   <span className="font-medium text-white">Toplam</span>
-                  <span className="font-orbitron text-2xl font-black text-cyber-cyan text-glow-cyan">
+                  <span className="text-2xl font-black text-brand-accent ">
                     {format(order.totalAmount)}
                   </span>
                 </div>
               </>
             ) : (
               <div className="py-8 text-center text-white/60">
-                <Package className="mx-auto mb-3 h-10 w-10 text-cyber-cyan/40" />
+                <Package className="mx-auto mb-3 h-10 w-10 text-brand-accent/40" />
                 <p>Sipariş detayları yüklenemedi.</p>
                 <p className="mt-1 font-mono text-xs text-white/40">{orderId}</p>
               </div>

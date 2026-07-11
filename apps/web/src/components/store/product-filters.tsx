@@ -214,9 +214,9 @@ export function ProductFilters({ brands, categories }: ProductFiltersProps) {
             onClick={() => setDrawerOpen(false)}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
-          <div className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col border-l border-cyber-cyan/30 bg-cyber-darker p-6 shadow-2xl">
+          <div className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col border-l border-white/[0.08] bg-brand-bg p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-orbitron text-lg font-bold text-white">Filtreler</h2>
+              <h2 className="text-lg font-semibold text-white">Filtreler</h2>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
@@ -252,8 +252,8 @@ function FilterButton({
       onClick={onClick}
       className={
         active
-          ? 'block w-full rounded-md border border-cyber-cyan/50 bg-cyber-cyan/10 px-3 py-2 text-left text-sm text-cyber-cyan'
-          : 'block w-full rounded-md border border-transparent px-3 py-2 text-left text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white'
+          ? 'block w-full rounded-xl border border-brand-accent/40 bg-brand-accent/10 px-3 py-2 text-left text-sm text-white'
+          : 'block w-full rounded-xl border border-transparent px-3 py-2 text-left text-sm text-brand-text-secondary transition-colors hover:bg-white/[0.04] hover:text-white'
       }
     >
       {children}

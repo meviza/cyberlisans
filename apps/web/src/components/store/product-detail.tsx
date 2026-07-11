@@ -21,9 +21,9 @@ function TrustBadge({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-md border border-cyber-cyan/20 bg-cyber-darker/60 px-3 py-2">
-      <Icon className="h-4 w-4 text-cyber-cyan" />
-      <span className="text-xs text-white/80">{label}</span>
+    <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+      <Icon className="h-4 w-4 text-brand-accent" />
+      <span className="text-xs text-brand-text-secondary">{label}</span>
     </div>
   );
 }
@@ -63,50 +63,50 @@ export function ProductDetail({ product, description }: ProductDetailProps) {
       <div>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Badge variant="default">{product.category}</Badge>
-          <Badge variant="magenta">{product.brand}</Badge>
+          <Badge variant="outline">{product.brand}</Badge>
           <Badge variant={stockBadge.variant}>{stockBadge.label}</Badge>
         </div>
-        <h1 className="font-orbitron text-3xl font-black text-white sm:text-4xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
           {product.title}
         </h1>
       </div>
 
-      <div className="rounded-xl border border-cyber-cyan/20 bg-cyber-darker/60 p-5">
+      <div className="rounded-2xl border border-white/[0.08] bg-brand-elevated/80 p-5 shadow-card">
         <div className="flex items-baseline gap-3">
-          <span className="font-orbitron text-4xl font-black text-cyber-cyan text-glow-cyan">
+          <span className="text-4xl font-semibold tracking-tight text-white">
             {format(product.price)}
           </span>
-          <span className="text-sm text-white/60">KDV dahil</span>
+          <span className="text-sm text-brand-muted">KDV dahil</span>
         </div>
       </div>
 
-      <div className="prose prose-invert max-w-none rounded-xl border border-cyber-cyan/20 bg-cyber-darker/40 p-5 text-sm leading-relaxed text-white/80">
+      <div className="prose prose-invert max-w-none rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 text-sm leading-relaxed text-brand-text-secondary">
         {description}
       </div>
 
       <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-end">
         <div>
-          <label className="mb-2 block text-sm text-white/80">Adet</label>
+          <label className="mb-2 block text-sm text-brand-text-secondary">Adet</label>
           <QuantitySelector value={qty} min={1} max={stock || 1} onChange={setQty} />
         </div>
         <div className="flex-1">
-          <span className="mb-2 hidden text-sm text-white/80 sm:block">&nbsp;</span>
+          <span className="mb-2 hidden text-sm sm:block">&nbsp;</span>
           <Button size="lg" disabled={stock === 0} onClick={onAdd} className="w-full">
             <ShoppingCart className="h-5 w-5" />
-            {added ? 'Sepete Eklendi ✓' : stock === 0 ? 'Stokta yok' : 'Sepete Ekle'}
+            {added ? 'Sepete eklendi ✓' : stock === 0 ? 'Stokta yok' : 'Sepete ekle'}
           </Button>
         </div>
       </div>
 
       <Button size="lg" variant="outline" className="w-full" disabled={stock === 0}>
         <Gift className="h-5 w-5" />
-        Hediye Olarak Gönder
+        Hediye olarak gönder
       </Button>
 
       <div className="grid grid-cols-3 gap-3 pt-2">
-        <TrustBadge icon={Zap} label="Anında Teslim" />
-        <TrustBadge icon={Shield} label="%100 Orijinal" />
-        <TrustBadge icon={RefreshCcw} label="14 Gün İade" />
+        <TrustBadge icon={Zap} label="Anında teslim" />
+        <TrustBadge icon={Shield} label="%100 orijinal" />
+        <TrustBadge icon={RefreshCcw} label="14 gün iade" />
       </div>
     </div>
   );
