@@ -2,19 +2,22 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
-import { listDealers } from '../../../domain/usecases/dealer/list-dealers';
+import { listDealers } from '../../../application/usecases/dealer/list-dealers';
 import {
   getDealerProfileById,
   assertDealerApproved,
-} from '../../../domain/usecases/dealer/get-dealer-profile';
-import { updateDealerProfile } from '../../../domain/usecases/dealer/update-dealer-profile';
+} from '../../../application/usecases/dealer/get-dealer-profile';
+import { updateDealerProfile } from '../../../application/usecases/dealer/update-dealer-profile';
 import {
   approveDealer,
   suspendDealer,
   rejectDealer,
-} from '../../../domain/usecases/dealer/approve-dealer';
-import { listDealerSales, getDealerStats } from '../../../domain/usecases/dealer/list-dealer-sales';
-import { processDealerPayout } from '../../../domain/usecases/dealer/request-dealer-payout';
+} from '../../../application/usecases/dealer/approve-dealer';
+import {
+  listDealerSales,
+  getDealerStats,
+} from '../../../application/usecases/dealer/list-dealer-sales';
+import { processDealerPayout } from '../../../application/usecases/dealer/request-dealer-payout';
 import { getRequestMeta } from '../../middleware/request-meta';
 import {
   adminDealerUpdateSchema,

@@ -6,10 +6,10 @@ import { ZodError } from 'zod';
 
 import { rateLimit } from '../middleware/rate-limit';
 import { getRequestMeta } from '../middleware/request-meta';
-import { getMe } from '../../domain/usecases/auth/get-me';
-import { updateProfile } from '../../domain/usecases/auth/update-profile';
-import { changePassword } from '../../domain/usecases/auth/change-password';
-import { deleteOwnAccount } from '../../domain/usecases/auth/delete-account';
+import { getMe } from '../../application/usecases/auth/get-me';
+import { updateProfile } from '../../application/usecases/auth/update-profile';
+import { changePassword } from '../../application/usecases/auth/change-password';
+import { deleteOwnAccount } from '../../application/usecases/auth/delete-account';
 import { prisma } from '../../infrastructure/db';
 import { InvalidCredentialsError, UserNotFoundError } from '../../domain/errors';
 

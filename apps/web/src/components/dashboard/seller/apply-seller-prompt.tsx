@@ -10,9 +10,9 @@ interface FeatureProps {
 
 function Feature({ icon: Icon, title }: FeatureProps) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-md border border-cyber-cyan/20 bg-cyber-cyan/5 p-3 text-center">
-      <Icon className="h-5 w-5 text-cyber-cyan" />
-      <span className="text-xs text-white/80">{title}</span>
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 text-center">
+      <Icon className="h-5 w-5 text-brand-accent" />
+      <span className="text-xs text-brand-text-secondary">{title}</span>
     </div>
   );
 }
@@ -22,22 +22,24 @@ export function ApplySellerPrompt() {
     <div className="mx-auto max-w-2xl space-y-6 py-8">
       <Card>
         <CardContent className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-cyber-cyan/40 bg-cyber-cyan/10 text-cyber-cyan">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-brand-accent/30 bg-brand-accent/10 text-brand-accent">
             <Store className="h-8 w-8" />
           </div>
-          <h1 className="font-orbitron text-2xl font-bold text-white">Satıcı Ol, Mağazanı Aç</h1>
-          <p className="mt-3 text-sm text-white/70">
-            Cyberlisans&apos;ta dijital ürünlerinizi satışa sunun. Komisyon oranlarınız, mağaza
-            puanınız ve tüm gelirleriniz tek bir panelde.
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Satıcı ol, mağazanı aç
+          </h1>
+          <p className="mt-3 text-sm text-brand-text-secondary">
+            CyberLisans&apos;ta dijital ürünlerinizi satışa sunun. Komisyon, mağaza puanı ve
+            gelirleriniz tek panelde.
           </p>
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Feature icon={TrendingUp} title="Rekabete Dayalı Komisyon" />
-            <Feature icon={Wallet} title="Hızlı Ödeme" />
-            <Feature icon={Star} title="Müşteri Puanları" />
+            <Feature icon={TrendingUp} title="Şeffaf komisyon" />
+            <Feature icon={Wallet} title="Hızlı payout" />
+            <Feature icon={Star} title="Müşteri puanları" />
           </div>
           <Link href="/dashboard/seller/apply" className="mt-8 inline-block">
             <Button size="lg">
-              <Store className="h-4 w-4" /> Hemen Başvur
+              <Store className="h-4 w-4" /> Hemen başvur
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>

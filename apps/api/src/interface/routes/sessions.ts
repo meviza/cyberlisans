@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { ZodError } from 'zod';
 import { authMiddleware } from '../../infrastructure/auth';
 import { sessionRepository } from '../../infrastructure/repositories/session.repository';
-import { logout, logoutAll, logoutSession } from '../../domain/usecases/auth/logout';
+import { logout, logoutAll, logoutSession } from '../../application/usecases/auth/logout';
 import { getRequestMeta } from '../middleware/request-meta';
 import { InvalidTokenError } from '../../domain/errors';
 
@@ -15,7 +15,8 @@ sessionRoutes.use('*', async (c, next) => {
     await next();
   } catch (err) {
     if (err instanceof ZodError) return c.json({ error: 'Validation', issues: err.issues }, 400);
-    if (err instanceof InvalidTokenError) return c.json({ error: err.message, code: err.code }, 404);
+    if (err instanceof InvalidTokenError)
+      return c.json({ error: err.message, code: err.code }, 404);
     console.error('[SESSION ERROR]', err);
     return c.json({ error: 'Internal error' }, 500);
   }

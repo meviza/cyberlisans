@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { ZodError } from 'zod';
-import { resolveDealerLink } from '../../domain/usecases/dealer/resolve-dealer-link';
+import { resolveDealerLink } from '../../application/usecases/dealer/resolve-dealer-link';
 import { dealerRepository } from '../../infrastructure/repositories/dealer.repository';
 import { PaymentError } from '@cyberlisans/payments/errors';
 import { resolveDealerLinkQuerySchema } from './dealer.schema';

@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
-import { listCategories } from '../../../domain/usecases/category/list-categories';
-import { createCategory } from '../../../domain/usecases/category/create-category';
-import { updateCategory } from '../../../domain/usecases/category/update-category';
-import { deleteCategory } from '../../../domain/usecases/category/delete-category';
+import { listCategories } from '../../../application/usecases/category/list-categories';
+import { createCategory } from '../../../application/usecases/category/create-category';
+import { updateCategory } from '../../../application/usecases/category/update-category';
+import { deleteCategory } from '../../../application/usecases/category/delete-category';
 import { getRequestMeta } from '../../middleware/request-meta';
 import { createCategorySchema, updateCategorySchema } from '../products.schema';
 

@@ -2,12 +2,12 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
-import { listAdminOrders } from '../../../domain/usecases/order/list-admin-orders';
-import { getAdminOrder } from '../../../domain/usecases/order/get-admin-order';
-import { adminFulfillOrder } from '../../../domain/usecases/order/admin-fulfill-order';
-import { adminRefundOrder } from '../../../domain/usecases/order/admin-refund-order';
-import { adminCancelOrder } from '../../../domain/usecases/order/admin-cancel-order';
-import { adminResendOrderConfirmation } from '../../../domain/usecases/order/admin-resend-confirmation';
+import { listAdminOrders } from '../../../application/usecases/order/list-admin-orders';
+import { getAdminOrder } from '../../../application/usecases/order/get-admin-order';
+import { adminFulfillOrder } from '../../../application/usecases/order/admin-fulfill-order';
+import { adminRefundOrder } from '../../../application/usecases/order/admin-refund-order';
+import { adminCancelOrder } from '../../../application/usecases/order/admin-cancel-order';
+import { adminResendOrderConfirmation } from '../../../application/usecases/order/admin-resend-confirmation';
 import { prisma } from '../../../infrastructure/db';
 import { getRequestMeta } from '../../middleware/request-meta';
 

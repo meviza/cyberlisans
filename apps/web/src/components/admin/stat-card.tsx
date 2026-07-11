@@ -13,31 +13,27 @@ export interface StatCardProps {
 
 const ACCENT_MAP: Record<
   NonNullable<StatCardProps['accent']>,
-  { border: string; bg: string; text: string; glow: string }
+  { border: string; bg: string; text: string }
 > = {
   cyan: {
-    border: 'border-cyber-cyan/30',
-    bg: 'bg-cyber-cyan/10',
-    text: 'text-cyber-cyan',
-    glow: 'rgba(0,240,255,0.5)',
+    border: 'border-brand-accent/30',
+    bg: 'bg-brand-accent/10',
+    text: 'text-brand-accent',
   },
   magenta: {
-    border: 'border-cyber-magenta/30',
-    bg: 'bg-cyber-magenta/10',
-    text: 'text-cyber-magenta',
-    glow: 'rgba(255,0,200,0.5)',
+    border: 'border-[#6B7CFF]/30',
+    bg: 'bg-[#6B7CFF]/10',
+    text: 'text-[#6B7CFF]',
   },
   purple: {
-    border: 'border-cyber-purple/30',
-    bg: 'bg-cyber-purple/10',
-    text: 'text-cyber-purple',
-    glow: 'rgba(139,92,246,0.5)',
+    border: 'border-white/15',
+    bg: 'bg-white/[0.04]',
+    text: 'text-brand-text-secondary',
   },
   lime: {
-    border: 'border-cyber-lime/30',
-    bg: 'bg-cyber-lime/10',
-    text: 'text-cyber-lime',
-    glow: 'rgba(190,242,100,0.5)',
+    border: 'border-brand-success/30',
+    bg: 'bg-brand-success/10',
+    text: 'text-brand-success',
   },
 };
 
@@ -56,30 +52,28 @@ export function StatCard({
         aria-hidden
         className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(circle at top right, ${a.glow.replace('0.5', '0.12')}, transparent 60%)`,
+          background: 'radial-gradient(circle at top right, rgba(0,87,255,0.12), transparent 60%)',
         }}
       />
       <CardContent className="relative p-5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-white/60">{label}</p>
-            <p className="font-orbitron text-2xl font-bold text-white">{value}</p>
-            {hint && <p className="text-xs text-white/50">{hint}</p>}
+            <p className="text-xs font-medium uppercase tracking-wider text-brand-muted">{label}</p>
+            <p className="text-2xl font-semibold tracking-tight text-white">{value}</p>
+            {hint && <p className="text-xs text-brand-muted">{hint}</p>}
             {trend && (
               <p
                 className={
                   trend.positive
-                    ? 'text-xs font-medium text-cyber-lime'
-                    : 'text-xs font-medium text-cyber-magenta'
+                    ? 'text-xs font-medium text-brand-success'
+                    : 'text-xs font-medium text-brand-danger'
                 }
               >
                 {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}%
               </p>
             )}
           </div>
-          <div
-            className={`rounded-md border ${a.border} ${a.bg} p-2.5 ${a.text} transition-all group-hover:shadow-[0_0_20px_${a.glow}]`}
-          >
+          <div className={`rounded-xl border p-2.5 transition ${a.border} ${a.bg} ${a.text}`}>
             <Icon className="h-5 w-5" />
           </div>
         </div>

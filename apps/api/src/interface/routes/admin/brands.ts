@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
-import { listBrands } from '../../../domain/usecases/brand/list-brands';
-import { createBrand } from '../../../domain/usecases/brand/create-brand';
-import { updateBrand } from '../../../domain/usecases/brand/update-brand';
-import { deleteBrand } from '../../../domain/usecases/brand/delete-brand';
+import { listBrands } from '../../../application/usecases/brand/list-brands';
+import { createBrand } from '../../../application/usecases/brand/create-brand';
+import { updateBrand } from '../../../application/usecases/brand/update-brand';
+import { deleteBrand } from '../../../application/usecases/brand/delete-brand';
 import { getRequestMeta } from '../../middleware/request-meta';
 import { createBrandSchema, updateBrandSchema } from '../products.schema';
 

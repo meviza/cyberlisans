@@ -1,20 +1,20 @@
 # M9 — Premium Redesign + Architecture Hardening Plan
 
 > **Tarih:** 2026-07-11  
-> **Durum:** Phase 1–3 in progress (shell + landing + tokens)  
+> **Durum:** Phase 1–4 in progress (UI shells + Clean Arch use-case migrate)  
 > **Amaç:** CyberLisans’ı GamsGo modelinde, sade-premium-kurumsal, 3D landing + 3 dashboard ile production-ready kaliteye yükseltmek.
 
 ### İlerleme (2026-07-11)
 
-| Phase             | Durum    | Not                                                |
-| ----------------- | -------- | -------------------------------------------------- |
-| 0 MCP + erişim    | ⚠️ Kısmi | GitHub ✅ Vercel ✅ Supabase CLI yanlış org        |
-| 1 Design system   | ✅       | Tokens, Button/Badge/Card/Input, globals           |
-| 2 Landing         | ✅       | Hero 3D lazy, trust strip, sections sadeleştirildi |
-| 3 Dashboard       | ✅ Kısmi | AppShell 3 rol, mobile nav, admin route redirects  |
-| 4 Backend cleanup | ⚪       |                                                    |
-| 5 DB/perf         | ⚪       | Supabase link sonrası                              |
-| 6 QA              | ⚪       | web vitest 18/18 geçti                             |
+| Phase             | Durum    | Not                                                                 |
+| ----------------- | -------- | ------------------------------------------------------------------- |
+| 0 MCP + erişim    | ⚠️ Kısmi | GitHub ✅ Vercel ✅ Supabase CLI yanlış org                         |
+| 1 Design system   | ✅       | Tokens, Button/Badge/Card/Input, globals                            |
+| 2 Landing         | ✅       | Hero 3D lazy, trust strip, sections sadeleştirildi                  |
+| 3 Dashboard       | ✅       | AppShell 3 rol + overview/seller/admin polish                       |
+| 4 Backend cleanup | ✅ Kısmi | domain/usecases → application/usecases; packages/db DEPRECATED note |
+| 5 DB/perf         | ⚪       | Supabase link sonrası                                               |
+| 6 QA              | ⚪       | web vitest 18/18; api typecheck OK                                  |
 
 ---
 

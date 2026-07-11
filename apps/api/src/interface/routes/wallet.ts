@@ -4,12 +4,12 @@ import { z, ZodError } from 'zod';
 import { authMiddleware, requireAdmin } from '../../infrastructure/auth';
 import { transferSchema, adminBalanceAdjustmentSchema } from '@cyberlisans/validators/wallet';
 import { currencySchema } from '@cyberlisans/validators/auth';
-import { getWallet } from '../../domain/usecases/wallet/get-wallet';
-import { listTransactions } from '../../domain/usecases/wallet/list-transactions';
-import { transfer } from '../../domain/usecases/wallet/transfer';
-import { requestWithdrawal } from '../../domain/usecases/wallet/withdraw';
-import { payWithWallet } from '../../domain/usecases/wallet/pay-with-wallet';
-import { adminAdjustBalance } from '../../domain/usecases/wallet/admin-adjust-balance';
+import { getWallet } from '../../application/usecases/wallet/get-wallet';
+import { listTransactions } from '../../application/usecases/wallet/list-transactions';
+import { transfer } from '../../application/usecases/wallet/transfer';
+import { requestWithdrawal } from '../../application/usecases/wallet/withdraw';
+import { payWithWallet } from '../../application/usecases/wallet/pay-with-wallet';
+import { adminAdjustBalance } from '../../application/usecases/wallet/admin-adjust-balance';
 import { getRequestMeta } from '../middleware/request-meta';
 import { PaymentError } from '@cyberlisans/payments/errors';
 

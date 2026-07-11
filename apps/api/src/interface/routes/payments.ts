@@ -3,12 +3,12 @@ import { zValidator } from '@hono/zod-validator';
 import { ZodError } from 'zod';
 import { authMiddleware, requireAdmin } from '../../infrastructure/auth';
 import { paymentRepository } from '../../infrastructure/repositories/payment.repository';
-import { initiatePayment } from '../../domain/usecases/payment/initiate-payment';
+import { initiatePayment } from '../../application/usecases/payment/initiate-payment';
 import {
   handlePaymentWebhook,
   WebhookSignatureError,
   WebhookAmountMismatchError,
-} from '../../domain/usecases/payment/handle-webhook';
+} from '../../application/usecases/payment/handle-webhook';
 import {
   initiatePaymentSchema,
   refundPaymentSchema,

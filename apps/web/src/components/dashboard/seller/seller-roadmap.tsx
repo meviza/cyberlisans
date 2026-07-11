@@ -13,11 +13,11 @@ export function SellerRoadmap() {
   return (
     <Card>
       <CardContent className="p-6">
-        <h2 className="mb-4 font-orbitron text-lg font-bold text-white">Yakında</h2>
-        <ul className="space-y-2 text-sm text-white/70">
+        <h2 className="mb-4 text-lg font-semibold text-white">Yakında</h2>
+        <ul className="space-y-2 text-sm text-brand-text-secondary">
           {ROADMAP_ITEMS.map((item) => (
             <li key={item} className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-cyber-cyan" /> {item}
+              <Clock className="h-4 w-4 text-brand-accent" /> {item}
             </li>
           ))}
         </ul>

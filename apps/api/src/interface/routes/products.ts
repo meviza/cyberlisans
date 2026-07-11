@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { ZodError } from 'zod';
-import { listProducts } from '../../domain/usecases/product/list-products';
-import { getProduct } from '../../domain/usecases/product/get-product';
-import { listCategories } from '../../domain/usecases/category/list-categories';
-import { listBrands } from '../../domain/usecases/brand/list-brands';
+import { listProducts } from '../../application/usecases/product/list-products';
+import { getProduct } from '../../application/usecases/product/get-product';
+import { listCategories } from '../../application/usecases/category/list-categories';
+import { listBrands } from '../../application/usecases/brand/list-brands';
 import { productRepository } from '../../infrastructure/repositories/product.repository';
 import { PaymentError } from '@cyberlisans/payments/errors';
 import { listProductsQuerySchema } from './products.schema';

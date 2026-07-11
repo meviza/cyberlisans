@@ -37,11 +37,11 @@ export interface AdminStats {
 }
 
 const METHOD_COLORS: Record<PaymentMethod, string> = {
-  WALLET: '#00F0FF',
-  PAYTR: '#FF00C8',
-  PAPARA: '#BEF264',
-  STRIPE: '#8B5CF6',
-  NOWPAYMENTS: '#FBBF24',
+  WALLET: '#0057FF',
+  PAYTR: '#6B7CFF',
+  PAPARA: '#29A383',
+  STRIPE: '#4B6BFF',
+  NOWPAYMENTS: '#FD8802',
   BANK_TRANSFER: '#60A5FA',
 };
 
@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
 
   if (error && !stats) {
     return (
-      <div className="rounded-md border border-cyber-magenta/30 bg-cyber-magenta/5 p-4 text-cyber-magenta">
+      <div className="rounded-xl border border-brand-danger/30 bg-brand-danger/10 p-4 text-brand-danger">
         İstatistikler yüklenemedi: {error}
       </div>
     );

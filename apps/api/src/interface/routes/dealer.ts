@@ -2,20 +2,23 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { ZodError } from 'zod';
 import { authMiddleware, requireTwoFactor } from '../../infrastructure/auth';
-import { getDealerProfile } from '../../domain/usecases/dealer/get-dealer-profile';
-import { registerDealer } from '../../domain/usecases/dealer/register-dealer';
-import { updateDealerProfile } from '../../domain/usecases/dealer/update-dealer-profile';
-import { createDealerLink } from '../../domain/usecases/dealer/create-dealer-link';
+import { getDealerProfile } from '../../application/usecases/dealer/get-dealer-profile';
+import { registerDealer } from '../../application/usecases/dealer/register-dealer';
+import { updateDealerProfile } from '../../application/usecases/dealer/update-dealer-profile';
+import { createDealerLink } from '../../application/usecases/dealer/create-dealer-link';
 import {
   listDealerLinks,
   updateDealerLink,
   deleteDealerLink,
-} from '../../domain/usecases/dealer/list-dealer-links';
-import { listDealerSales, getDealerStats } from '../../domain/usecases/dealer/list-dealer-sales';
+} from '../../application/usecases/dealer/list-dealer-links';
+import {
+  listDealerSales,
+  getDealerStats,
+} from '../../application/usecases/dealer/list-dealer-sales';
 import {
   requestDealerPayout,
   listDealerPayouts,
-} from '../../domain/usecases/dealer/request-dealer-payout';
+} from '../../application/usecases/dealer/request-dealer-payout';
 import { getRequestMeta } from '../middleware/request-meta';
 import { PaymentError } from '@cyberlisans/payments/errors';
 import { createRateLimiter, RATE_LIMIT_CONFIGS } from '../middleware/security/rate-limit';

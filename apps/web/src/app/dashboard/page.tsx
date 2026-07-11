@@ -49,9 +49,9 @@ const STATUS_MAP: Record<
 > = {
   PAID: { label: 'Ödendi', variant: 'warning' },
   PENDING: { label: 'Bekliyor', variant: 'warning' },
-  FULFILLED: { label: 'Teslim Edildi', variant: 'success' },
+  FULFILLED: { label: 'Teslim edildi', variant: 'success' },
   CANCELLED: { label: 'İptal', variant: 'danger' },
-  REFUNDED: { label: 'İade Edildi', variant: 'default' },
+  REFUNDED: { label: 'İade edildi', variant: 'default' },
 };
 
 export default function DashboardOverviewPage() {
@@ -109,28 +109,31 @@ export default function DashboardOverviewPage() {
     <div className="space-y-6">
       <Card className="overflow-hidden">
         <div
-          className="relative h-40 sm:h-48"
+          className="relative h-36 sm:h-40"
           style={{
             background:
-              'linear-gradient(135deg, rgba(0,240,255,0.2) 0%, rgba(139,92,246,0.2) 50%, rgba(255,0,200,0.2) 100%)',
+              'radial-gradient(ellipse 80% 80% at 20% 0%, rgba(0,87,255,0.35), transparent 55%), linear-gradient(135deg, #0B1220 0%, #00001e 100%)',
           }}
         >
-          <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+          <div
+            className="absolute inset-0 bg-grid-faint opacity-40"
+            style={{ backgroundSize: '48px 48px' }}
+          />
         </div>
         <CardContent className="relative -mt-12 p-6 sm:p-8">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm text-white/60">Hoş geldin,</p>
-              <h1 className="font-orbitron text-3xl font-black text-white">
+              <p className="text-sm text-brand-muted">Hoş geldin,</p>
+              <h1 className="text-3xl font-semibold tracking-tight text-white">
                 {user?.displayName ?? user?.username}
               </h1>
-              <p className="mt-1 text-sm text-white/60">{user?.email}</p>
+              <p className="mt-1 text-sm text-brand-text-secondary">{user?.email}</p>
             </div>
             <div className="flex gap-2">
-              <Badge variant="magenta" size="lg">
+              <Badge variant="default" size="lg">
                 {user?.role}
               </Badge>
-              <Badge variant="default" size="lg">
+              <Badge variant="outline" size="lg">
                 {user?.currency}
               </Badge>
             </div>
@@ -140,25 +143,25 @@ export default function DashboardOverviewPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Toplam Harcama"
+          label="Toplam harcama"
           value={`₺${totalSpend.toLocaleString('tr-TR')}`}
           icon={CreditCard}
           hint="Ödenen ve teslim edilen siparişler"
         />
         <StatCard
-          label="Aktif Lisanslar"
+          label="Aktif lisanslar"
           value={String(activeLicenses)}
           icon={ShoppingBag}
           hint="Satın alınan dijital ürün adedi"
         />
         <StatCard
-          label="Sadakat Puanı"
+          label="Sadakat puanı"
           value={loyaltyPoints.toLocaleString('tr-TR')}
           icon={Sparkles}
           hint="Harcamaya göre hesaplanır"
         />
         <StatCard
-          label="Son Sipariş"
+          label="Son sipariş"
           value={lastOrder ? `₺${lastOrder.totalAmount.toLocaleString('tr-TR')}` : '—'}
           icon={Receipt}
           hint={
@@ -173,19 +176,19 @@ export default function DashboardOverviewPage() {
         <Card className="lg:col-span-2">
           <CardContent className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-orbitron text-lg font-bold text-white">Hızlı Eylemler</h2>
+              <h2 className="text-lg font-semibold text-white">Hızlı eylemler</h2>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Link href="/dashboard/wallet">
                 <Button variant="primary" className="w-full">
                   <Wallet className="h-4 w-4" />
-                  Cüzdan Yükle
+                  Cüzdan yükle
                 </Button>
               </Link>
               <Link href="/products">
                 <Button variant="outline" className="w-full">
                   <ShoppingBag className="h-4 w-4" />
-                  Ürünlere Göz At
+                  Ürünlere göz at
                 </Button>
               </Link>
               <Link href="/dashboard/settings">
@@ -200,7 +203,7 @@ export default function DashboardOverviewPage() {
 
         <Card>
           <CardContent className="p-6">
-            <h2 className="mb-4 font-orbitron text-lg font-bold text-white">Hesap Durumu</h2>
+            <h2 className="mb-4 text-lg font-semibold text-white">Hesap durumu</h2>
             <div className="space-y-3">
               <StatusRow
                 icon={Mail}
@@ -218,7 +221,7 @@ export default function DashboardOverviewPage() {
             </div>
             <Link
               href="/dashboard/settings"
-              className="mt-4 inline-flex items-center gap-1 text-sm text-cyber-cyan hover:text-cyber-magenta"
+              className="mt-4 inline-flex items-center gap-1 text-sm text-brand-accent hover:underline"
             >
               Güvenliği yönet
               <ArrowUpRight className="h-3 w-3" />
@@ -230,12 +233,9 @@ export default function DashboardOverviewPage() {
       <Card>
         <CardContent className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-orbitron text-lg font-bold text-white">Son Siparişler</h2>
-            <Link
-              href="/dashboard/orders"
-              className="text-sm text-cyber-cyan hover:text-cyber-magenta"
-            >
-              Tümünü Gör →
+            <h2 className="text-lg font-semibold text-white">Son siparişler</h2>
+            <Link href="/dashboard/orders" className="text-sm text-brand-accent hover:underline">
+              Tümünü gör →
             </Link>
           </div>
           {loadingOrders ? (
@@ -243,19 +243,19 @@ export default function DashboardOverviewPage() {
               <Spinner size="md" />
             </div>
           ) : ordersError ? (
-            <div className="rounded-md border border-cyber-magenta/40 bg-cyber-magenta/10 px-4 py-3 text-sm text-cyber-magenta">
+            <div className="rounded-xl border border-brand-danger/40 bg-brand-danger/10 px-4 py-3 text-sm text-brand-danger">
               {ordersError}
             </div>
           ) : recentOrders.length === 0 ? (
-            <div className="rounded-md border border-white/10 bg-white/5 px-4 py-8 text-center text-sm text-white/60">
+            <div className="rounded-xl border border-dashed border-white/10 px-4 py-10 text-center text-sm text-brand-muted">
               Henüz sipariş yok. İlk alışverişin burada görünecek.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-cyber-cyan/20 text-left text-xs uppercase tracking-wider text-white/60">
-                    <th className="py-3 pr-4">Sipariş No</th>
+                  <tr className="border-b border-white/[0.08] text-left text-xs uppercase tracking-wider text-brand-muted">
+                    <th className="py-3 pr-4">Sipariş no</th>
                     <th className="py-3 pr-4">Tarih</th>
                     <th className="py-3 pr-4">Ürün</th>
                     <th className="py-3 pr-4 text-right">Tutar</th>
@@ -271,10 +271,10 @@ export default function DashboardOverviewPage() {
                     return (
                       <tr
                         key={o.id}
-                        className="border-b border-cyber-cyan/10 transition-colors hover:bg-cyber-cyan/5"
+                        className="border-b border-white/[0.06] transition-colors hover:bg-white/[0.03]"
                       >
-                        <td className="py-3 pr-4 font-mono text-cyber-cyan">{o.id}</td>
-                        <td className="py-3 pr-4 text-white/70">{o.date}</td>
+                        <td className="py-3 pr-4 font-mono text-xs text-brand-accent">{o.id}</td>
+                        <td className="py-3 pr-4 text-brand-text-secondary">{o.date}</td>
                         <td className="py-3 pr-4 text-white">{o.product}</td>
                         <td className="py-3 pr-4 text-right font-medium text-white">
                           ₺{o.amount.toLocaleString()}
@@ -310,17 +310,17 @@ function StatusRow({
 }) {
   const colors =
     status === 'success'
-      ? 'text-cyber-lime border-cyber-lime/30 bg-cyber-lime/5'
+      ? 'text-brand-success border-brand-success/25 bg-brand-success/5'
       : status === 'warning'
-        ? 'text-cyber-magenta border-cyber-magenta/30 bg-cyber-magenta/5'
-        : 'text-white/70 border-white/20 bg-white/5';
+        ? 'text-brand-warning border-brand-warning/25 bg-brand-warning/5'
+        : 'text-brand-text-secondary border-white/10 bg-white/[0.03]';
   return (
-    <div className={`flex items-center justify-between rounded-md border px-3 py-2 ${colors}`}>
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4" />
+    <div className={`flex items-center justify-between rounded-xl border px-3 py-2 ${colors}`}>
+      <div className="flex min-w-0 items-center gap-2">
+        <Icon className="h-4 w-4 shrink-0" />
         <span className="text-sm">{label}</span>
       </div>
-      <span className="text-xs font-medium">{detail}</span>
+      <span className="ml-2 max-w-[45%] truncate text-xs font-medium">{detail}</span>
     </div>
   );
 }

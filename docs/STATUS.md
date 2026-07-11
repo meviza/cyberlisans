@@ -3,8 +3,8 @@
 > **Bu dosya her oturum başında okunacak tek sayfa özettir.**
 > Yeni AI agent veya ekip üyesi bu dosyayı okuyarak projeye 30 saniyede bağlam kurabilir.
 
-**Son güncelleme:** 2026-07-11 18:10
-**Mevcut milestone:** M9 premium redesign (Phase 1–3 in progress)
+**Son güncelleme:** 2026-07-11 18:50
+**Mevcut milestone:** M9 premium redesign (Phase 1–4 in progress)
 **Son tamamlanan:** M5.2 pre-launch hardening
 **Production:** https://cyberlisans-mp.vercel.app
 

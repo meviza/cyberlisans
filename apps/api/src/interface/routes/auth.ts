@@ -17,16 +17,16 @@ import {
   RATE_LIMIT_CONFIGS,
   emailBodyIdentifier,
 } from '../middleware/security/rate-limit';
-import { registerUserGeneric } from '../../domain/usecases/auth/register-user';
-import { loginUser } from '../../domain/usecases/auth/login-user';
-import { refreshToken } from '../../domain/usecases/auth/refresh-token';
-import { logout } from '../../domain/usecases/auth/logout';
-import { verifyEmail } from '../../domain/usecases/auth/verify-email';
-import { requestPasswordReset } from '../../domain/usecases/auth/request-password-reset';
-import { resetPassword } from '../../domain/usecases/auth/reset-password';
-import { enable2FA } from '../../domain/usecases/auth/enable-2fa';
-import { verify2FA } from '../../domain/usecases/auth/verify-2fa';
-import { disable2FA } from '../../domain/usecases/auth/disable-2fa';
+import { registerUserGeneric } from '../../application/usecases/auth/register-user';
+import { loginUser } from '../../application/usecases/auth/login-user';
+import { refreshToken } from '../../application/usecases/auth/refresh-token';
+import { logout } from '../../application/usecases/auth/logout';
+import { verifyEmail } from '../../application/usecases/auth/verify-email';
+import { requestPasswordReset } from '../../application/usecases/auth/request-password-reset';
+import { resetPassword } from '../../application/usecases/auth/reset-password';
+import { enable2FA } from '../../application/usecases/auth/enable-2fa';
+import { verify2FA } from '../../application/usecases/auth/verify-2fa';
+import { disable2FA } from '../../application/usecases/auth/disable-2fa';
 import {
   EmailAlreadyExistsError,
   UsernameTakenError,
