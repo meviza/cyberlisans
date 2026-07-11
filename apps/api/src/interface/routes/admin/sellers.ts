@@ -11,6 +11,7 @@ import {
   ListAllSellersUseCase,
   ListPendingSellersUseCase,
   GetAdminSellerUseCase,
+  GetSellerStatusCountsUseCase,
 } from '../../../application/usecases/admin/list-sellers';
 import type { SellerRepositoryPort } from '../../../application/ports/seller';
 import type { IAuditRepository } from '../../../application/ports/repositories';
@@ -38,6 +39,13 @@ adminSellersRoutes.get('/pending', async (c) => {
   const { sellers, audit } = await importWire();
   const uc = new ListPendingSellersUseCase({ sellers, audit });
   return c.json(await uc.execute(page, limit));
+});
+
+/** Status counters for admin review dashboard */
+adminSellersRoutes.get('/stats', async (c) => {
+  const { sellers, audit } = await importWire();
+  const uc = new GetSellerStatusCountsUseCase({ sellers, audit });
+  return c.json(await uc.execute());
 });
 
 adminSellersRoutes.get('/', zValidator('query', listSchema), async (c) => {

@@ -75,6 +75,13 @@ export interface ListSellersFilter {
   limit: number;
 }
 
+export interface SellerUserSummary {
+  id: string;
+  email: string;
+  username: string | null;
+  displayName?: string | null;
+}
+
 export interface SellerOutput {
   id: string;
   userId: string;
@@ -97,6 +104,16 @@ export interface SellerOutput {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
+  /** Populated on admin list/detail when available */
+  user?: SellerUserSummary | null;
+}
+
+export interface SellerStatusCounts {
+  PENDING: number;
+  APPROVED: number;
+  SUSPENDED: number;
+  REJECTED: number;
+  total: number;
 }
 
 export interface SellerRepositoryPort {
@@ -108,6 +125,7 @@ export interface SellerRepositoryPort {
   ): Promise<SellerEntity>;
   update(id: string, data: Partial<SellerEntity>): Promise<SellerEntity>;
   list(filter: ListSellersFilter): Promise<{ items: SellerEntity[]; total: number }>;
+  countByStatus(): Promise<SellerStatusCounts>;
   approve(id: string, adminId: string, notes?: string | null): Promise<SellerEntity>;
   reject(id: string, adminId: string, reason: string): Promise<SellerEntity>;
   suspend(id: string, adminId: string, reason: string): Promise<SellerEntity>;

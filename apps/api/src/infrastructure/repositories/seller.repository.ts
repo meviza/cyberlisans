@@ -3,6 +3,7 @@ import type {
   SellerRepositoryPort,
   SellerEntity,
   ListSellersFilter,
+  SellerStatusCounts,
 } from '../../application/ports/seller';
 
 type Row = Record<string, unknown>;
@@ -126,12 +127,43 @@ export class SellerRepository implements SellerRepositoryPort {
     let q = supabaseAdmin().from('sellers').select('*', { count: 'exact' });
     if (filter.status) q = q.eq('status', filter.status);
     if (filter.kycStatus) q = q.eq('kycStatus', filter.kycStatus);
+    if (filter.search?.trim()) {
+      const term = filter.search.trim().replace(/%/g, '');
+      // company / slug / tax id ilike; user email resolved in use-case layer if needed
+      q = q.or(`companyName.ilike.%${term}%,slug.ilike.%${term}%,taxId.ilike.%${term}%`);
+    }
     q = q.order('createdAt', { ascending: false });
     const from = (filter.page - 1) * filter.limit;
     q = q.range(from, from + filter.limit - 1);
     const { data, error, count } = await q;
     if (error) throw dbError(error);
     return { items: (data ?? []).map((r) => toEntity(r)), total: count ?? 0 };
+  }
+
+  async countByStatus(): Promise<SellerStatusCounts> {
+    const statuses = ['PENDING', 'APPROVED', 'SUSPENDED', 'REJECTED'] as const;
+    const counts = await Promise.all(
+      statuses.map(async (status) => {
+        const { count, error } = await supabaseAdmin()
+          .from('sellers')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', status);
+        if (error) throw dbError(error);
+        return [status, count ?? 0] as const;
+      }),
+    );
+    const result: SellerStatusCounts = {
+      PENDING: 0,
+      APPROVED: 0,
+      SUSPENDED: 0,
+      REJECTED: 0,
+      total: 0,
+    };
+    for (const [status, n] of counts) {
+      result[status] = n;
+      result.total += n;
+    }
+    return result;
   }
 
   async approve(id: string, adminId: string, notes?: string | null): Promise<SellerEntity> {

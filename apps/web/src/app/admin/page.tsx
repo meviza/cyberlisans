@@ -32,6 +32,7 @@ export interface AdminStats {
   revenue: { totalTry: number; last30DaysTry: number; last30Days: number[] };
   products: { active: number; lowStock?: number };
   dealers?: { pending: number };
+  sellers?: { pending: number };
   paymentsByMethod: Record<PaymentMethod, number>;
   topProducts: { id: string; title: string; sold: number }[];
 }
@@ -188,14 +189,14 @@ export default function AdminDashboardPage() {
           </div>
         </Link>
         <Link
-          href="/admin/dealers?status=PENDING"
+          href="/admin/sellers"
           className="group rounded-xl border border-cyber-magenta/20 bg-cyber-magenta/5 p-4 transition-colors hover:border-cyber-magenta/50 hover:bg-cyber-magenta/10"
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wider text-white/50">Bayi onayı</p>
+              <p className="text-xs uppercase tracking-wider text-white/50">Satıcı onayı</p>
               <p className="mt-1 font-orbitron text-xl text-white">
-                {formatNumber(s.dealers?.pending ?? 0)} bekleyen başvuru
+                {formatNumber(s.sellers?.pending ?? s.dealers?.pending ?? 0)} bekleyen başvuru
               </p>
             </div>
             <Store className="h-6 w-6 text-cyber-magenta" />
