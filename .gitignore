@@ -28,3 +28,8 @@ newman/
 .testsprite/
 testsprite.config.json
 supabase/.temp/
+
+# Netlify
+.netlify
+.env.netlify
+.netlify-env.json

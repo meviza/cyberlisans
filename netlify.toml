@@ -1,0 +1,49 @@
+# CyberLisans — Netlify (Next.js 15 monorepo / pnpm + turbo)
+# Docs: https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
+# OpenNext: https://opennext.js.org/netlify
+
+[build]
+  # Build from monorepo root so workspace packages resolve.
+  # apps/admin is also Next.js — always filter to storefront only.
+  command = "pnpm turbo run build --filter=@cyberlisans/web..."
+  # Suggested publish for Next.js; OpenNext adapter rewires output.
+  publish = "apps/web/.next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  PNPM_VERSION = "10.0.0"
+  # Required for Next.js + pnpm so the adapter can resolve deps.
+  PNPM_FLAGS = "--shamefully-hoist"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NPM_CONFIG_FUND = "false"
+  NPM_CONFIG_AUDIT = "false"
+
+# Let Netlify auto-install the latest OpenNext adapter unless pinned.
+# Do NOT pin @netlify/plugin-nextjs unless debugging a specific regression.
+
+# Security headers (parity with vercel.json)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
+
+[dev]
+  command = "pnpm turbo run dev --filter=@cyberlisans/web"
+  targetPort = 3000
+  port = 8888
+  autoLaunch = false

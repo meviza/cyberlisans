@@ -3,16 +3,17 @@
 > **Bu dosya her oturum başında okunacak tek sayfa özettir.**
 > Yeni AI agent veya ekip üyesi bu dosyayı okuyarak projeye 30 saniyede bağlam kurabilir.
 
-**Son güncelleme:** 2026-07-11 18:50
-**Mevcut milestone:** M9 premium redesign (Phase 1–4 in progress)
-**Son tamamlanan:** M5.2 pre-launch hardening
-**Production:** https://cyberlisans-mp.vercel.app
+**Son güncelleme:** 2026-07-11 20:05
+**Mevcut milestone:** M9 premium redesign (Phase 1–4) + hosting → Netlify
+**Son tamamlanan:** M5.2 pre-launch hardening; M9 FE redesign main'de
+**Production (legacy):** https://cyberlisans-mp.vercel.app (son deploys Error)
+**Production (hedef):** Netlify (kurulum: `netlify.toml` + `scripts/netlify-bootstrap.sh`)
 
 ---
 
 ## 🏁 Tek Cümlede
 
-Cyberlisans, **Clean Architecture monorepo** olarak geliştirilen, **Supabase REST + PostgREST** ile Vercel'de host edilen, **Trigger.dev** ile zamanlanmış işleri yönetilen, **Postman/Newman CI** ile test edilen, **3 rol (CUSTOMER/SELLER/ADMIN)** ile çalışan, **tam escrow akışlı** dijital ürün marketplace'idir.
+Cyberlisans, **Clean Architecture monorepo** olarak geliştirilen, **Supabase REST + PostgREST** ile host edilen (geçiş: **Vercel → Netlify**), **Trigger.dev** ile zamanlanmış işleri yönetilen, **Postman/Newman CI** ile test edilen, **3 rol (CUSTOMER/SELLER/ADMIN)** ile çalışan, **tam escrow akışlı** dijital ürün marketplace'idir.
 
 ---
 
@@ -60,16 +61,17 @@ apps/web (Next.js 15) ──→ apps/api (Hono) ──→ Supabase (PostgREST)
 
 ## 🔗 Entegrasyonlar
 
-| Servis          | Amaç                 | Durum          | Erişim                                                   |
-| --------------- | -------------------- | -------------- | -------------------------------------------------------- |
-| **Supabase**    | DB + Auth + Storage  | ✅ Çalışıyor   | project `aobbnmasgvbnpjmitnyi`, REST API                 |
-| **Vercel**      | Hosting + CDN        | ⚠️ Alias drift | project `prj_UJlBBLXtEra8Y6TsOUh5XPxpeEsu` (cyberlisans) |
-| **Trigger.dev** | Cron + scheduled job | ✅ Çalışıyor   | project `proj_sibrytqjplnlnkvxwfve` (Cyberlisans)        |
-| **Postman**     | API test + CI        | ✅ Çalışıyor   | workspace (user-owned)                                   |
-| **Sentry**      | Error monitoring     | ⚠️ Kısmen      | project `cyberlisans` (org: meviza)                      |
-| **PayTR**       | Ödeme                | ⏳ Mock        | —                                                        |
-| **Papara**      | Ödeme                | ⏳ Mock        | —                                                        |
-| **Crypto**      | Ödeme                | ⏳ Mock        | —                                                        |
+| Servis          | Amaç                 | Durum        | Erişim                                                   |
+| --------------- | -------------------- | ------------ | -------------------------------------------------------- |
+| **Supabase**    | DB + Auth + Storage  | ✅ Çalışıyor | project `aobbnmasgvbnpjmitnyi`, REST API                 |
+| **Netlify**     | Hosting + CDN (yeni) | 🟡 Kurulum   | `netlify.toml`, bootstrap script; CLI login gerekli      |
+| **Vercel**      | Hosting (legacy)     | 🔴 Son Error | project `prj_UJlBBLXtEra8Y6TsOUh5XPxpeEsu` (cyberlisans) |
+| **Trigger.dev** | Cron + scheduled job | ✅ Çalışıyor | project `proj_sibrytqjplnlnkvxwfve` (Cyberlisans)        |
+| **Postman**     | API test + CI        | ✅ Çalışıyor | workspace (user-owned)                                   |
+| **Sentry**      | Error monitoring     | ⚠️ Kısmen    | project `cyberlisans` (org: meviza)                      |
+| **PayTR**       | Ödeme                | ⏳ Mock      | —                                                        |
+| **Papara**      | Ödeme                | ⏳ Mock      | —                                                        |
+| **Crypto**      | Ödeme                | ⏳ Mock      | —                                                        |
 
 ---
 
