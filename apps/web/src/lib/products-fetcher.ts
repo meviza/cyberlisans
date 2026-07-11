@@ -85,6 +85,89 @@ function emptyList(limit = 24): ProductListResponse {
   return { items: [], total: 0, page: 1, limit, totalPages: 0 };
 }
 
+/** API may return DB snake/camel rows (priceTry, isFeatured) or storefront DTO. */
+function normalizeProduct(raw: Record<string, unknown>): ProductSummary {
+  const priceRaw =
+    raw['price'] ?? raw['priceTry'] ?? raw['price_try'] ?? raw['priceUsd'] ?? raw['price_usd'] ?? 0;
+  const price = typeof priceRaw === 'number' ? priceRaw : Number(priceRaw) || 0;
+  const stockRaw = raw['stock'] ?? raw['stockCount'] ?? 0;
+  const stock = typeof stockRaw === 'number' ? stockRaw : Number(stockRaw) || 0;
+  const featured = Boolean(raw['featured'] ?? raw['isFeatured'] ?? raw['is_featured']);
+  const image =
+    (raw['image'] as string | null | undefined) ??
+    (raw['imageUrl'] as string | null | undefined) ??
+    (raw['image_url'] as string | null | undefined) ??
+    null;
+  const brand =
+    (raw['brand'] as string | undefined) ??
+    (raw['brandName'] as string | undefined) ??
+    (raw['brand'] as { name?: string } | undefined)?.name ??
+    '';
+  const brandSlug =
+    (raw['brandSlug'] as string | undefined) ??
+    (raw['brand_slug'] as string | undefined) ??
+    undefined;
+  const categorySlug =
+    (raw['categorySlug'] as string | undefined) ??
+    (raw['category_slug'] as string | undefined) ??
+    (raw['category'] as string | undefined) ??
+    'oyun';
+  const category =
+    (raw['categoryName'] as string | undefined) ??
+    (typeof raw['category'] === 'string' && raw['category'] !== categorySlug
+      ? (raw['category'] as string)
+      : categorySlug);
+  const deliveryRaw = String(
+    raw['delivery'] ?? raw['deliveryType'] ?? raw['delivery_type'] ?? 'KEY',
+  );
+  const delivery = (['AUTO', 'MANUAL', 'KEY'].includes(deliveryRaw) ? deliveryRaw : 'KEY') as
+    | 'AUTO'
+    | 'MANUAL'
+    | 'KEY';
+  const currencyRaw = String(raw['currency'] ?? 'TRY').toUpperCase();
+  const currency = (['TRY', 'USD', 'EUR', 'USDT'].includes(currencyRaw) ? currencyRaw : 'TRY') as
+    | 'TRY'
+    | 'USD'
+    | 'EUR'
+    | 'USDT';
+
+  return {
+    id: String(raw['id'] ?? ''),
+    slug: String(raw['slug'] ?? ''),
+    title: String(raw['title'] ?? raw['name'] ?? ''),
+    brand: brand || '—',
+    brandSlug,
+    category: String(category || 'Oyun'),
+    categorySlug: String(categorySlug || 'oyun'),
+    price,
+    compareAtPrice: (raw['compareAtPrice'] as number | null | undefined) ?? null,
+    currency,
+    image,
+    images: Array.isArray(raw['images']) ? (raw['images'] as ProductImage[]) : undefined,
+    stock,
+    featured,
+    sold: Number(raw['sold'] ?? raw['soldCount'] ?? 0) || 0,
+    delivery,
+    rating: typeof raw['rating'] === 'number' ? raw['rating'] : undefined,
+    reviewCount: typeof raw['reviewCount'] === 'number' ? raw['reviewCount'] : undefined,
+    createdAt: String(raw['createdAt'] ?? raw['created_at'] ?? new Date().toISOString()),
+  };
+}
+
+function normalizeListPayload(data: unknown, limit: number): ProductListResponse {
+  if (!data || typeof data !== 'object') return emptyList(limit);
+  const obj = data as Record<string, unknown>;
+  const itemsRaw = (obj['items'] ?? obj['data'] ?? []) as unknown[];
+  const items = Array.isArray(itemsRaw)
+    ? itemsRaw.map((row) => normalizeProduct((row ?? {}) as Record<string, unknown>))
+    : [];
+  const total = Number(obj['total'] ?? items.length) || items.length;
+  const page = Number(obj['page'] ?? 1) || 1;
+  const lim = Number(obj['limit'] ?? limit) || limit;
+  const totalPages = Number(obj['totalPages'] ?? Math.ceil(total / Math.max(lim, 1))) || 0;
+  return { items, total, page, limit: lim, totalPages };
+}
+
 async function fetchJson<T>(path: string, init: FetchOptions = {}): Promise<T> {
   const url = `${API_URL}${path}`;
   const next =
@@ -128,10 +211,11 @@ export async function fetchProducts(input: {
   params.set('page', String(input.page ?? 1));
   params.set('limit', String(input.limit ?? 24));
   try {
-    return await fetchJson<ProductListResponse>(`/products?${params.toString()}`, {
+    const data = await fetchJson<unknown>(`/products?${params.toString()}`, {
       revalidate: 60,
       tags: ['products'],
     });
+    return normalizeListPayload(data, input.limit ?? 24);
   } catch {
     return emptyList(input.limit ?? 24);
   }
@@ -139,11 +223,11 @@ export async function fetchProducts(input: {
 
 export async function fetchFeaturedProducts(limit = 8): Promise<ProductSummary[]> {
   try {
-    const data = await fetchJson<{ items: ProductSummary[] }>(`/products/featured?limit=${limit}`, {
+    const data = await fetchJson<unknown>(`/products/featured?limit=${limit}`, {
       revalidate: 60,
       tags: ['products', 'products:featured'],
     });
-    return data.items ?? [];
+    return normalizeListPayload(data, limit).items;
   } catch {
     return [];
   }
@@ -151,10 +235,21 @@ export async function fetchFeaturedProducts(limit = 8): Promise<ProductSummary[]
 
 export async function fetchProductBySlug(slug: string): Promise<ProductDetail | null> {
   try {
-    return await fetchJson<ProductDetail>(`/products/${encodeURIComponent(slug)}`, {
+    const data = await fetchJson<Record<string, unknown>>(`/products/${encodeURIComponent(slug)}`, {
       revalidate: 60,
       tags: ['products', `products:slug:${slug}`],
     });
+    const base = normalizeProduct(data);
+    return {
+      ...base,
+      description: String(data['description'] ?? ''),
+      longDescription: (data['longDescription'] as string | null | undefined) ?? null,
+      tags: Array.isArray(data['tags']) ? (data['tags'] as string[]) : undefined,
+      variants: Array.isArray(data['variants'])
+        ? (data['variants'] as ProductDetail['variants'])
+        : undefined,
+      faq: Array.isArray(data['faq']) ? (data['faq'] as ProductDetail['faq']) : undefined,
+    };
   } catch {
     return null;
   }
@@ -162,11 +257,16 @@ export async function fetchProductBySlug(slug: string): Promise<ProductDetail | 
 
 export async function fetchCategories(): Promise<CategoryRow[]> {
   try {
-    const data = await fetchJson<{ items: CategoryRow[] }>(`/products/categories`, {
+    const data = await fetchJson<{ items?: CategoryRow[] }>(`/products/categories`, {
       revalidate: 300,
       tags: ['categories'],
     });
-    return data.items ?? [];
+    return (data.items ?? []).map((c) => ({
+      id: c.id,
+      slug: c.slug,
+      name: c.name,
+      iconUrl: c.iconUrl ?? null,
+    }));
   } catch {
     return [];
   }
@@ -174,11 +274,16 @@ export async function fetchCategories(): Promise<CategoryRow[]> {
 
 export async function fetchBrands(): Promise<BrandRow[]> {
   try {
-    const data = await fetchJson<{ items: BrandRow[] }>(`/products/brands`, {
+    const data = await fetchJson<{ items?: Array<Record<string, unknown>> }>(`/products/brands`, {
       revalidate: 300,
       tags: ['brands'],
     });
-    return data.items ?? [];
+    return (data.items ?? []).map((b) => ({
+      id: String(b['id'] ?? ''),
+      slug: String(b['slug'] ?? ''),
+      name: String(b['name'] ?? ''),
+      logoUrl: (b['logoUrl'] as string | null | undefined) ?? null,
+    }));
   } catch {
     return [];
   }
