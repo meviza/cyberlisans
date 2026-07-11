@@ -5,6 +5,7 @@ import { FeaturedProductsSection } from '@/components/sections/featured-products
 import { FeaturesSection } from '@/components/sections/features-section';
 import { HowItWorksSection } from '@/components/sections/how-it-works-section';
 import { StatsSection } from '@/components/sections/stats-section';
+import { SellerMarketingSection } from '@/components/sections/seller-marketing-section';
 import { FAQSection } from '@/components/sections/faq-section';
 import { CTASection } from '@/components/sections/cta-section';
 import { FooterSection } from '@/components/sections/footer-section';
@@ -62,6 +63,7 @@ export default function HomePage() {
       <FeaturedProductsSection />
       <FeaturesSection />
       <HowItWorksSection />
+      <SellerMarketingSection />
       <StatsSection />
       <FAQSection />
       <CTASection />

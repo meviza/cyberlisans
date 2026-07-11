@@ -126,6 +126,31 @@
   .section-lead {
     @apply mt-4 max-w-2xl text-base leading-relaxed text-brand-text-secondary sm:text-lg;
   }
+
+  /* Laravel Cloud–style light marketing band */
+  .band-light {
+    @apply relative overflow-hidden bg-brand-panel-light text-brand-ink;
+  }
+
+  .surface-light-card {
+    @apply rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_0_rgba(255,255,255,0.8),0_12px_40px_rgba(11,18,32,0.08)];
+  }
+
+  .btn-on-light {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white shadow-accent-glow transition hover:bg-brand-accent-hover;
+  }
+
+  .btn-on-light-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-black/10 bg-white px-5 py-2.5 text-sm font-semibold text-brand-ink transition hover:border-brand-accent/40 hover:text-brand-accent;
+  }
+
+  .reveal-ready {
+    @apply opacity-0 translate-y-6;
+  }
+
+  .reveal-visible {
+    @apply animate-slide-up opacity-100;
+  }
 }
 
 @layer utilities {

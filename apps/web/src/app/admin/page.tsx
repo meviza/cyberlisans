@@ -53,7 +53,8 @@ export default function AdminDashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await apiFetch<AdminStats>('/api/admin/stats');
+        // api-client already prefixes /api — do not double-prefix
+        const res = await apiFetch<AdminStats>('/admin/stats');
         if (!cancelled) setStats(res);
       } catch (e) {
         if (cancelled) return;

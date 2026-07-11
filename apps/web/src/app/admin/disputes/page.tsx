@@ -1,37 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { AlertCircle, Gavel } from 'lucide-react';
+import { Gavel } from 'lucide-react';
 import { Spinner } from '@cyberlisans/ui/atoms';
 import { EmptyState } from '@/components/store/empty-state';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { DisputeTable, type DisputeRow } from '@/components/dashboard/admin/dispute-table';
 import { DisputeFilters } from '@/components/dashboard/admin/dispute-filters';
 
-const MOCK: DisputeRow[] = [
-  {
-    id: 'dsp_001abc',
-    orderId: 'ord_002xyz',
-    customerName: 'Müşteri Demo',
-    sellerName: 'Demo Seller',
-    reason: 'Lisans anahtarı çalışmıyor',
-    status: 'OPEN',
-    openedAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: 'dsp_002def',
-    orderId: 'ord_003uvw',
-    customerName: 'Ali Y.',
-    sellerName: 'GameStore',
-    reason: 'Yanlış ürün teslim edildi',
-    status: 'OPEN',
-    openedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-];
-
 export default function AdminDisputesPage() {
   const [rows, setRows] = React.useState<DisputeRow[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<'ALL' | DisputeRow['status']>('ALL');
   const [date, setDate] = React.useState<'ALL' | '7d' | '30d'>('ALL');
 
@@ -40,11 +20,14 @@ export default function AdminDisputesPage() {
     (async () => {
       try {
         const res = await apiFetch<{ items: DisputeRow[] }>('/admin/disputes');
-        if (!cancelled) setRows(res.items);
+        if (!cancelled) {
+          setRows(res.items ?? []);
+          setLoadError(null);
+        }
       } catch (err) {
         if (cancelled) return;
-        if (err instanceof ApiError && err.status === 404) setRows(MOCK);
-        else setRows([]);
+        setRows([]);
+        setLoadError(err instanceof ApiError ? err.message : 'İtirazlar yüklenemedi');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -75,9 +58,14 @@ export default function AdminDisputesPage() {
 
   return (
     <div className="space-y-6">
+      {loadError && (
+        <div className="rounded-xl border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm text-brand-danger">
+          {loadError}
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-orbitron text-2xl font-black text-white">İtiraz Yönetimi</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">İtiraz Yönetimi</h1>
           <p className="text-sm text-white/60">Açık ve geçmiş itirazları yönet</p>
         </div>
         <div className="rounded-md border border-cyber-cyan/30 bg-cyber-cyan/5 px-3 py-1.5 text-xs text-cyber-cyan">
@@ -94,16 +82,12 @@ export default function AdminDisputesPage() {
         <EmptyState
           icon={Gavel}
           title="İtiraz bulunamadı"
-          description="Bu filtreyle eşleşen itiraz yok."
+          description={
+            loadError ? 'API hatası nedeniyle liste boş.' : 'Bu filtreyle eşleşen itiraz yok.'
+          }
         />
       ) : (
         <DisputeTable rows={filtered} />
-      )}
-      {rows === MOCK && (
-        <div className="flex items-center gap-2 rounded-md border border-cyber-yellow/30 bg-cyber-yellow/5 px-3 py-2 text-xs text-cyber-yellow">
-          <AlertCircle className="h-4 w-4" /> Mock veri gösteriliyor — /api/admin/disputes henüz
-          yok.
-        </div>
       )}
     </div>
   );

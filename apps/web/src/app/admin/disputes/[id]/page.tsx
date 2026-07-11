@@ -48,34 +48,7 @@ export default function AdminDisputeDetailPage() {
         if (!cancelled) setData(res);
       } catch (err) {
         if (cancelled) return;
-        if (err instanceof ApiError && err.status === 404) {
-          setData({
-            id: disputeId,
-            orderId: 'ord_demo_001',
-            reason: 'Lisans anahtarı çalışmıyor',
-            status: 'OPEN',
-            openedBy: 'Müşteri Demo',
-            openedAt: new Date(Date.now() - 86400000).toISOString(),
-            messages: [
-              {
-                id: 'm1',
-                author: 'CUSTOMER',
-                authorName: 'Müşteri Demo',
-                content: 'Aldığım anahtar geçersiz, iade istiyorum.',
-                createdAt: new Date(Date.now() - 86400000).toISOString(),
-              },
-              {
-                id: 'm2',
-                author: 'SELLER',
-                authorName: 'Demo Seller',
-                content: 'Anahtarı test ettim, çalışıyor. Tekrar deneyin.',
-                createdAt: new Date(Date.now() - 80000000).toISOString(),
-              },
-            ],
-          });
-        } else {
-          setError('İtiraz yüklenemedi');
-        }
+        setError(err instanceof ApiError ? err.message : 'İtiraz yüklenemedi');
       } finally {
         if (!cancelled) setLoading(false);
       }

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { createAdminStack, errorHandler } from '../../middleware/admin-stack';
-import { prisma } from '../../../infrastructure/db';
+import { supabaseAdmin, dbError } from '../../../infrastructure/db';
 
 export const adminStatsRoutes = new Hono();
 
@@ -14,15 +14,29 @@ adminStatsRoutes.use('*', async (c, next) => {
   }
 });
 
-function dayKey(date: Date): string {
-  return date.toISOString().slice(0, 10);
+function dayKey(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toISOString().slice(0, 10);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function countRows(query: any): Promise<number> {
+  const { count, error } = await query;
+  if (error) {
+    if (String(error.message || '').includes('does not exist')) return 0;
+    throw dbError(error);
+  }
+  return count ?? 0;
 }
 
 adminStatsRoutes.get('/', async (c) => {
+  const db = supabaseAdmin();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const from30 = new Date(today);
   from30.setDate(today.getDate() - 29);
+  const from30Iso = from30.toISOString();
+  const todayIso = today.toISOString();
 
   const dayMap = new Map<string, { orders: number; revenue: number }>();
   for (let i = 0; i < 30; i++) {
@@ -37,51 +51,60 @@ adminStatsRoutes.get('/', async (c) => {
     totalOrders,
     ordersToday,
     activeProducts,
-    paidOrders,
-    payments,
-    topProducts,
-    pendingDealers,
     pendingOrders,
     lowStockProducts,
+    pendingDealers,
+    pendingSellers,
   ] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { createdAt: { gte: from30 } } }),
-    prisma.order.count(),
-    prisma.order.count({ where: { createdAt: { gte: today } } }),
-    prisma.product.count({ where: { isActive: true } }),
-    prisma.order.findMany({
-      where: { status: { in: ['PAID', 'FULFILLED'] } },
-      select: { createdAt: true, totalAmount: true },
-    }),
-    prisma.payment.groupBy({ by: ['provider'], _count: { _all: true } }),
-    prisma.orderItem.groupBy({
-      by: ['productId'],
-      _sum: { quantity: true },
-      orderBy: { _sum: { quantity: 'desc' } },
-      take: 5,
-    }),
-    prisma.dealerProfile.count({ where: { status: 'PENDING' } }),
-    prisma.order.count({ where: { status: 'PENDING' } }),
-    prisma.product.count({ where: { isActive: true, stock: { lte: 10 } } }),
+    countRows(db.from('users').select('*', { count: 'exact', head: true })),
+    countRows(
+      db.from('users').select('*', { count: 'exact', head: true }).gte('createdAt', from30Iso),
+    ),
+    countRows(db.from('orders').select('*', { count: 'exact', head: true })),
+    countRows(
+      db.from('orders').select('*', { count: 'exact', head: true }).gte('createdAt', todayIso),
+    ),
+    countRows(db.from('products').select('*', { count: 'exact', head: true }).eq('isActive', true)),
+    countRows(
+      db.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'PENDING'),
+    ),
+    countRows(
+      db
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('isActive', true)
+        .lte('stock', 10),
+    ),
+    countRows(
+      db
+        .from('dealer_profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'PENDING'),
+    ),
+    countRows(
+      db.from('sellers').select('*', { count: 'exact', head: true }).eq('status', 'PENDING'),
+    ),
   ]);
 
-  for (const order of paidOrders) {
-    const key = dayKey(order.createdAt);
+  const { data: paidOrders, error: paidErr } = await db
+    .from('orders')
+    .select('createdAt,totalAmount,status')
+    .in('status', ['PAID', 'FULFILLED']);
+  if (paidErr) throw dbError(paidErr);
+
+  let totalTry = 0;
+  for (const order of paidOrders ?? []) {
+    const amount = Number((order as { totalAmount: unknown }).totalAmount ?? 0);
+    totalTry += amount;
+    const key = dayKey((order as { createdAt: string }).createdAt);
     const row = dayMap.get(key);
     if (row) {
       row.orders += 1;
-      row.revenue += Number(order.totalAmount ?? 0);
+      row.revenue += amount;
     }
   }
 
-  const productIds = topProducts.map((p: { productId: string }) => p.productId);
-  const products = await prisma.product.findMany({
-    where: { id: { in: productIds } },
-    select: { id: true, title: true },
-  });
-  const productName = new Map(products.map((p: { id: string; title: string }) => [p.id, p.title]));
-
-  const paymentsByMethod = {
+  const paymentsByMethod: Record<string, number> = {
     WALLET: 0,
     PAYTR: 0,
     PAPARA: 0,
@@ -89,36 +112,63 @@ adminStatsRoutes.get('/', async (c) => {
     NOWPAYMENTS: 0,
     BANK_TRANSFER: 0,
   };
-  for (const p of payments as Array<{
-    provider: keyof typeof paymentsByMethod;
-    _count: { _all: number };
-  }>) {
-    paymentsByMethod[p.provider] = p._count._all;
+  const { data: payments } = await db.from('payments').select('provider');
+  for (const p of payments ?? []) {
+    const provider = String((p as { provider: string }).provider || '').toUpperCase();
+    if (provider in paymentsByMethod) paymentsByMethod[provider]! += 1;
   }
+
+  const { data: items, error: itemsErr } = await db
+    .from('order_items')
+    .select('productId,quantity');
+  if (itemsErr) throw dbError(itemsErr);
+
+  const soldMap = new Map<string, number>();
+  for (const it of items ?? []) {
+    const pid = (it as { productId: string }).productId;
+    const qty = Number((it as { quantity: number }).quantity ?? 0);
+    soldMap.set(pid, (soldMap.get(pid) ?? 0) + qty);
+  }
+  const topIds = [...soldMap.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([id]) => id);
+
+  let titleMap = new Map<string, string>();
+  if (topIds.length > 0) {
+    const { data: products, error: pErr } = await db
+      .from('products')
+      .select('id,title')
+      .in('id', topIds);
+    if (pErr) throw dbError(pErr);
+    titleMap = new Map(
+      (products ?? []).map((p) => [(p as { id: string }).id, (p as { title: string }).title]),
+    );
+  }
+
+  const dayValues = [...dayMap.values()];
 
   return c.json({
     users: { total: totalUsers, last30DaysIncrease: newUsers30 },
     orders: {
       total: totalOrders,
       today: ordersToday,
-      last30Days: [...dayMap.values()].map((d) => d.orders),
+      last30Days: dayValues.map((d) => d.orders),
       pending: pendingOrders,
     },
     revenue: {
-      totalTry: paidOrders.reduce(
-        (sum: number, order: { totalAmount: unknown }) => sum + Number(order.totalAmount ?? 0),
-        0,
-      ),
-      last30DaysTry: [...dayMap.values()].reduce((sum, day) => sum + day.revenue, 0),
-      last30Days: [...dayMap.values()].map((d) => Number(d.revenue.toFixed(2))),
+      totalTry,
+      last30DaysTry: dayValues.reduce((sum, day) => sum + day.revenue, 0),
+      last30Days: dayValues.map((d) => Number(d.revenue.toFixed(2))),
     },
     products: { active: activeProducts, lowStock: lowStockProducts },
     dealers: { pending: pendingDealers },
+    sellers: { pending: pendingSellers },
     paymentsByMethod,
-    topProducts: topProducts.map((p: { productId: string; _sum: { quantity: number | null } }) => ({
-      id: p.productId,
-      title: productName.get(p.productId) ?? 'Bilinmeyen ürün',
-      sold: p._sum.quantity ?? 0,
+    topProducts: topIds.map((id) => ({
+      id,
+      title: titleMap.get(id) ?? 'Bilinmeyen ürün',
+      sold: soldMap.get(id) ?? 0,
     })),
   });
 });

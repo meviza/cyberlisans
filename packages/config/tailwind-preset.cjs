@@ -12,6 +12,11 @@ module.exports = {
           surface: '#0B1220',
           elevated: '#11181C',
           panel: '#0F1724',
+          // Laravel Cloud–style light panels (marketing bands)
+          'panel-light': '#F4F7FB',
+          'panel-soft': '#E8EEF7',
+          ink: '#0B1220',
+          'ink-muted': '#5B6578',
           accent: '#0057FF',
           'accent-hover': '#0044CC',
           'accent-soft': 'rgba(0, 87, 255, 0.12)',
@@ -77,6 +82,9 @@ module.exports = {
         float: 'float 6s ease-in-out infinite',
         'pulse-glow': 'pulse-glow 2.5s ease-in-out infinite',
         'fade-up': 'fade-up 0.6s ease-out both',
+        'fade-in': 'fade-in 0.7s ease-out both',
+        'slide-up': 'slide-up 0.7s cubic-bezier(0.22,1,0.36,1) both',
+        'soft-blob': 'soft-blob 12s ease-in-out infinite',
       },
       keyframes: {
         glitch: {
@@ -101,6 +109,19 @@ module.exports = {
         'fade-up': {
           '0%': { opacity: '0', transform: 'translateY(12px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'slide-up': {
+          '0%': { opacity: '0', transform: 'translateY(28px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'soft-blob': {
+          '0%, 100%': { transform: 'translate(0,0) scale(1)' },
+          '33%': { transform: 'translate(12px,-18px) scale(1.05)' },
+          '66%': { transform: 'translate(-10px,10px) scale(0.96)' },
         },
       },
     },
