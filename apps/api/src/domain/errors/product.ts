@@ -62,7 +62,11 @@ export class ProductKeyInUseError extends PaymentError {
 
 export class NoKeysAvailableError extends PaymentError {
   constructor() {
-    super('Stokta anahtar yok', 'NO_KEYS_AVAILABLE', 422);
+    super(
+      'Bu üründe teslim edilecek lisans anahtarı kalmadı. Stok sayısı güncel olmayabilir; satıcı anahtar yükleyene kadar Stripe ile ödeme alınamaz.',
+      'NO_KEYS_AVAILABLE',
+      422,
+    );
   }
 }
 

@@ -22,7 +22,10 @@ export interface SellerHeaderProps {
 }
 
 export function SellerHeader({ seller }: SellerHeaderProps) {
-  const statusInfo = STATUS_MAP[seller.status];
+  const statusInfo = STATUS_MAP[seller.status] ?? {
+    label: seller.status || 'Bilinmiyor',
+    variant: 'warning' as const,
+  };
 
   return (
     <>
@@ -44,15 +47,17 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
             <div>
               <p className="text-sm text-brand-muted">Mağaza</p>
               <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                {seller.companyName}
+                {seller.companyName || 'Mağazanız'}
               </h1>
-              <Link
-                href={`/s/${seller.slug}`}
-                className="mt-1 inline-flex items-center gap-1 text-sm text-brand-accent hover:underline"
-              >
-                /s/{seller.slug}
-                <ExternalLink className="h-3 w-3" />
-              </Link>
+              {seller.slug ? (
+                <Link
+                  href={`/s/${seller.slug}`}
+                  className="mt-1 inline-flex items-center gap-1 text-sm text-brand-accent hover:underline"
+                >
+                  /s/{seller.slug}
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              ) : null}
             </div>
             <Badge variant={statusInfo.variant} size="lg">
               {statusInfo.label}

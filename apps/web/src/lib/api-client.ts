@@ -54,10 +54,12 @@ export interface SellerInfo {
   kycStatus: string;
   commissionRate: number;
   balance: number;
-  pendingBalance: number;
-  totalSales: number;
-  rating: number;
-  ratingCount: number;
+  /** Optional until wallet/stats endpoints enrich /sellers/me */
+  pendingBalance?: number;
+  totalSales?: number;
+  rating?: number;
+  ratingCount?: number;
+  rejectionReason?: string | null;
 }
 
 export interface ApplySellerPayload {
