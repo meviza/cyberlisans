@@ -2,59 +2,74 @@
 
 import * as React from 'react';
 import { Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Float, Stars, Environment, Sparkles } from '@react-three/drei';
-import * as THREE from 'three';
-import { NeonGrid, ParticleField, FloatingCube } from '@cyberlisans/3d';
+import dynamic from 'next/dynamic';
 
-function CameraRig() {
-  useFrame(({ camera, mouse }) => {
-    camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.05;
-    camera.position.y += (-mouse.y * 0.3 - camera.position.y) * 0.05;
-    camera.lookAt(0, 0, 0);
-  });
-  return null;
+/**
+ * Premium soft 3D hero — lazy loaded, disabled on mobile / reduced motion.
+ * Avoids heavy neon cyberpunk aesthetics; subtle geometry + depth only.
+ */
+
+function useShouldRender3D() {
+  const [ok, setOk] = React.useState(false);
+
+  React.useEffect(() => {
+    const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mqMobile = window.matchMedia('(max-width: 1023px)');
+    const update = () => setOk(!mqReduce.matches && !mqMobile.matches);
+    update();
+    mqReduce.addEventListener('change', update);
+    mqMobile.addEventListener('change', update);
+    return () => {
+      mqReduce.removeEventListener('change', update);
+      mqMobile.removeEventListener('change', update);
+    };
+  }, []);
+
+  return ok;
 }
 
-function SceneFallback() {
+function StaticPoster() {
   return (
-    <mesh>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshBasicMaterial color="#00F0FF" wireframe />
-    </mesh>
+    <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+      <div
+        className="absolute h-[120%] w-[120%] opacity-80"
+        style={{
+          background:
+            'radial-gradient(circle at 40% 40%, rgba(0,87,255,0.35), transparent 45%), radial-gradient(circle at 70% 60%, rgba(107,124,255,0.2), transparent 40%), linear-gradient(160deg, #0B1220, #00001e)',
+        }}
+      />
+      <div className="relative z-10 mx-auto max-w-xs text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-accent/20 ring-1 ring-brand-accent/40">
+          <div className="h-8 w-8 rounded-lg bg-brand-accent shadow-accent-glow" />
+        </div>
+        <p className="text-sm font-medium text-white">Escrow korumalı marketplace</p>
+        <p className="mt-1 text-xs text-brand-muted">Alıcı · Satıcı · Platform</p>
+      </div>
+    </div>
   );
 }
 
+const CanvasScene = dynamic(() => import('./landing-canvas'), {
+  ssr: false,
+  loading: () => <StaticPoster />,
+});
+
 export function LandingScene() {
+  const should3d = useShouldRender3D();
+
+  if (!should3d) {
+    return (
+      <div className="absolute inset-0 h-full w-full">
+        <StaticPoster />
+      </div>
+    );
+  }
+
   return (
     <div className="absolute inset-0 h-full w-full">
-      <Canvas
-        camera={{ position: [0, 2, 8], fov: 60 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
-        onCreated={({ gl }) => {
-          gl.toneMapping = THREE.ACESFilmicToneMapping;
-        }}
-      >
-        <CameraRig />
-        <color attach="background" args={['#050510']} />
-        <fog attach="fog" args={['#050510', 8, 25]} />
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={1.5} color="#00F0FF" />
-        <pointLight position={[-10, -5, -5]} intensity={1.2} color="#FF00C8" />
-        <Suspense fallback={<SceneFallback />}>
-          <NeonGrid color="#00F0FF" speed={0.5} />
-          <ParticleField count={2000} color1="#00F0FF" color2="#FF00C8" />
-          <Float speed={1.5} rotationIntensity={1.5} floatIntensity={2}>
-            <FloatingCube position={[0, 1, 0]} />
-          </Float>
-          <Environment preset="city" />
-        </Suspense>
-        <Sparkles count={100} scale={10} size={2} speed={0.3} color="#00F0FF" />
-        <Sparkles count={50} scale={8} size={1.5} speed={0.4} color="#FF00C8" />
-        <Stars radius={50} depth={50} count={1000} factor={4} saturation={0} fade speed={1} />
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.3} />
-      </Canvas>
+      <Suspense fallback={<StaticPoster />}>
+        <CanvasScene />
+      </Suspense>
     </div>
   );
 }

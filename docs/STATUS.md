@@ -3,8 +3,9 @@
 > **Bu dosya her oturum başında okunacak tek sayfa özettir.**
 > Yeni AI agent veya ekip üyesi bu dosyayı okuyarak projeye 30 saniyede bağlam kurabilir.
 
-**Son güncelleme:** 2026-07-07 11:30
-**Mevcut milestone:** M5.2 pre-launch hardening (refactor + RLS + lint + tests)
+**Son güncelleme:** 2026-07-11 17:40
+**Mevcut milestone:** M9 premium redesign (Phase 1–2 in progress)
+**Son tamamlanan:** M5.2 pre-launch hardening
 **Production:** https://cyberlisans-mp.vercel.app
 
 ---
@@ -32,6 +33,7 @@ Cyberlisans, **Clean Architecture monorepo** olarak geliştirilen, **Supabase RE
 | **M6**    | Review/rating + email verification + 2FA aktif                      | ⚪ Plan       | v6.0-trust               |
 | **M7**    | SEO + multi-language + landing page                                 | ⚪ Plan       | v7.0-growth              |
 | **M8**    | Beta launch + analytics + A/B test                                  | ⚪ Plan       | v8.0-launch              |
+| **M9**    | Premium redesign: tokens + landing + 3 dashboard + arch cleanup     | 🟡 Devam      | v9.0-premium             |
 
 ---
 

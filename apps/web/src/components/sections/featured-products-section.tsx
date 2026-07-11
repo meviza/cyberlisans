@@ -6,19 +6,22 @@ function ProductCardInline({ product }: { product: Product }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group relative overflow-hidden rounded-xl border border-cyber-cyan/20 bg-cyber-darker/60 backdrop-blur-sm transition-all hover:scale-105 hover:border-cyber-cyan/60 hover:shadow-glow-cyan"
+      className="group surface-card overflow-hidden transition hover:border-brand-accent/30"
     >
-      <div className="aspect-square w-full" style={{ background: product.image }} />
+      <div
+        className="aspect-square w-full bg-brand-surface"
+        style={product.image ? { background: product.image } : undefined}
+      />
       <div className="p-4">
-        <div className="mb-1 text-xs uppercase tracking-wider text-cyber-magenta">
+        <div className="mb-1 text-xs font-medium uppercase tracking-wider text-brand-muted">
           {product.brand}
         </div>
-        <h3 className="mb-2 font-display text-base font-bold text-white">{product.title}</h3>
+        <h3 className="mb-2 line-clamp-2 text-sm font-semibold text-white group-hover:text-brand-accent">
+          {product.title}
+        </h3>
         <div className="flex items-center justify-between">
-          <span className="font-display text-lg font-black text-cyber-cyan text-glow-cyan">
-            {product.price} ₺
-          </span>
-          <span className="text-xs text-cyber-cyan/60">{product.stock} stok</span>
+          <span className="text-base font-semibold text-white">{product.price} ₺</span>
+          <span className="text-xs text-brand-muted">{product.stock} stok</span>
         </div>
       </div>
     </Link>
@@ -52,28 +55,33 @@ export async function FeaturedProductsSection() {
   const items = featured.map(toCardProduct);
 
   return (
-    <section className="relative bg-cyber-dark py-16 md:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+    <section className="section-pad border-t border-white/[0.06] bg-brand-surface/30">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <h2 className="mb-3 font-display text-3xl font-black text-white sm:text-4xl">
-              Öne Çıkan <span className="text-cyber-magenta text-glow-magenta">Ürünler</span>
-            </h2>
-            <p className="text-white/60">En popüler dijital lisanslar</p>
+            <p className="text-sm font-medium text-brand-accent">Vitrin</p>
+            <h2 className="section-title mt-2">Öne çıkan ürünler</h2>
+            <p className="section-lead">En çok tercih edilen dijital lisanslar</p>
           </div>
-          <Link
-            href="/products"
-            className="font-mono text-sm uppercase tracking-widest text-cyber-cyan transition-colors hover:text-cyber-magenta"
-          >
-            Tümünü Gör →
+          <Link href="/products" className="text-sm font-medium text-brand-accent hover:underline">
+            Tümünü gör →
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {items.map((p) => (
-            <ProductCardInline key={p.id} product={p} />
-          ))}
-        </div>
+        {items.length === 0 ? (
+          <div className="mt-12 rounded-2xl border border-dashed border-white/10 px-6 py-16 text-center">
+            <p className="text-sm text-brand-muted">Henüz öne çıkan ürün yok.</p>
+            <Link href="/products" className="btn-secondary-outline mt-4 inline-flex">
+              Mağazaya git
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {items.map((p) => (
+              <ProductCardInline key={p.id} product={p} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

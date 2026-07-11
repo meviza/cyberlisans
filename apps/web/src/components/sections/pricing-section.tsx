@@ -1,115 +1,81 @@
-'use client';
-
 import Link from 'next/link';
 
-const plans = [
+const TIERS = [
   {
-    name: 'Starter',
-    price: 0,
-    period: 'ay',
-    badge: null,
-    features: ['Kayıt + cüzdan', '%1 geri kazanım', 'Standart destek', 'Tüm temel lisanslar'],
-    cta: 'Ücretsiz Başla',
-    href: '/register',
+    name: 'Alıcı',
+    price: 'Ücretsiz',
+    desc: 'Marketplace’ten güvenle alışveriş.',
+    features: ['Escrow koruması', 'Anında teslim', 'Cüzdan & sipariş paneli', 'Dispute açma'],
+    cta: { href: '/register', label: 'Alıcı ol' },
     highlight: false,
   },
   {
-    name: 'Pro',
-    price: 49,
-    period: 'ay',
-    badge: 'En Popüler',
+    name: 'Satıcı',
+    price: '%10–15',
+    desc: 'Komisyon oranına göre satış. KYC + admin onayı gerekir.',
     features: [
-      'Öncelikli destek',
-      'Erken erişim kampanyaları',
-      'Özel sadakat çarpanı',
-      '%2 geri kazanım',
-      'Hediye seçenekleri',
+      'Ürün & key yönetimi',
+      'Payout talebi',
+      'Satış analitikleri',
+      'Public vitrin /s/slug',
     ],
-    cta: "Pro'ya Geç",
-    href: '/register?plan=pro',
+    cta: { href: '/seller', label: 'Satıcı başvur' },
     highlight: true,
   },
   {
-    name: 'Business',
-    price: 199,
-    period: 'ay',
-    badge: null,
-    features: [
-      'API erişimi',
-      'Beyaz etiket',
-      'Özel hesap yöneticisi',
-      '%3 geri kazanım',
-      'Toplu lisans alımları',
-    ],
-    cta: 'İletişime Geç',
-    href: '/contact?plan=business',
+    name: 'Kurumsal',
+    price: 'Özel',
+    desc: 'Yüksek hacim ve özel komisyon için iletişime geçin.',
+    features: ['Özel komisyon', 'API entegrasyonu', 'Öncelikli destek', 'SLA'],
+    cta: { href: '/contact', label: 'İletişim' },
     highlight: false,
   },
 ];
 
 export function PricingSection() {
   return (
-    <section className="relative bg-cyber-darker py-16 md:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <h2 className="mb-3 font-display text-3xl font-black text-white sm:text-4xl">
-            Sana Uygun <span className="text-cyber-cyan text-glow-cyan">Plan</span>
-          </h2>
-          <p className="mx-auto max-w-2xl text-white/60">
-            Bireysel kullanıcıdan işletmeye, herkes için bir plan.
+    <section
+      id="fiyatlandirma"
+      className="section-pad border-y border-white/[0.06] bg-brand-surface/30"
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-medium text-brand-accent">Roller</p>
+          <h2 className="section-title mt-2">Alıcı, satıcı, kurumsal</h2>
+          <p className="section-lead mx-auto">
+            Admin paneli ayrıdır ve yalnızca yetkili hesaplara açıktır.
           </p>
         </div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {plans.map((plan) => (
+        <div className="mt-14 grid gap-4 lg:grid-cols-3">
+          {TIERS.map((t) => (
             <div
-              key={plan.name}
-              className={`relative flex flex-col rounded-2xl border p-8 backdrop-blur-sm transition-all ${
-                plan.highlight
-                  ? 'border-cyber-cyan bg-gradient-to-br from-cyber-cyan/10 to-cyber-purple/10 shadow-glow-cyan scale-105'
-                  : 'border-white/10 bg-cyber-dark/60 hover:border-cyber-cyan/40'
-              }`}
+              key={t.name}
+              className={
+                t.highlight
+                  ? 'rounded-2xl border border-brand-accent/40 bg-brand-accent/10 p-6 shadow-accent-glow'
+                  : 'rounded-2xl border border-white/[0.08] bg-brand-bg/50 p-6'
+              }
             >
-              {plan.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-cyber-cyan px-4 py-1 font-mono text-xs font-bold uppercase tracking-widest text-cyber-darker shadow-glow-cyan">
-                  {plan.badge}
-                </div>
-              )}
-
-              <h3 className="mb-1 font-display text-2xl font-black text-white">{plan.name}</h3>
-              <div className="mb-6 flex items-baseline gap-1">
-                <span className="font-display text-5xl font-black text-white">{plan.price}</span>
-                <span className="font-mono text-sm text-white/60">₺/{plan.period}</span>
-              </div>
-
-              <ul className="mb-8 flex-1 space-y-3">
-                {plan.features.map((feat) => (
-                  <li key={feat} className="flex items-start gap-3 text-sm text-white/80">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyber-cyan"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span>{feat}</span>
+              <h3 className="text-lg font-semibold text-white">{t.name}</h3>
+              <div className="mt-3 text-3xl font-semibold tracking-tight text-white">{t.price}</div>
+              <p className="mt-2 text-sm text-brand-text-secondary">{t.desc}</p>
+              <ul className="mt-6 space-y-2.5">
+                {t.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-brand-text-secondary">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-accent" />
+                    {f}
                   </li>
                 ))}
               </ul>
-
               <Link
-                href={plan.href}
-                className={`inline-flex items-center justify-center rounded-lg px-6 py-3 font-display text-sm font-bold uppercase tracking-wider transition-all ${
-                  plan.highlight
-                    ? 'bg-cyber-cyan text-cyber-darker shadow-glow-cyan hover:brightness-110'
-                    : 'border border-white/20 bg-white/5 text-white hover:border-cyber-cyan/60 hover:bg-cyber-cyan/10'
-                }`}
+                href={t.cta.href}
+                className={
+                  t.highlight
+                    ? 'btn-primary-solid mt-8 w-full'
+                    : 'btn-secondary-outline mt-8 w-full'
+                }
               >
-                {plan.cta}
+                {t.cta.label}
               </Link>
             </div>
           ))}

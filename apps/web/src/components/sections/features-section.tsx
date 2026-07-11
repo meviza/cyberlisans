@@ -1,47 +1,62 @@
-'use client';
+import { Shield, KeyRound, Wallet, HeadphonesIcon, Gauge, BadgeCheck } from 'lucide-react';
 
-const features = [
-  { icon: '⚡', title: 'Anında Teslim', desc: 'Ödemen onaylandığı saniye kodunu teslim al.' },
-  { icon: '🔒', title: 'Güvenli Ödeme', desc: 'PayTR, Papara, kripto ve daha fazlasıyla %100 güvenli.' },
-  { icon: '💰', title: 'Çoklu Para Birimi', desc: 'TRY, USD, EUR, USDT. İstediğin gibi öde.' },
-  { icon: '🌍', title: 'Global Erişim', desc: 'TR, EN, DE, AR, RU. Dünyanın her yerinden alışveriş.' },
-  { icon: '🎁', title: 'Sadakat Programı', desc: 'Her alışverişte %1 geri kazan, ödüller topla.' },
-  { icon: '🛡️', title: '7/24 Destek', desc: 'Telegram, Discord ve e-posta ile her zaman yanındayız.' },
+const FEATURES = [
+  {
+    icon: Shield,
+    title: 'Escrow koruması',
+    description:
+      'Ödemeniz 7 gün boyunca platform kasasında tutulur. Teslimat sorunsuzsa satıcıya aktarılır.',
+  },
+  {
+    icon: KeyRound,
+    title: 'Anında key teslimi',
+    description:
+      'Stokta ürünler saniyeler içinde otomatik teslim edilir. Manuel siparişler net SLA ile.',
+  },
+  {
+    icon: Wallet,
+    title: 'Çoklu ödeme',
+    description: 'Kart, Papara, kripto ve cüzdan bakiyesi. TRY / USD destekli fiyatlandırma.',
+  },
+  {
+    icon: BadgeCheck,
+    title: 'Onaylı satıcılar',
+    description: 'KYC doğrulaması ve admin onayı olmadan kimse satışa açılamaz.',
+  },
+  {
+    icon: Gauge,
+    title: 'Şeffaf komisyon',
+    description: 'Satıcı bazlı net komisyon oranları. Sürpriz kesinti yok.',
+  },
+  {
+    icon: HeadphonesIcon,
+    title: 'Anlaşmazlık çözümü',
+    description: 'İtiraz açın; super admin ekibi kanıta dayalı karar verir.',
+  },
 ];
 
 export function FeaturesSection() {
   return (
-    <section className="relative overflow-hidden bg-cyber-darker py-16 md:py-24">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-20"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,0,200,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,0,200,0.12) 1px, transparent 1px)',
-          backgroundSize: '80px 80px',
-          maskImage: 'linear-gradient(180deg, transparent, black 30%, black 70%, transparent)',
-        }}
-      />
-
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <h2 className="mb-3 font-display text-3xl font-black text-white sm:text-4xl">
-            Neden <span className="text-cyber-cyan text-glow-cyan">CyberLisans</span>?
-          </h2>
-          <p className="mx-auto max-w-2xl text-white/60">
-            Dijital lisans alımında yeni nesil standart.
+    <section id="ozellikler" className="section-pad relative">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-2xl">
+          <p className="text-sm font-medium text-brand-accent">Neden CyberLisans</p>
+          <h2 className="section-title mt-2">Kurumsal güven, modern hız</h2>
+          <p className="section-lead">
+            FunPay / GamsGo modelini Türkiye pazarına uyarladık — sade arayüz, escrow ve net roller.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-cyber-dark/60 p-6 backdrop-blur-sm transition-all hover:scale-105 hover:border-cyber-cyan/60 hover:shadow-glow-cyan"
-            >
-              <div className="mb-4 text-4xl">{f.icon}</div>
-              <h3 className="mb-2 font-display text-xl font-bold text-white">{f.title}</h3>
-              <p className="text-sm text-white/70">{f.desc}</p>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="surface-card p-6 transition hover:border-white/15">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-accent/15 text-brand-accent">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-semibold text-white">{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-brand-text-secondary">
+                {f.description}
+              </p>
             </div>
           ))}
         </div>

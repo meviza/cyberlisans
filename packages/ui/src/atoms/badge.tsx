@@ -9,19 +9,19 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50',
-        success: 'bg-cyber-lime/20 text-cyber-lime border border-cyber-lime/50',
-        warning: 'bg-cyber-yellow/20 text-cyber-yellow border border-cyber-yellow/50',
-        danger: 'bg-cyber-pink/20 text-cyber-pink border border-cyber-pink/50',
-        cyan: 'bg-cyber-cyan/20 text-cyber-cyan border border-cyber-cyan/50',
-        magenta: 'bg-cyber-magenta/20 text-cyber-magenta border border-cyber-magenta/50',
-        purple: 'bg-cyber-purple/20 text-cyber-purple border border-cyber-purple/50',
-        outline: 'bg-transparent text-cyber-text border border-cyber-text/30',
+        default: 'bg-brand-accent/15 text-brand-accent border border-brand-accent/30',
+        success: 'bg-brand-success/15 text-brand-success border border-brand-success/30',
+        warning: 'bg-brand-warning/15 text-brand-warning border border-brand-warning/30',
+        danger: 'bg-brand-danger/15 text-brand-danger border border-brand-danger/30',
+        cyan: 'bg-brand-accent/15 text-brand-accent border border-brand-accent/30',
+        magenta: 'bg-brand-accent-soft text-[#6B7CFF] border border-[#6B7CFF]/30',
+        purple: 'bg-white/[0.04] text-brand-text-secondary border border-white/10',
+        outline: 'bg-transparent text-brand-text border border-white/15',
       },
       size: {
-        sm: 'h-5 px-1.5 text-[10px] rounded-sm',
+        sm: 'h-5 px-1.5 text-[10px] rounded-md',
         md: 'h-6 px-2 text-xs rounded-md',
-        lg: 'h-7 px-2.5 text-sm rounded-md',
+        lg: 'h-7 px-2.5 text-sm rounded-lg',
       },
     },
     defaultVariants: {

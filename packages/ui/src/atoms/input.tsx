@@ -5,17 +5,18 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn';
 
 const inputVariants = cva(
-  'flex w-full bg-cyber-bg/50 border text-cyber-text placeholder:text-cyber-text-dim transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyber-cyan/50 disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full border bg-white/[0.03] text-brand-text placeholder:text-brand-muted transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent/40 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'border-cyber-cyan/30 hover:border-cyber-cyan/60 focus-visible:border-cyber-cyan',
-        error: 'border-cyber-pink focus-visible:ring-cyber-pink/50 focus-visible:border-cyber-pink',
+        default: 'border-white/12 hover:border-white/20 focus-visible:border-brand-accent/50',
+        error:
+          'border-brand-danger/60 focus-visible:ring-brand-danger/40 focus-visible:border-brand-danger',
       },
       size: {
-        sm: 'h-8 px-2 text-xs rounded-sm',
-        md: 'h-10 px-3 text-sm rounded-md',
-        lg: 'h-12 px-4 text-base rounded-md',
+        sm: 'h-8 px-2 text-xs rounded-lg',
+        md: 'h-10 px-3 text-sm rounded-lg',
+        lg: 'h-12 px-4 text-base rounded-xl',
       },
     },
     defaultVariants: {
@@ -38,7 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return (
         <div className="relative w-full">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyber-text-dim pointer-events-none">
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-brand-muted">
               {leftIcon}
             </div>
           )}
@@ -54,7 +55,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-cyber-text-dim pointer-events-none">
+            <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted">
               {rightIcon}
             </div>
           )}

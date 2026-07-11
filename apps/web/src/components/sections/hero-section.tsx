@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ArrowRight, ShieldCheck, Zap, Lock } from 'lucide-react';
 
 export interface HeroSectionProps {
   scene?: React.ReactNode;
@@ -8,82 +9,69 @@ export interface HeroSectionProps {
 
 export function HeroSection({ scene }: HeroSectionProps) {
   return (
-    <section className="relative overflow-hidden bg-cyber-darker">
+    <section className="relative overflow-hidden bg-brand-bg">
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-hero-glow" />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-30"
+        className="pointer-events-none absolute inset-0 bg-grid-faint opacity-40"
         style={{
-          backgroundImage:
-            'linear-gradient(rgba(0,240,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.15) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-          maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+          backgroundSize: '56px 56px',
+          maskImage: 'radial-gradient(ellipse at center, black 20%, transparent 70%)',
         }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(0,240,255,0.25), transparent 70%)' }}
-      />
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-32 lg:px-8">
-        <div className="flex flex-col justify-center">
-          <span className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-cyber-cyan/40 bg-cyber-cyan/10 px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-cyber-cyan text-glow-cyan">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-cyber-cyan" />⚡ Anında Teslim ·
-            7/24 Otomatik
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-28 lg:px-8">
+        <div className="flex flex-col justify-center animate-fade-up">
+          <span className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-brand-text-secondary">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-success" />
+            Escrow korumalı · Anında teslim
           </span>
 
-          <h1 className="mb-6 font-display text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-            Dijital Lisansların{' '}
-            <span className="bg-gradient-to-r from-cyber-cyan via-cyber-purple to-cyber-magenta bg-clip-text text-transparent text-glow-cyan">
-              Yeni Adresi
-            </span>
+          <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+            Dijital lisansları <span className="gradient-text">güvenle al, güvenle sat</span>
           </h1>
 
-          <p className="mb-8 max-w-xl text-base text-white/70 sm:text-lg">
-            Steam, PlayStation, Xbox ve daha fazlası için orijinal anahtarlar, yazılım lisansları ve
-            AI API kredileri. Saniyeler içinde teslim, güvenli ödeme.
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-brand-text-secondary sm:text-lg">
+            Oyun key’leri, yazılım lisansları ve AI kredileri için P2P marketplace. Ödemeniz
+            escrow’da güvende; teslimat saniyeler içinde.
           </p>
 
-          <div className="mb-10 flex flex-wrap items-center gap-4">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 rounded-lg bg-cyber-cyan px-6 py-3 font-display text-sm font-bold uppercase tracking-wider text-cyber-darker shadow-glow-cyan transition-all hover:brightness-110"
-            >
-              Hemen Başla →
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link href="/products" className="btn-primary-solid">
+              Mağazaya git
+              <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link
-              href="#nasil-calisir"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-6 py-3 font-display text-sm font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-all hover:border-cyber-cyan/60 hover:bg-cyber-cyan/10"
-            >
-              Nasıl Çalışır?
+            <Link href="/seller" className="btn-secondary-outline">
+              Satıcı ol
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
-              { icon: '⚡', label: 'Anında Teslim' },
-              { icon: '🔒', label: '%100 Güvenli' },
-              { icon: '💳', label: 'Çoklu Ödeme' },
-              { icon: '🌍', label: 'Global Erişim' },
+              { icon: Zap, label: 'Anında teslim', desc: 'Otomatik key' },
+              { icon: ShieldCheck, label: 'Escrow koruma', desc: '7 gün güvence' },
+              { icon: Lock, label: 'Güvenli ödeme', desc: 'Çoklu yöntem' },
             ].map((t) => (
               <div
                 key={t.label}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80"
+                className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-3"
               >
-                <span className="text-lg">{t.icon}</span>
-                <span className="font-mono">{t.label}</span>
+                <t.icon className="mt-0.5 h-4 w-4 shrink-0 text-brand-accent" />
+                <div>
+                  <div className="text-sm font-medium text-white">{t.label}</div>
+                  <div className="text-xs text-brand-muted">{t.desc}</div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative min-h-[400px] lg:min-h-[560px]">
-          <div className="absolute inset-0 rounded-2xl border border-cyber-cyan/20 bg-gradient-to-br from-cyber-cyan/5 via-transparent to-cyber-magenta/5">
+        <div className="relative min-h-[320px] sm:min-h-[420px] lg:min-h-[520px]">
+          <div className="absolute inset-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-brand-surface shadow-card">
+            <div className="absolute inset-0 bg-panel-gradient" />
             {scene ?? (
               <div className="flex h-full items-center justify-center">
-                <div className="font-mono text-sm uppercase tracking-widest text-cyber-cyan/40">
-                  3D sahne yükleniyor
-                </div>
+                <div className="text-sm text-brand-muted">Sahne yükleniyor…</div>
               </div>
             )}
           </div>

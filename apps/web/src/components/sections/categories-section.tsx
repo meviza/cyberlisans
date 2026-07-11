@@ -10,7 +10,7 @@ const ICONS: Record<string, React.ReactNode> = {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-8 w-8"
+      className="h-6 w-6"
     >
       <line x1="6" y1="11" x2="10" y2="11" />
       <line x1="8" y1="9" x2="8" y2="13" />
@@ -27,7 +27,7 @@ const ICONS: Record<string, React.ReactNode> = {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-8 w-8"
+      className="h-6 w-6"
     >
       <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -43,7 +43,7 @@ const ICONS: Record<string, React.ReactNode> = {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-8 w-8"
+      className="h-6 w-6"
     >
       <path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z" />
       <path d="M5 3v4M3 5h4M19 17v4M17 19h4" />
@@ -51,45 +51,31 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-const GRADIENTS: Record<string, string> = {
-  oyun: 'from-cyber-cyan/20 to-cyber-purple/20',
-  yazilim: 'from-cyber-magenta/20 to-cyber-purple/20',
-  'ai-api': 'from-cyber-purple/20 to-cyber-cyan/20',
-};
-
 export function CategoriesSection() {
   return (
-    <section className="relative bg-cyber-darker py-16 md:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <h2 className="mb-3 font-display text-3xl font-black text-white sm:text-4xl">
-            Kategorileri <span className="text-cyber-cyan text-glow-cyan">Keşfet</span>
-          </h2>
-          <p className="mx-auto max-w-2xl text-white/60">
-            İhtiyacın olan lisans saniyeler içinde kapında.
-          </p>
+    <section className="section-pad">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-2xl">
+          <p className="text-sm font-medium text-brand-accent">Kategoriler</p>
+          <h2 className="section-title mt-2">Ne arıyorsan, saniyeler içinde</h2>
+          <p className="section-lead">Oyun, yazılım ve AI API kredileri — tek marketplace.</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
-              href={`/category/${cat.slug}`}
-              className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${GRADIENTS[cat.slug]} p-8 backdrop-blur-sm transition-all hover:scale-105 hover:border-cyber-cyan/60 hover:shadow-glow-cyan`}
+              href={`/products?category=${cat.slug}`}
+              className="group surface-card flex flex-col p-6 transition hover:border-brand-accent/30"
             >
-              <div className="absolute inset-0 bg-cyber-darker/60" />
-              <div className="relative flex flex-col items-start gap-4">
-                <div className="rounded-xl border border-cyber-cyan/30 bg-cyber-cyan/10 p-3 text-cyber-cyan">
-                  {ICONS[cat.icon]}
-                </div>
-                <div>
-                  <h3 className="mb-1 font-display text-2xl font-black text-white">{cat.name}</h3>
-                  <p className="font-mono text-sm text-white/60">{cat.count ?? 0} ürün</p>
-                </div>
-                <div className="mt-2 font-mono text-xs uppercase tracking-widest text-cyber-cyan opacity-0 transition-opacity group-hover:opacity-100">
-                  Keşfet →
-                </div>
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-accent/15 text-brand-accent transition group-hover:bg-brand-accent/25">
+                {ICONS[cat.icon]}
               </div>
+              <h3 className="text-lg font-semibold text-white">{cat.name}</h3>
+              <p className="mt-1 text-sm text-brand-muted">{cat.count ?? 0} ürün</p>
+              <span className="mt-6 text-sm font-medium text-brand-accent opacity-80 transition group-hover:opacity-100">
+                Keşfet →
+              </span>
             </Link>
           ))}
         </div>

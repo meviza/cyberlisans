@@ -45,11 +45,11 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-cyber-cyan/20 bg-cyber-darker/60 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-cyber-cyan/60 hover:shadow-glow-cyan"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-brand-elevated/80 shadow-card backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-brand-accent/30"
     >
       <div
-        className="relative aspect-square w-full overflow-hidden"
-        style={{ background: product.image }}
+        className="relative aspect-square w-full overflow-hidden bg-brand-surface"
+        style={product.image ? { background: product.image } : undefined}
       >
         {product.featured && (
           <div className="absolute left-3 top-3 z-10">
@@ -67,27 +67,25 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <div className="mb-1 text-xs uppercase tracking-wider text-cyber-magenta">
+        <div className="mb-1 text-xs font-medium uppercase tracking-wider text-brand-muted">
           {product.brand}
         </div>
-        <h3 className="mb-2 line-clamp-2 font-display text-base font-bold text-white">
-          {product.title}
-        </h3>
+        <h3 className="mb-2 line-clamp-2 text-base font-semibold text-white">{product.title}</h3>
 
-        <div className="mb-3 flex items-center gap-2 text-xs text-white/50">
-          <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5">
+        <div className="mb-3 flex items-center gap-2 text-xs text-brand-muted">
+          <span className="rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5">
             {product.category}
           </span>
           {showSold && (soldCount ?? 0) > 0 && (
             <span className="inline-flex items-center gap-1">
-              <Star className="h-3 w-3 text-cyber-cyan/60" />
+              <Star className="h-3 w-3 text-brand-accent/70" />
               {soldCount} satıldı
             </span>
           )}
         </div>
 
         <div className="mt-auto flex items-center justify-between gap-2">
-          <span className="font-orbitron text-lg font-black text-cyber-cyan text-glow-cyan">
+          <span className="text-lg font-semibold tracking-tight text-white">
             {format(product.price)}
           </span>
           <button
@@ -97,8 +95,8 @@ export function ProductCard({ product, showSold = true, soldCount }: ProductCard
             aria-label="Sepete ekle"
             className={
               added
-                ? 'inline-flex items-center gap-1 rounded-md bg-cyber-lime/20 px-2.5 py-1.5 text-xs font-bold text-cyber-lime'
-                : 'inline-flex items-center gap-1 rounded-md border border-cyber-cyan/40 bg-cyber-cyan/10 px-2.5 py-1.5 text-xs font-bold text-cyber-cyan transition-colors hover:bg-cyber-cyan/20 disabled:cursor-not-allowed disabled:opacity-40'
+                ? 'inline-flex items-center gap-1 rounded-lg bg-brand-success/15 px-2.5 py-1.5 text-xs font-semibold text-brand-success'
+                : 'inline-flex items-center gap-1 rounded-lg border border-brand-accent/40 bg-brand-accent/10 px-2.5 py-1.5 text-xs font-semibold text-brand-accent transition-colors hover:bg-brand-accent/20 disabled:cursor-not-allowed disabled:opacity-40'
             }
           >
             <ShoppingCart className="h-3.5 w-3.5" />

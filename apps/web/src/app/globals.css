@@ -3,33 +3,54 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg: #00001e;
+    --surface: #0b1220;
+    --elevated: #11181c;
+    --accent: #0057ff;
+    --accent-hover: #0044cc;
+    --text: #f4f6f8;
+    --text-secondary: #b2b2d0;
+    --muted: #6f6f91;
+    --border: rgba(255, 255, 255, 0.08);
+    --success: #29a383;
+    --warning: #fd8802;
+    --danger: #e54666;
+  }
+
   html {
     scroll-behavior: smooth;
   }
+
   body {
-    background-color: #050510;
-    color: #ffffff;
-    font-family: var(--font-inter), system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans), system-ui, sans-serif;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   ::selection {
-    background: rgba(0, 240, 255, 0.3);
-    color: #00f0ff;
+    background: rgba(0, 87, 255, 0.35);
+    color: #fff;
   }
+
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #0a0a1f;
+    background: #00001e;
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #00f0ff, #ff00c8);
-    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #ff00c8, #00f0ff);
+    background: rgba(0, 87, 255, 0.45);
   }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -37,41 +58,73 @@
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
 
 @layer components {
   .text-glow-cyan {
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.3);
+    text-shadow: none;
   }
   .text-glow-magenta {
-    text-shadow: 0 0 10px rgba(255, 0, 200, 0.5), 0 0 20px rgba(255, 0, 200, 0.3);
+    text-shadow: none;
   }
   .text-glow-purple {
-    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3);
+    text-shadow: none;
   }
+
   .border-glow-cyan {
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4), inset 0 0 15px rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 0 1px rgba(0, 87, 255, 0.25);
   }
   .border-glow-magenta {
-    box-shadow: 0 0 15px rgba(255, 0, 200, 0.4), inset 0 0 15px rgba(255, 0, 200, 0.1);
+    box-shadow: 0 0 0 1px rgba(107, 124, 255, 0.25);
   }
+
   .bg-grid-pattern {
-    background-image:
-      linear-gradient(rgba(0, 240, 255, 0.07) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 240, 255, 0.07) 1px, transparent 1px);
-    background-size: 50px 50px;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
   }
+
   .bg-dot-pattern {
-    background-image: radial-gradient(rgba(0, 240, 255, 0.15) 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 18px 18px;
   }
+
   .gradient-text {
-    background: linear-gradient(135deg, #00f0ff 0%, #ff00c8 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #b2b2d0 50%, #0057ff 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .surface-card {
+    @apply rounded-2xl border border-white/[0.08] bg-brand-elevated/80 shadow-card backdrop-blur-sm;
+  }
+
+  .surface-glass {
+    @apply rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl;
+  }
+
+  .btn-primary-solid {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-accent px-5 py-2.5 text-sm font-semibold text-white shadow-accent-glow transition hover:bg-brand-accent-hover;
+  }
+
+  .btn-secondary-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/[0.06];
+  }
+
+  .section-pad {
+    @apply px-4 py-20 sm:px-6 lg:px-8 lg:py-28;
+  }
+
+  .section-title {
+    @apply text-3xl font-semibold tracking-tight text-white sm:text-4xl;
+  }
+
+  .section-lead {
+    @apply mt-4 max-w-2xl text-base leading-relaxed text-brand-text-secondary sm:text-lg;
   }
 }
 

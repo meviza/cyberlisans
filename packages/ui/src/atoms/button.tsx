@@ -7,25 +7,25 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const buttonVariants = cva(
-  'relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyber-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-bg disabled:pointer-events-none disabled:opacity-50',
+  'relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-brand-bg disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        primary:
-          'bg-cyber-cyan text-cyber-bg hover:bg-cyber-cyan/90 shadow-neon-cyan hover:shadow-[0_0_30px_rgba(0,255,255,0.8)]',
+        primary: 'bg-brand-accent text-white hover:bg-brand-accent-hover shadow-accent-glow',
         secondary:
-          'bg-transparent text-cyber-magenta border border-cyber-magenta hover:bg-cyber-magenta/10 shadow-neon-magenta hover:shadow-[0_0_30px_rgba(255,0,255,0.8)]',
-        ghost: 'bg-transparent text-cyber-cyan hover:bg-cyber-cyan/10',
+          'bg-white/[0.04] text-white border border-white/12 hover:bg-white/[0.08] hover:border-white/20',
+        ghost: 'bg-transparent text-brand-text-secondary hover:bg-white/[0.06] hover:text-white',
         outline:
-          'bg-transparent text-cyber-cyan border border-cyber-cyan/50 hover:border-cyber-cyan hover:bg-cyber-cyan/5',
+          'bg-transparent text-white border border-white/15 hover:border-brand-accent/50 hover:bg-brand-accent/10',
         gradient:
-          'bg-gradient-to-r from-cyber-cyan to-cyber-magenta text-cyber-bg hover:opacity-90 shadow-neon-cyan hover:shadow-neon-magenta',
+          'bg-gradient-to-r from-brand-accent to-[#4B6BFF] text-white hover:opacity-95 shadow-accent-glow',
+        danger: 'bg-brand-danger text-white hover:brightness-110',
       },
       size: {
-        sm: 'h-8 px-3 text-xs rounded-sm',
-        md: 'h-10 px-4 text-sm rounded-md',
-        lg: 'h-12 px-6 text-base rounded-md',
-        icon: 'h-10 w-10 rounded-md',
+        sm: 'h-8 px-3 text-xs rounded-lg',
+        md: 'h-10 px-4 text-sm rounded-lg',
+        lg: 'h-12 px-6 text-base rounded-xl',
+        icon: 'h-10 w-10 rounded-lg',
       },
     },
     defaultVariants: {
