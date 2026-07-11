@@ -24,10 +24,17 @@ interface AuthContextValue {
     email: string,
     password: string,
     twoFactorToken?: string,
-  ) => Promise<{ requires2FA?: boolean }>;
+  ) => Promise<{ requires2FA?: boolean; user?: AuthUser }>;
   register: (input: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+}
+
+/** Post-login home by role */
+export function homePathForRole(role: AuthUser['role'] | undefined | null): string {
+  if (role === 'ADMIN' || role === 'SUPER_ADMIN') return '/admin';
+  if (role === 'DEALER') return '/dealer';
+  return '/dashboard';
 }
 
 interface RegisterPayload {
@@ -82,8 +89,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (res.requires2FA) return { requires2FA: true };
       setTokens(res.accessToken, res.refreshToken);
-      await refresh();
-      return {};
+      try {
+        const me = await apiFetch<AuthUser>('/profile/me');
+        setUser(me);
+        setIsLoading(false);
+        return { user: me };
+      } catch {
+        await refresh();
+        return {};
+      }
     },
     [refresh],
   );

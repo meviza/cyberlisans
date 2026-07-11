@@ -85,7 +85,7 @@ export function isNavActive(pathname: string, item: ShellNavItem): boolean {
 export const VARIANT_LABEL: Record<ShellVariant, string> = {
   customer: 'Alıcı',
   seller: 'Satıcı',
-  admin: 'Admin',
+  admin: 'Super Admin',
 };
 
 export const VARIANT_HOME: Record<ShellVariant, string> = {

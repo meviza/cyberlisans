@@ -48,12 +48,30 @@ export function ShellTopbar({
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
   const showRoleSwitch = !!user && !isAdmin;
 
+  const isAdminVariant = variant === 'admin';
+  const roleBadge =
+    user?.role === 'SUPER_ADMIN'
+      ? 'SUPER ADMIN'
+      : user?.role === 'ADMIN'
+        ? 'ADMIN'
+        : VARIANT_LABEL[variant];
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-brand-bg/85 backdrop-blur-xl">
+    <header
+      className={cn(
+        'sticky top-0 z-50 border-b backdrop-blur-xl',
+        isAdminVariant
+          ? 'border-amber-500/20 bg-[#0c0a09]/90'
+          : 'border-white/[0.08] bg-brand-bg/85',
+      )}
+    >
+      {isAdminVariant && (
+        <div className="h-0.5 w-full bg-gradient-to-r from-amber-600 via-amber-400 to-orange-500" />
+      )}
       <div
         className={cn(
           'mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:h-16 sm:px-6',
-          variant === 'admin' ? 'max-w-[1600px]' : 'max-w-7xl lg:px-8',
+          isAdminVariant ? 'max-w-[1600px]' : 'max-w-7xl lg:px-8',
         )}
       >
         <div className="flex items-center gap-3">
@@ -67,14 +85,35 @@ export function ShellTopbar({
           </button>
 
           <Link href={VARIANT_HOME[variant]} className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-accent text-sm font-bold text-white shadow-accent-glow">
-              CL
+            <span
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-white',
+                isAdminVariant
+                  ? 'bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.45)]'
+                  : 'bg-brand-accent shadow-accent-glow',
+              )}
+            >
+              {isAdminVariant ? 'SA' : 'CL'}
             </span>
             <span className="hidden text-[15px] font-semibold tracking-tight text-white sm:inline">
-              Cyber<span className="text-brand-text-secondary">Lisans</span>
+              {isAdminVariant ? (
+                <>
+                  Cyber<span className="text-amber-300/90">Admin</span>
+                </>
+              ) : (
+                <>
+                  Cyber<span className="text-brand-text-secondary">Lisans</span>
+                </>
+              )}
             </span>
-            <Badge variant={variant === 'admin' ? 'magenta' : 'default'} size="sm">
-              {VARIANT_LABEL[variant]}
+            <Badge
+              variant={isAdminVariant ? 'warning' : 'default'}
+              size="sm"
+              className={
+                isAdminVariant ? 'border-amber-400/40 bg-amber-500/15 text-amber-200' : undefined
+              }
+            >
+              {roleBadge}
             </Badge>
           </Link>
         </div>
