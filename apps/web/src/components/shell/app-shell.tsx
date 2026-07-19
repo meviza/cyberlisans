@@ -108,7 +108,7 @@ export function AppShell({
                 Super Admin
               </span>
               <span className="text-amber-100/70">
-                Satıcı başvurularını onaylayan operatör paneli · müşteri mağazasından ayrıdır
+                Sipariş, ürün ve ödeme operasyon paneli · müşteri mağazasından ayrıdır
               </span>
             </div>
           )}

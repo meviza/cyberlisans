@@ -189,14 +189,14 @@ export default function AdminDashboardPage() {
           </div>
         </Link>
         <Link
-          href="/admin/sellers"
+          href="/admin/orders"
           className="group rounded-xl border border-cyber-magenta/20 bg-cyber-magenta/5 p-4 transition-colors hover:border-cyber-magenta/50 hover:bg-cyber-magenta/10"
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wider text-white/50">Satıcı onayı</p>
+              <p className="text-xs uppercase tracking-wider text-white/50">Siparişler</p>
               <p className="mt-1 font-orbitron text-xl text-white">
-                {formatNumber(s.sellers?.pending ?? s.dealers?.pending ?? 0)} bekleyen başvuru
+                Operasyon paneli
               </p>
             </div>
             <Store className="h-6 w-6 text-cyber-magenta" />

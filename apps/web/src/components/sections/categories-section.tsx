@@ -58,7 +58,7 @@ export function CategoriesSection() {
         <div className="max-w-2xl">
           <p className="text-sm font-medium text-brand-accent">Kategoriler</p>
           <h2 className="section-title mt-2">Ne arıyorsan, saniyeler içinde</h2>
-          <p className="section-lead">Oyun, yazılım ve AI API kredileri — tek marketplace.</p>
+          <p className="section-lead">Yazılım lisansları ve API paketleri — doğrudan satış.</p>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">

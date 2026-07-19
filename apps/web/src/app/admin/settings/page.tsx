@@ -51,7 +51,7 @@ export default function AdminSettingsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Ayarlar"
-        description="Genel, ödeme, komisyon, kur ve KVKK ayarları"
+        description="Genel, ödeme, kur ve KVKK ayarları"
         crumbs={[{ href: '/admin/settings', label: 'Ayarlar' }]}
       />
       <SettingsForm initial={data as AppSettings} />

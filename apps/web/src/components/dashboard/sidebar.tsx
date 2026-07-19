@@ -9,9 +9,6 @@ import {
   Wallet,
   Receipt,
   Settings,
-  Store,
-  Gavel,
-  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@cyberlisans/ui/cn';
 import { useAuth } from '@/lib/auth-context';
@@ -26,44 +23,13 @@ interface NavItem {
 
 const ITEMS: NavItem[] = [
   { href: '/dashboard', label: 'Genel Bakış', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/products', label: 'Ürünlerim', icon: Package },
-  { href: '/dashboard/seller', label: 'Satıcı Mağazam', icon: Store },
+  { href: '/dashboard/products', label: 'Lisanslarım', icon: Package },
   { href: '/dashboard/wallet', label: 'Cüzdan', icon: Wallet },
   {
     href: '/dashboard/orders',
     label: 'Siparişlerim',
     icon: Receipt,
     roles: ['CUSTOMER', 'DEALER', 'ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    href: '/dashboard/seller/products',
-    label: 'Ürünlerim',
-    icon: Package,
-    roles: ['DEALER', 'ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    href: '/dashboard/seller/payouts',
-    label: 'Payoutlar',
-    icon: Wallet,
-    roles: ['DEALER', 'ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    href: '/dashboard/admin/disputes',
-    label: 'Disputes',
-    icon: Gavel,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    href: '/dashboard/admin/products',
-    label: 'Ürün Onayları',
-    icon: Package,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    href: '/dashboard/admin/escrow',
-    label: 'Escrow',
-    icon: ShieldCheck,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
   },
   { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
 ];

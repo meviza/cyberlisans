@@ -31,10 +31,10 @@ export function OrderStatusTimeline({
   const steps: Step[] = [
     { key: 'PENDING', label: 'Sipariş Oluşturuldu', icon: CheckCircle2 },
     { key: 'PAID', label: 'Ödendi', icon: CheckCircle2, when: paidAt },
-    { key: 'ESCROW_HELD', label: "Escrow'da (7 gün)", icon: Clock, when: escrowHeldAt },
+    { key: 'ESCROW_HELD', label: 'İşleniyor', icon: Clock, when: escrowHeldAt },
   ];
   if (status === 'RELEASED') {
-    steps.push({ key: 'RELEASED', label: 'Satıcıya Aktarıldı', icon: Unlock, when: releasedAt });
+    steps.push({ key: 'RELEASED', label: 'Tamamlandı', icon: Unlock, when: releasedAt });
   }
   if (status === 'DISPUTED') {
     steps.push({ key: 'DISPUTED', label: 'İtiraz Açıldı', icon: AlertTriangle });
@@ -84,7 +84,7 @@ export function OrderStatusTimeline({
                   )}
                   {s.key === 'ESCROW_HELD' && status === 'ESCROW_HELD' && releaseEta && (
                     <p className="text-xs text-cyber-cyan">
-                      Yaklaşık serbest bırakma: {new Date(releaseEta).toLocaleDateString('tr-TR')}
+                      Tahmini tamamlanma: {new Date(releaseEta).toLocaleDateString('tr-TR')}
                     </p>
                   )}
                   {i < steps.length - 1 && (

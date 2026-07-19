@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ShoppingBag, Store, AlertCircle } from 'lucide-react';
+import { ShoppingBag, Building2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, Badge } from '@cyberlisans/ui/atoms';
 import { useCurrency } from '@/lib/currency-context';
 
@@ -19,7 +19,6 @@ export function OrderEscrowCard({
   productTitle,
   productImage,
   sellerName,
-  sellerRating,
   price,
   currency,
   status,
@@ -31,8 +30,8 @@ export function OrderEscrowCard({
   const statusBadge = {
     PENDING: { label: 'Bekliyor', variant: 'warning' as const },
     PAID: { label: 'Ödendi', variant: 'success' as const },
-    ESCROW_HELD: { label: "Escrow'da", variant: 'magenta' as const },
-    RELEASED: { label: 'Satıcıya Aktarıldı', variant: 'success' as const },
+    ESCROW_HELD: { label: 'İşleniyor', variant: 'magenta' as const },
+    RELEASED: { label: 'Tamamlandı', variant: 'success' as const },
     DISPUTED: { label: 'İtiraz Açık', variant: 'danger' as const },
     REFUNDED: { label: 'İade Edildi', variant: 'default' as const },
     CANCELLED: { label: 'İptal', variant: 'default' as const },
@@ -55,11 +54,8 @@ export function OrderEscrowCard({
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-white">{productTitle}</p>
             <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
-              <Store className="h-3.5 w-3.5" />
-              <span>{sellerName}</span>
-              {typeof sellerRating === 'number' && (
-                <span className="text-cyber-cyan">★ {sellerRating.toFixed(1)}</span>
-              )}
+              <Building2 className="h-3.5 w-3.5" />
+              <span>{sellerName || 'CyberLisans'}</span>
             </div>
           </div>
           <div className="text-right">
@@ -77,8 +73,8 @@ export function OrderEscrowCard({
           <div className="mt-4 flex items-start gap-2 rounded-md border border-cyber-magenta/30 bg-cyber-magenta/5 p-3 text-xs text-white/70">
             <AlertCircle className="h-4 w-4 shrink-0 text-cyber-magenta" />
             <span>
-              Tutar escrow&apos;da. 7 gün içinde otomatik olarak satıcıya aktarılır. Sorun yaşarsan
-              itiraz açabilirsin.
+              Siparişiniz işleniyor. Lisans anahtarı hesabınıza düştükten sonra kullanmaya
+              başlayabilirsiniz. Sorun yaşarsanız destek ekibine yazın.
             </span>
           </div>
         )}

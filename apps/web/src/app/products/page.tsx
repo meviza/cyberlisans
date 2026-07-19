@@ -10,8 +10,9 @@ import { CATEGORIES } from '@/lib/categories';
 import { Package } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Mağaza',
-  description: 'Tüm dijital lisans ürünlerimizi incele. Oyun, yazılım ve AI API kredileri.',
+  title: 'Lisanslar',
+  description:
+    'Yazılım lisansları ve API erişim paketleri. Doğrudan satış, anında dijital teslimat.',
   alternates: { canonical: 'https://cyberlisans.com/products' },
 };
 

@@ -91,7 +91,7 @@ export function ShellSidebar({
           <div>
             <p className="text-sm font-semibold text-white">Super Admin</p>
             <p className="text-[10px] uppercase tracking-wider text-amber-200/70">
-              Satıcı onay · operasyon
+              Katalog · operasyon
             </p>
           </div>
         </Link>

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingCart, Menu, X, LogIn, Store, ShoppingBag, Shield } from 'lucide-react';
+import { ShoppingCart, Menu, X, LogIn, Shield } from 'lucide-react';
 import { Button, Avatar, AvatarFallback } from '@cyberlisans/ui/atoms';
 import { CurrencySwitcher } from './currency-switcher';
 import { useCart } from '@/lib/cart-store';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/cn';
 
 const NAV_LINKS = [
   { href: '/', label: 'Ana Sayfa' },
-  { href: '/products', label: 'Mağaza' },
+  { href: '/products', label: 'Lisanslar' },
   { href: '/about', label: 'Hakkımızda' },
   { href: '/contact', label: 'İletişim' },
 ];
@@ -35,7 +35,6 @@ export function StorefrontHeader() {
   ).toUpperCase();
   const badgeCount = hydrated ? getItemCount() : 0;
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
-  const onSellerSide = pathname.startsWith('/seller') || pathname.startsWith('/dashboard/seller');
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-brand-bg/80 backdrop-blur-xl">
@@ -70,36 +69,6 @@ export function StorefrontHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* GamsGo-style Alıcı / Satıcı switch when logged in */}
-          {user && !isAdmin && (
-            <div className="hidden items-center rounded-lg border border-white/10 bg-white/[0.03] p-0.5 sm:flex">
-              <Link
-                href="/dashboard"
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition',
-                  !onSellerSide
-                    ? 'bg-brand-accent text-white shadow-sm'
-                    : 'text-brand-text-secondary hover:text-white',
-                )}
-              >
-                <ShoppingBag className="h-3.5 w-3.5" />
-                Alıcı
-              </Link>
-              <Link
-                href="/seller"
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition',
-                  onSellerSide
-                    ? 'bg-brand-accent text-white shadow-sm'
-                    : 'text-brand-text-secondary hover:text-white',
-                )}
-              >
-                <Store className="h-3.5 w-3.5" />
-                Satıcı
-              </Link>
-            </div>
-          )}
-
           {isAdmin && (
             <Link
               href="/admin"
@@ -182,22 +151,6 @@ export function StorefrontHeader() {
                 {l.label}
               </Link>
             ))}
-            {user && !isAdmin && (
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <Link
-                  href="/dashboard"
-                  className="rounded-lg border border-white/10 px-3 py-2 text-center text-xs font-medium text-white"
-                >
-                  Alıcı paneli
-                </Link>
-                <Link
-                  href="/seller"
-                  className="rounded-lg border border-white/10 px-3 py-2 text-center text-xs font-medium text-white"
-                >
-                  Satıcı paneli
-                </Link>
-              </div>
-            )}
             {isAdmin && (
               <Link
                 href="/admin"

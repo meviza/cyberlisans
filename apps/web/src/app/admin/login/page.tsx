@@ -86,8 +86,7 @@ export default function AdminLoginPage() {
             Operatör girişi
           </h1>
           <p className="mt-2 text-sm text-amber-100/60">
-            Satıcı başvurularını onaylayan, KYC ve marketplace yöneten hesap. Müşteri mağazasından
-            ayrı panodur.
+            Ürün, sipariş ve ödeme operasyonunu yöneten hesap. Müşteri mağazasından ayrı panodur.
           </p>
         </div>
 
@@ -97,8 +96,7 @@ export default function AdminLoginPage() {
             <div>
               <p className="font-semibold text-amber-200">Bu panel ne işe yarar?</p>
               <p className="mt-1 text-amber-100/70">
-                Bekleyen satıcı başvurularını inceler, onaylar veya reddeder; ürün onayları, sipariş
-                ve ödeme operasyonuna erişir.
+                Katalog, sipariş, ödeme ve kullanıcı operasyonuna erişir.
               </p>
             </div>
           </div>

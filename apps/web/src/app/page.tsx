@@ -1,11 +1,8 @@
 import { HeroSection } from '@/components/sections/hero-section';
 import { TrustStrip } from '@/components/sections/trust-strip';
-import { CategoriesSection } from '@/components/sections/categories-section';
-import { FeaturedProductsSection } from '@/components/sections/featured-products-section';
 import { FeaturesSection } from '@/components/sections/features-section';
 import { HowItWorksSection } from '@/components/sections/how-it-works-section';
 import { StatsSection } from '@/components/sections/stats-section';
-import { SellerMarketingSection } from '@/components/sections/seller-marketing-section';
 import { FAQSection } from '@/components/sections/faq-section';
 import { CTASection } from '@/components/sections/cta-section';
 import { FooterSection } from '@/components/sections/footer-section';
@@ -19,34 +16,34 @@ import {
 
 const FAQ_ITEMS = [
   {
+    question: 'Ne satıyorsunuz?',
+    answer:
+      'CyberLisans, yazılım lisansları ve API erişim paketlerini doğrudan satar. Tüm ürünler şirket envanterinden temin edilir.',
+  },
+  {
     question: 'Ödeme nasıl yapılır?',
     answer:
-      'Kart, Papara, kripto veya cüzdan bakiyesi ile ödeme yapabilirsiniz. Tüm ödemeler escrow hesabına alınır.',
+      'Kredi/banka kartı ve diğer desteklenen yöntemlerle güvenli ödeme yapabilirsiniz. Fatura ve makbuz dijital olarak iletilir.',
   },
   {
     question: 'Teslim ne kadar sürer?',
     answer:
-      'Stokta ve otomatik teslim ürünlerde ödeme onayı sonrası genellikle 5 saniye içinde key hesabınıza düşer.',
+      'Stokta ve otomatik teslim ürünlerde ödeme onayı sonrası lisans anahtarı veya erişim bilgisi genellikle saniyeler içinde hesabınıza düşer.',
   },
   {
     question: 'Lisans orijinal mi?',
     answer:
-      'Onaylı satıcılar listeler; admin ürün onayı vardır. Sorun yaşarsanız 7 gün içinde itiraz açabilirsiniz.',
+      'Evet. Ürünler doğrudan şirket stokundan sağlanır. Aktivasyon veya erişim sorunu yaşarsanız destek ekibimiz yardımcı olur.',
   },
   {
-    question: 'İade var mı?',
+    question: 'İade politikası nedir?',
     answer:
-      'Kullanılmamış / aktive edilmemiş ürünlerde platform politikasına göre iade mümkündür. Escrow süresi içinde dispute açın.',
+      'Kullanılmamış / aktive edilmemiş dijital ürünlerde platform iade politikasına göre değerlendirme yapılır. Detaylar kullanım koşullarındadır.',
   },
   {
-    question: 'Satıcı nasıl olurum?',
+    question: 'Kurumsal satın alma var mı?',
     answer:
-      'Kayıt olduktan sonra Satıcı paneline başvurun, KYC belgelerini yükleyin. Super admin onayı sonrası ürün listeleyebilirsiniz.',
-  },
-  {
-    question: 'Güvenlik nasıl sağlanır?',
-    answer:
-      'JWT oturum, rate-limit, RLS, encrypted secret store, audit log ve escrow state machine ile katmanlı güvenlik.',
+      'Evet. Toplu lisans ve API paketleri için faturalı kurumsal satış sunuyoruz. İletişim formundan talep oluşturabilirsiniz.',
   },
 ];
 
@@ -59,11 +56,8 @@ export default function HomePage() {
       <FAQJsonLd items={FAQ_ITEMS} />
       <HeroSection scene={<LandingScene />} />
       <TrustStrip />
-      <CategoriesSection />
-      <FeaturedProductsSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <SellerMarketingSection />
       <StatsSection />
       <FAQSection />
       <CTASection />

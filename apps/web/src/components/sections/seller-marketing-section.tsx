@@ -1,31 +1,31 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, KeyRound, LineChart, Shield } from 'lucide-react';
+import { ArrowRight, KeyRound, Building2, HeadphonesIcon } from 'lucide-react';
 import { ScrollReveal } from '@/components/motion/scroll-reveal';
 
 const STEPS = [
   {
-    icon: BadgeCheck,
-    title: 'Başvur & KYC',
-    desc: 'Vergi bilgilerin ve kimlik doğrulama ile satıcı profilini oluştur.',
-  },
-  {
     icon: KeyRound,
-    title: 'Ürün & stok ekle',
-    desc: 'Key / lisans stoklarını yükle; admin onayı sonrası vitrine çık.',
+    title: 'Lisans seç',
+    desc: 'Yazılım veya API paketini mağazadan seçin.',
   },
   {
-    icon: LineChart,
-    title: 'Sat & payout al',
-    desc: 'Escrow sonrası bakiye birikir; payout talebi ile çekim yap.',
+    icon: Building2,
+    title: 'Güvenle öde',
+    desc: 'Kart ile ödeme yapın; fatura dijital iletilir.',
+  },
+  {
+    icon: HeadphonesIcon,
+    title: 'Teslim al',
+    desc: 'Lisans anahtarı veya erişim bilgisi hesabınıza düşer.',
   },
 ];
 
+/** Kept for optional reuse; homepage no longer promotes multi-party selling. */
 export function SellerMarketingSection() {
   return (
     <section className="band-light section-pad">
-      {/* Soft animated blobs — Laravel Cloud energy without neon */}
       <div
         aria-hidden
         className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-accent/15 blur-3xl animate-soft-blob"
@@ -37,13 +37,13 @@ export function SellerMarketingSection() {
 
       <div className="relative mx-auto max-w-7xl">
         <ScrollReveal className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold text-brand-accent">Satıcı ol</p>
+          <p className="text-sm font-semibold text-brand-accent">Doğrudan satış</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-brand-ink sm:text-4xl">
-            Marketplace’te güvenle sat
+            Yazılım ve API lisansı tek yerden
           </h2>
           <p className="mt-4 text-base leading-relaxed text-brand-ink-muted sm:text-lg">
-            Escrow korumalı P2P model. Şeffaf komisyon, admin onaylı ürünler, anında key teslim
-            altyapısı — Laravel Cloud sakinliğinde modern bir satıcı deneyimi.
+            CyberLisans kendi stokundan lisans satar. Şeffaf fiyat, anında dijital teslimat ve
+            kurumsal faturalandırma.
           </p>
         </ScrollReveal>
 
@@ -63,26 +63,19 @@ export function SellerMarketingSection() {
 
         <ScrollReveal delayMs={200} className="mt-12">
           <div className="surface-light-card flex flex-col items-start justify-between gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 rounded-lg bg-brand-accent/10 p-2 text-brand-accent">
-                <Shield className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-semibold text-brand-ink">
-                  %12 varsayılan komisyon · 7 gün escrow
-                </p>
-                <p className="mt-1 text-sm text-brand-ink-muted">
-                  Onaylı satıcılar için net kurallar. Dispute sürecinde platform arabulucu.
-                </p>
-              </div>
+            <div>
+              <p className="font-semibold text-brand-ink">Kurumsal toplu alım</p>
+              <p className="mt-1 text-sm text-brand-ink-muted">
+                Faturalı teklif için iletişim formunu kullanın.
+              </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/seller" className="btn-on-light">
-                Satıcı sayfası
+              <Link href="/products" className="btn-on-light">
+                Lisansları incele
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/dashboard/seller/apply" className="btn-on-light-outline">
-                Hemen başvur
+              <Link href="/contact" className="btn-on-light-outline">
+                İletişim
               </Link>
             </div>
           </div>

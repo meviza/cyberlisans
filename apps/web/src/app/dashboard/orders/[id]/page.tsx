@@ -95,7 +95,7 @@ function mapOrder(raw: ApiOrder): OrderDetail {
     .filter((c): c is string => Boolean(c));
   const escrowKeyId = raw.escrowKeyId ?? first?.productKeyId ?? null;
 
-  // Escrow window: 7 days after paid if still held
+  // Processing window after payment
   let releaseEta = raw.releaseEta ?? null;
   if (!releaseEta && raw.paidAt && mapStatus(raw.status) === 'ESCROW_HELD') {
     const eta = new Date(raw.paidAt);
@@ -228,7 +228,7 @@ export default function OrderDetailPage() {
           <DisputeButton orderId={order.id} canView={canViewKey} escrowKeyId={order.escrowKeyId} />
           {canDispute && (
             <p className="text-xs text-white/50">
-              İtiraz açtığında escrow süreci durur ve admin devreye girer.
+              İtiraz açtığınızda destek ekibi siparişi inceler.
             </p>
           )}
         </div>

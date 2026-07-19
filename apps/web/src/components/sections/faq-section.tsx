@@ -1,27 +1,27 @@
 const FAQ_ITEMS = [
   {
+    q: 'Ne satıyorsunuz?',
+    a: 'CyberLisans, yazılım lisansları ve API erişim paketlerini doğrudan satar. Tüm ürünler şirket envanterinden temin edilir.',
+  },
+  {
     q: 'Ödeme nasıl yapılır?',
-    a: 'Kart, Papara, kripto veya cüzdan bakiyesi ile ödeme yapabilirsiniz. Tüm ödemeler escrow hesabına alınır.',
+    a: 'Kredi/banka kartı ve diğer desteklenen yöntemlerle güvenli ödeme yapabilirsiniz. Fatura ve makbuz dijital olarak iletilir.',
   },
   {
     q: 'Teslim ne kadar sürer?',
-    a: 'Stokta ve otomatik teslim ürünlerde ödeme onayı sonrası genellikle 5 saniye içinde key hesabınıza düşer.',
+    a: 'Stokta ve otomatik teslim ürünlerde ödeme onayı sonrası lisans anahtarı veya erişim bilgisi genellikle saniyeler içinde hesabınıza düşer.',
   },
   {
     q: 'Lisans orijinal mi?',
-    a: 'Onaylı satıcılar listeler; admin ürün onayı vardır. Sorun yaşarsanız 7 gün içinde itiraz açabilirsiniz.',
+    a: 'Evet. Ürünler doğrudan şirket stokundan sağlanır. Aktivasyon veya erişim sorunu yaşarsanız destek ekibimiz yardımcı olur.',
   },
   {
-    q: 'İade var mı?',
-    a: 'Kullanılmamış / aktive edilmemiş ürünlerde platform politikasına göre iade veya kısmi iade mümkündür. Escrow süresi içinde dispute açın.',
+    q: 'İade politikası nedir?',
+    a: 'Kullanılmamış / aktive edilmemiş dijital ürünlerde platform iade politikasına göre değerlendirme yapılır. Detaylar kullanım koşullarındadır.',
   },
   {
-    q: 'Satıcı nasıl olurum?',
-    a: 'Kayıt olduktan sonra Satıcı paneline başvurun, KYC belgelerini yükleyin. Super admin onayı sonrası ürün listeleyebilirsiniz.',
-  },
-  {
-    q: 'Güvenlik nasıl sağlanır?',
-    a: 'JWT oturum, rate-limit, RLS, encrypted secret store, audit log ve escrow state machine ile katmanlı güvenlik.',
+    q: 'Kurumsal satın alma var mı?',
+    a: 'Evet. Toplu lisans ve API paketleri için faturalı kurumsal satış sunuyoruz. İletişim formundan talep oluşturabilirsiniz.',
   },
 ];
 

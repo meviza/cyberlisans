@@ -1,18 +1,18 @@
 const STEPS = [
   {
     n: '01',
-    title: 'Ürünü seç',
-    description: 'Mağazadan veya satıcı vitrininden key / lisans / AI kredisi seç.',
+    title: 'Lisansı seç',
+    description: 'Yazılım lisansı veya API erişim paketini mağazadan seçin.',
   },
   {
     n: '02',
     title: 'Güvenle öde',
-    description: 'Ödeme escrow’a alınır. Key anında hesabına düşer.',
+    description: 'Kart veya desteklenen yöntemle ödeme yapın. Fatura dijital iletilir.',
   },
   {
     n: '03',
-    title: 'Escrow serbest',
-    description: '7 gün içinde itiraz yoksa bakiye satıcıya geçer; komisyon şeffaf kesilir.',
+    title: 'Anında teslim al',
+    description: 'Lisans anahtarı veya erişim bilgisi hesabınıza düşer; kullanmaya başlayın.',
   },
 ];
 
@@ -25,8 +25,8 @@ export function HowItWorksSection() {
       <div className="mx-auto max-w-7xl">
         <div className="max-w-2xl">
           <p className="text-sm font-medium text-brand-accent">Nasıl çalışır</p>
-          <h2 className="section-title mt-2">Üç adımda güvenli alım</h2>
-          <p className="section-lead">Alıcı, satıcı ve platform rolleri net ayrılmıştır.</p>
+          <h2 className="section-title mt-2">Üç adımda lisans alımı</h2>
+          <p className="section-lead">Doğrudan satış modeli — tek satıcı, net süreç.</p>
         </div>
 
         <div className="mt-14 grid gap-6 lg:grid-cols-3">

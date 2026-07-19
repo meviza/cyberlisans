@@ -19,8 +19,8 @@ const LABELS: Record<string, string> = {
   audit: 'Audit log',
   privacy: 'KVKK / GDPR',
   settings: 'Ayarlar',
-  escrow: 'Escrow',
-  disputes: 'Disputes',
+  escrow: 'Ödemeler (eski)',
+  disputes: 'İtirazlar',
   new: 'Yeni',
   edit: 'Düzenle',
 };
