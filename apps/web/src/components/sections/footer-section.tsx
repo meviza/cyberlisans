@@ -1,16 +1,14 @@
 import Link from 'next/link';
 
 const productLinks = [
-  { label: 'Tüm ürünler', href: '/products' },
-  { label: 'Oyun', href: '/products?category=games' },
+  { label: 'Tüm lisanslar', href: '/products' },
   { label: 'Yazılım', href: '/products?category=software' },
-  { label: 'AI API', href: '/products?category=ai-api' },
+  { label: 'API paketleri', href: '/products?category=ai-api' },
 ];
 
 const companyLinks = [
   { label: 'Hakkımızda', href: '/about' },
   { label: 'İletişim', href: '/contact' },
-  { label: 'Satıcı ol', href: '/seller' },
   { label: 'Kariyer', href: '/careers' },
 ];
 
@@ -34,8 +32,8 @@ export function FooterSection() {
               <span className="text-base font-semibold text-white">CyberLisans</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-brand-text-secondary">
-              Escrow korumalı dijital lisans marketplace. Alıcı, satıcı ve admin panelleri tek
-              platformda.
+              Yazılım ve API lisanslarının doğrudan satışı. Kurumsal faturalandırma ve anında
+              dijital teslimat.
             </p>
           </div>
 
@@ -89,7 +87,7 @@ export function FooterSection() {
           <p className="text-xs text-brand-muted">
             © {new Date().getFullYear()} CyberLisans. Tüm hakları saklıdır.
           </p>
-          <p className="text-xs text-brand-muted">Türkiye · Escrow · KVKK uyumlu altyapı</p>
+          <p className="text-xs text-brand-muted">Türkiye · Doğrudan satış · KVKK uyumlu</p>
         </div>
       </div>
     </footer>

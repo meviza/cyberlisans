@@ -1,9 +1,9 @@
 import { ShieldCheck, Zap, Lock, BadgeCheck } from 'lucide-react';
 
 const ITEMS = [
-  { icon: ShieldCheck, label: 'Escrow koruma', desc: '7 gün güvence' },
-  { icon: Zap, label: 'Anında teslim', desc: 'Otomatik key' },
-  { icon: Lock, label: 'Güvenli ödeme', desc: 'Çoklu yöntem' },
+  { icon: ShieldCheck, label: 'Doğrudan satış', desc: 'Şirket envanteri' },
+  { icon: Zap, label: 'Anında teslim', desc: 'Dijital lisans' },
+  { icon: Lock, label: 'Güvenli ödeme', desc: 'Kart & fatura' },
   { icon: BadgeCheck, label: 'KVKK uyumlu', desc: 'Türkiye odaklı' },
 ];
 

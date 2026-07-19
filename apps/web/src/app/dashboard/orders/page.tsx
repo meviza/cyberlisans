@@ -24,7 +24,7 @@ const STATUS_MAP: Record<
 > = {
   PENDING: { label: 'Bekliyor', variant: 'warning' },
   PAID: { label: 'Ödendi', variant: 'success' },
-  ESCROW_HELD: { label: "Escrow'da", variant: 'magenta' },
+  ESCROW_HELD: { label: 'İşleniyor', variant: 'magenta' },
   RELEASED: { label: 'Tamamlandı', variant: 'success' },
   DISPUTED: { label: 'İtiraz', variant: 'danger' },
   REFUNDED: { label: 'İade', variant: 'default' },
@@ -35,7 +35,7 @@ const FILTERS: Array<{ value: 'all' | OrderStatus; label: string }> = [
   { value: 'all', label: 'Tümü' },
   { value: 'PENDING', label: 'Bekliyor' },
   { value: 'PAID', label: 'Ödendi' },
-  { value: 'ESCROW_HELD', label: "Escrow'da" },
+  { value: 'ESCROW_HELD', label: 'İşleniyor' },
   { value: 'RELEASED', label: 'Tamamlandı' },
   { value: 'DISPUTED', label: 'İtiraz' },
 ];

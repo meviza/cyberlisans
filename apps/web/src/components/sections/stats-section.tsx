@@ -3,10 +3,10 @@
 import { ScrollReveal } from '@/components/motion/scroll-reveal';
 
 const STATS = [
-  { value: '7 gün', label: 'Escrow koruma süresi' },
-  { value: '%12', label: 'Varsayılan platform komisyonu' },
+  { value: 'Doğrudan', label: 'Şirket stokundan satış' },
+  { value: '7/24', label: 'Dijital ürün erişimi' },
   { value: '<5 sn', label: 'Ortalama otomatik teslim' },
-  { value: '3 rol', label: 'Alıcı · Satıcı · Admin' },
+  { value: 'KVKK', label: 'Türkiye uyumlu altyapı' },
 ];
 
 export function StatsSection() {

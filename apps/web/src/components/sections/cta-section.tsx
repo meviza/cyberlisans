@@ -25,24 +25,24 @@ export function CTASection() {
             />
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-brand-ink sm:text-4xl">
-                Hemen başla — alıcı veya satıcı
+                Yazılım ve API lisansına hemen başla
               </h2>
               <p className="mt-4 text-brand-ink-muted">
-                Hesabını oluştur, mağazadan alışveriş yap veya KYC ile satıcı paneline başvur.
+                Mağazadan lisans seçin veya kurumsal toplu alım için bizimle iletişime geçin.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                <Link href="/register" className="btn-on-light">
-                  Ücretsiz kayıt
+                <Link href="/products" className="btn-on-light">
+                  Lisansları incele
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="/seller" className="btn-on-light-outline">
-                  Satıcı ol
+                <Link href="/contact" className="btn-on-light-outline">
+                  İletişim
                 </Link>
                 <Link
-                  href="/products"
+                  href="/about"
                   className="text-sm font-medium text-brand-ink-muted underline-offset-4 hover:text-brand-accent hover:underline"
                 >
-                  Ürünleri incele
+                  Hakkımızda
                 </Link>
               </div>
             </div>

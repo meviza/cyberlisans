@@ -68,7 +68,7 @@ export default function LoginPage() {
       title={wantsAdmin ? 'Admin Girişi' : 'Giriş Yap'}
       subtitle={
         wantsAdmin
-          ? 'Super Admin paneli — satıcı başvuruları, KYC ve operasyon'
+          ? 'Super Admin paneli — ürün, sipariş ve ödeme operasyonu'
           : 'Hesabına giriş yaparak lisanslarına ve cüzdanına ulaş'
       }
       footer={
@@ -101,8 +101,8 @@ export default function LoginPage() {
     >
       {wantsAdmin && (
         <div className="mb-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs leading-relaxed text-amber-100">
-          Bu giriş <strong>super admin / admin</strong> içindir. Satıcı başvurularını onaylayan
-          hesap buraya yönlendirilir; müşteri paneliyle karışmaz.
+          Bu giriş <strong>super admin / admin</strong> içindir. Operasyon hesabı buraya
+          yönlendirilir; müşteri paneliyle karışmaz.
         </div>
       )}
       {forbidden && (

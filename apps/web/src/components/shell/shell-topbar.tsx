@@ -9,8 +9,6 @@ import {
   LogOut,
   Menu,
   Settings,
-  ShoppingBag,
-  Store,
   User as UserIcon,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, Badge } from '@cyberlisans/ui/atoms';
@@ -46,7 +44,6 @@ export function ShellTopbar({
   ).toUpperCase();
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
-  const showRoleSwitch = !!user && !isAdmin;
 
   const isAdminVariant = variant === 'admin';
   const roleBadge =
@@ -119,35 +116,6 @@ export function ShellTopbar({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {showRoleSwitch && (
-            <div className="hidden items-center rounded-lg border border-white/10 bg-white/[0.03] p-0.5 sm:flex">
-              <Link
-                href="/dashboard"
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition',
-                  variant === 'customer'
-                    ? 'bg-brand-accent text-white shadow-sm'
-                    : 'text-brand-text-secondary hover:text-white',
-                )}
-              >
-                <ShoppingBag className="h-3.5 w-3.5" />
-                Alıcı
-              </Link>
-              <Link
-                href="/dashboard/seller"
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition',
-                  variant === 'seller'
-                    ? 'bg-brand-accent text-white shadow-sm'
-                    : 'text-brand-text-secondary hover:text-white',
-                )}
-              >
-                <Store className="h-3.5 w-3.5" />
-                Satıcı
-              </Link>
-            </div>
-          )}
-
           {isAdmin && variant !== 'admin' && (
             <Link
               href="/admin"
@@ -161,7 +129,7 @@ export function ShellTopbar({
             href="/products"
             className="hidden rounded-lg px-3 py-1.5 text-sm text-brand-text-secondary transition hover:text-white sm:block"
           >
-            Mağaza
+            Lisanslar
           </Link>
 
           <div className="relative" ref={menuRef}>

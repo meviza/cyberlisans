@@ -3,35 +3,35 @@ import { Shield, KeyRound, Wallet, HeadphonesIcon, Gauge, BadgeCheck } from 'luc
 const FEATURES = [
   {
     icon: Shield,
-    title: 'Escrow koruması',
+    title: 'Doğrudan lisans satışı',
     description:
-      'Ödemeniz 7 gün boyunca platform kasasında tutulur. Teslimat sorunsuzsa satıcıya aktarılır.',
+      'Ürünler üçüncü taraf aracılığı olmadan şirket stokundan sağlanır. Tek satıcı: CyberLisans.',
   },
   {
     icon: KeyRound,
-    title: 'Anında key teslimi',
+    title: 'Anında dijital teslim',
     description:
       'Stokta ürünler saniyeler içinde otomatik teslim edilir. Manuel siparişler net SLA ile.',
   },
   {
     icon: Wallet,
-    title: 'Çoklu ödeme',
-    description: 'Kart, Papara, kripto ve cüzdan bakiyesi. TRY / USD destekli fiyatlandırma.',
+    title: 'Güvenli ödeme',
+    description: 'Kart ve desteklenen yöntemlerle ödeme. TRY / USD destekli fiyatlandırma.',
   },
   {
     icon: BadgeCheck,
-    title: 'Onaylı satıcılar',
-    description: 'KYC doğrulaması ve admin onayı olmadan kimse satışa açılamaz.',
+    title: 'Kurumsal faturalandırma',
+    description: 'Bireysel ve kurumsal alımlar için dijital fatura ve makbuz desteği.',
   },
   {
     icon: Gauge,
-    title: 'Şeffaf komisyon',
-    description: 'Satıcı bazlı net komisyon oranları. Sürpriz kesinti yok.',
+    title: 'Şeffaf fiyatlandırma',
+    description: 'Listelenen fiyat nettir. Gizli ek kesinti veya sürpriz ücret yoktur.',
   },
   {
     icon: HeadphonesIcon,
-    title: 'Anlaşmazlık çözümü',
-    description: 'İtiraz açın; super admin ekibi kanıta dayalı karar verir.',
+    title: 'Destek ekibi',
+    description: 'Aktivasyon, erişim ve fatura konularında e-posta üzerinden destek.',
   },
 ];
 
@@ -41,9 +41,10 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl">
         <div className="max-w-2xl">
           <p className="text-sm font-medium text-brand-accent">Neden CyberLisans</p>
-          <h2 className="section-title mt-2">Kurumsal güven, modern hız</h2>
+          <h2 className="section-title mt-2">Kurumsal sadelik, modern hız</h2>
           <p className="section-lead">
-            FunPay / GamsGo modelini Türkiye pazarına uyarladık — sade arayüz, escrow ve net roller.
+            Yazılım ve API lisanslarını doğrudan satan sade bir dijital mağaza — güvenli ödeme ve
+            anında teslimat.
           </p>
         </div>
 

@@ -27,8 +27,8 @@ const STATUS_MAP: Record<
 > = {
   PENDING: { label: 'Bekliyor', variant: 'warning' },
   PAID: { label: 'Ödendi', variant: 'success' },
-  ESCROW_HELD: { label: "Escrow'da", variant: 'magenta' },
-  RELEASED: { label: 'Serbest Bırakıldı', variant: 'success' },
+  ESCROW_HELD: { label: 'İşleniyor', variant: 'magenta' },
+  RELEASED: { label: 'Tamamlandı', variant: 'success' },
   DISPUTED: { label: 'İtiraz Var', variant: 'danger' },
   REFUNDED: { label: 'İade Edildi', variant: 'default' },
   CANCELLED: { label: 'İptal', variant: 'default' },
